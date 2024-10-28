@@ -38,8 +38,8 @@ class MonarqDevice(Device):
     }
     
     def __init__(self, 
-                 wires, 
-                 shots,  
+                 wires = None, 
+                 shots = None,  
                  baseDecomposition=True, 
                  placeAndRoute=True, 
                  optimization=True, 

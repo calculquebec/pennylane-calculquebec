@@ -48,8 +48,8 @@ class ApiAdapter:
         return requests.get(route, headers=self.headers)
     
     def create_job(self, circuit : dict[str, any], 
-                   shot_count : int,
-                   circuit_name: str = "default") -> requests.Response:
+                   circuit_name: str = "default",
+                   shot_count : int = 1) -> requests.Response:
         body = ApiUtility.job_body(circuit, circuit_name, self.project_id, self.machine_name, shot_count)
         return requests.post(self.host + ApiUtility.routes.jobs, data=json.dumps(body), headers=self.headers)
 

@@ -83,19 +83,28 @@ def shortest_path(a : int, b : int, graph : nx.Graph, excluding : list[int] = []
         excluding : nodes we dont want to use
         prioritized_nodes : nodes we want to use if possible
     """
+
     g_copy = deepcopy(graph)
     g_copy.remove_nodes_from(excluding)
-    return nx.astar_path(g_copy, a, b, 
-                         weight = lambda u, v, _: 1 if any(node in (u, v) 
-                                                           for node in prioritized_nodes) else 2)
+    max_degree = max(graph.degree(nnn) for nnn in graph.nodes)
+    def weight(nu, nv):
+        if nu == a and nv == b or nu == b and nv == a: 
+            return 1
+        va = 5
+        if nu in prioritized_nodes: va -= 1
+        if nv in prioritized_nodes: va -= 1
+        return va
 
-def find_best_wire(graph : nx.Graph):
+    
+    return nx.astar_path(g_copy, a, b, weight = lambda u, v, _: weight(u, v))
+
+def find_best_wire(graph : nx.Graph, excluded : list[int] = []):
     """
     find node with highest degree in graph
     """
-    return max(graph.nodes, key=lambda n: graph.degree(n))
+    return max([n for n in graph.nodes if n not in excluded], key=lambda n: graph.degree(n))
 
-def find_closest_wire(a : int, machine_graph : nx.Graph, excluding : list[int]):
+def find_closest_wire(a : int, machine_graph : nx.Graph, excluding : list[int] = [], prioritized : list[int] = []):
     """
     find node in graph that is closest to given node, not considering arbitrary excluding list
     """
@@ -104,7 +113,7 @@ def find_closest_wire(a : int, machine_graph : nx.Graph, excluding : list[int]):
     for b in machine_graph.nodes:
         if b in excluding:
             continue
-        value = len(shortest_path(a, b, machine_graph))
+        value = len(shortest_path(a, b, machine_graph, prioritized_nodes=prioritized))
         
         if value < min_value:
             min_value = value

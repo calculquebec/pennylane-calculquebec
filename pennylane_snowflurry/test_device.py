@@ -5,7 +5,7 @@ from pennylane.devices import Device
 from pennylane.transforms.core import TransformProgram
 from pennylane.tape import QuantumScript, QuantumTape
 from pennylane_snowflurry.execution_config import DefaultExecutionConfig, ExecutionConfig
-from pennylane_snowflurry.api_adapter import instructions
+from pennylane_snowflurry.api_utility import instructions
 from pennylane_snowflurry.transpiler.monarq_transpile import get_transpiler
 
 class TestDevice(Device):
@@ -94,7 +94,7 @@ class TestDevice(Device):
         else:
             # Fallback or default behavior if execution_config is not an instance of ExecutionConfig
             interface = None
-            
-        dev = qml.device("default.qubit", wires=[i for i in range(24)], shots=self.shots)
-        results = qml.execute(circuits, dev)
+        
+        results = [qml.execute([circuit], qml.device("default.qubit", circuit.wires, circuit.shots)) for circuit in circuits]
+
         return results if not is_single_circuit else results[0]

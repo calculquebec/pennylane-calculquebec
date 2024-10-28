@@ -16,10 +16,10 @@ class Job:
     access_token : str
     realm : str
     
-    def __init__(self, circuit : QuantumTape, circuit_name = None):
+    def __init__(self, circuit : QuantumTape, circuit_name = "default"):
         self.adapter = ApiAdapter()
         self.circuit_dict = ApiUtility.convert_circuit(circuit)
-        self.circuit_name = circuit_name if circuit_name is not None else "default"
+        self.circuit_name = circuit_name
         self.shots = circuit.shots.total_shots
 
     def run(self, max_tries : int = -1):
@@ -30,7 +30,6 @@ class Job:
         """
 
         if max_tries == -1: max_tries = 2 ** 15
-        if circuit_name is None: circuit_name = "default"
 
         response = self.adapter.create_job(self.circuit_dict, self.circuit_name, self.shots)
         
