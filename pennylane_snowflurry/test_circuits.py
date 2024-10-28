@@ -89,6 +89,7 @@ def Toffoli():
     qml.Hadamard(1)
     [qml.Toffoli([0, 1, 2])]
     return qml.probs(wires = [0, 1, 2])
+
 def bernstein_vazirani(number : int):
     value = []
     while number > 0:
