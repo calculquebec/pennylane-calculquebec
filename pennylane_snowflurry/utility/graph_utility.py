@@ -6,7 +6,7 @@ from typing import Tuple
 from copy import deepcopy
 from itertools import combinations
 from pennylane_snowflurry.monarq_data import connectivity, build_benchmark
-from pennylane_snowflurry.api_utility import ApiUtility
+from pennylane_snowflurry.API.api_utility import ApiUtility
 
 def is_directly_connected(op : Operation, machine_topology : nx.Graph) -> bool:
     return op.wires[1] in machine_topology.neighbors(op.wires[0])

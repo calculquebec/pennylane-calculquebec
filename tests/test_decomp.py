@@ -1,12 +1,12 @@
 import numpy as np
 from pennylane_snowflurry.transpiler.base_decomposition import base_decomposition, base_gates
 from pennylane_snowflurry.transpiler.native_decomposition import native_gate_decomposition
-from pennylane_snowflurry.api_utility import instructions
+from pennylane_snowflurry.API.api_utility import instructions
 import unittest
 import pennylane as qml
 from pennylane.tape import QuantumTape
 
-class test_place_route(unittest.TestCase):
+class test_decomp(unittest.TestCase):
     def __init__(self, _):
         super().__init__(_)
         self.dev = qml.device("default.qubit")

@@ -3,10 +3,10 @@ from pennylane.devices import Device
 from pennylane.transforms.core import TransformProgram
 from pennylane.tape import QuantumScript, QuantumTape
 from pennylane_snowflurry.execution_config import DefaultExecutionConfig, ExecutionConfig
-from pennylane_snowflurry.api_job import Job
+from pennylane_snowflurry.API.api_job import Job
 from pennylane_snowflurry.transpiler.monarq_transpile import get_transpiler
 
-class MonarqDevice(Device):
+class CalculQCDevice(Device):
     """PennyLane device for interfacing with Anyon's quantum Hardware.
 
     * Extends the PennyLane :class:`~.pennylane.Device` class.
@@ -23,7 +23,7 @@ class MonarqDevice(Device):
         access_token (str): User access token.
     """
 
-    name = "MonarQDevice"
+    name = "CalculQCDevice"
     short_name = "calculqc.qubit"
     pennylane_requires = ">=0.30.0"
     author = "CalculQuebec"
@@ -56,7 +56,7 @@ class MonarqDevice(Device):
 
     @property
     def name(self):
-        return MonarqDevice.short_name
+        return CalculQCDevice.short_name
     
     def preprocess(
         self,
