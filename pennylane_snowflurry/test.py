@@ -18,12 +18,12 @@ if __name__ == "__main__":
         project_id = "default"
         circuit_name = "test_circuit"
 
-    num_qubits = 11
+    num_qubits = 6
 
-    dev = TestDevice()
-    dev = qml.device("default.qubit", shots = 1000)
-    dev = MonarqDevice(num_qubits, 1000)
-    dev = SnowflurryQubitDevice(num_qubits, 1000, "global", const.host, const.user, const.access_token, const.project_id, const.realm)
+    dev = TestDevice(6, 1000)
+    # dev = qml.device("default.qubit", shots = 1000)
+    # dev = MonarqDevice(shots = 1000)
+    # dev = SnowflurryQubitDevice(num_qubits, 1000, "global", const.host, const.user, const.access_token, const.project_id, const.realm)
 
     def prepare(circuit, dev, regular = True, snowflurry = True, calcul_quebec = True, measurement = qml.probs):
         """
@@ -104,17 +104,13 @@ if __name__ == "__main__":
         print(f"snowflurry depth : {sf_depth}")
         print(f"calcul quebec depth : {cq_depth}")
 
-    
-    partial_circuit = partial(test_circuits.GHZ, 4)
+    def circuit():
+        for i in range(0, num_qubits - 1):
+            qml.CNOT([i, i + 1])
+        return qml.counts()
+
+    partial_circuit = circuit
     circuit = qml.QNode(partial_circuit, dev)
 
     print(circuit())
     exit()
-
-    for i in range(3, 16):
-        partial_circuit = partial(test_circuits.GHZ, i)
-        circuit = qml.QNode(partial_circuit, dev)
-
-        print(f"GHZ with {i} qubits : ")
-        test_efficiency(circuit)
-        print("\n")

@@ -64,8 +64,7 @@ def _recurse(a_key, b_key, mapping, to_explore, machine_topology, circuit_topolo
         if b_key in mapping:
             return
 
-        to_explore.pop(to_explore.index(b_key))
-        mapping[b_key] = graph_util.find_closest_wire(mapping[a_key], machine_topology, [v for (k, v) in mapping.items()])
+        mapping[b_key] = graph_util.find_closest_wire(mapping[a_key], machine_topology, [v for (_, v) in mapping.items()], [v for _, v in mapping.items()])
 
         a_key2 = b_key
         for b_key2 in to_explore:
@@ -85,9 +84,10 @@ def placement_astar(tape : QuantumTape, use_benchmark = True) -> QuantumTape:
     # sort nodes by degree descending, so that we map the most connected node first
     to_explore = list(reversed(sorted([w for w in tape.wires], key=lambda w: circuit_topology.degree(w))))
 
-    while len(to_explore) > 0:
-        a_key = to_explore.pop(0)
-        mapping[a_key] = graph_util.find_best_wire(machine_topology)
+    for a_key in to_explore:
+        if a_key in mapping:
+            continue
+        mapping[a_key] = graph_util.find_best_wire(machine_topology, [v for _, v in mapping.items()])
 
         for b_key in to_explore:
             if (a_key, b_key) not in circuit_topology.edges: 
