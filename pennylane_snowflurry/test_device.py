@@ -73,7 +73,6 @@ class TestDevice(Device):
         return transform_program, config
 
     def execute(self, circuits: QuantumTape | list[QuantumTape], execution_config : ExecutionConfig = DefaultExecutionConfig):
-        # circuits = [circuits]
         is_single_circuit : bool = isinstance(circuits, QuantumScript)
         if is_single_circuit:
             circuits = [circuits]

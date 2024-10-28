@@ -4,4 +4,4 @@ JuliaEnv().update()
 
 from .pennylane_converter import PennylaneConverter
 from .snowflurry_device import SnowflurryQubitDevice
-from .monarq_device import MonarqDevice
+from .calculqc_device import CalculQCDevice
