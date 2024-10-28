@@ -3,7 +3,7 @@ from pennylane_snowflurry.utility.debug_utility import arbitrary_circuit
 import numpy as np
 import pennylane as qml
 import test_circuits
-from pennylane_snowflurry.monarq_device import MonarqDevice
+from pennylane_snowflurry.calculqc_device import CalculQCDevice
 from pennylane_snowflurry.test_device import TestDevice
 from pennylane_snowflurry.snowflurry_device import SnowflurryQubitDevice
 from pennylane_snowflurry.utility.debug_utility import SnowflurryUtility, get_labels
@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     dev = TestDevice(6, 1000)
     # dev = qml.device("default.qubit", shots = 1000)
-    # dev = MonarqDevice(shots = 1000)
+    # dev = CalculQCDevice(shots = 1000)
     # dev = SnowflurryQubitDevice(num_qubits, 1000, "global", const.host, const.user, const.access_token, const.project_id, const.realm)
 
     def prepare(circuit, dev, regular = True, snowflurry = True, calcul_quebec = True, measurement = qml.probs):

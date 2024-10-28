@@ -1,7 +1,7 @@
 from pennylane.tape import QuantumTape
 from pennylane.operation import Operation
 from pennylane.measurements import MeasurementProcess
-from pennylane_snowflurry.api_utility import ApiUtility
+from pennylane_snowflurry.API.api_utility import ApiUtility
 from dotenv import dotenv_values
 import requests
 import json

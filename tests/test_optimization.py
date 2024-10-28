@@ -5,7 +5,7 @@ import unittest
 import pennylane as qml
 from pennylane.tape import QuantumTape
 
-class test_place_route(unittest.TestCase):
+class test_optimization(unittest.TestCase):
     def __init__(self, _):
         super().__init__(_)
         self.dev = qml.device("default.qubit")
