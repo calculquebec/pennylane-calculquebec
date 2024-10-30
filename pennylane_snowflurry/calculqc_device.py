@@ -4,7 +4,8 @@ from pennylane.transforms.core import TransformProgram
 from pennylane.tape import QuantumScript, QuantumTape
 from pennylane_snowflurry.execution_config import DefaultExecutionConfig, ExecutionConfig
 from pennylane_snowflurry.API.api_job import Job
-from pennylane_snowflurry.transpiler.monarq_transpile import get_transpiler
+from pennylane_snowflurry.transpiler.monarq_transpile import Transpiler
+from pennylane_snowflurry.transpiler.transpiler_config import TranspilerConfig as Config
 
 class CalculQCDevice(Device):
     """PennyLane device for interfacing with Anyon's quantum Hardware.
@@ -40,15 +41,17 @@ class CalculQCDevice(Device):
     def __init__(self, 
                  wires = None, 
                  shots = None,  
-                 baseDecomposition=True, 
-                 placeAndRoute=True, 
-                 optimization=True, 
-                 nativeDecomposition=True, 
-                 use_benchmarking=True) -> None:
+                 baseDecomposition=Config.BaseDecomp.CLIFFORDT, 
+                 place=Config.Place.ASTAR, 
+                 route=Config.Route.ASTARSWAP,
+                 optimization=Config.Optimization.NAIVE, 
+                 nativeDecomposition=Config.NativeDecomp.MONARQ, 
+                 use_benchmarking=Config.Benchmark.ACCEPTANCE) -> None:
 
         super().__init__(wires=wires, shots=shots)
         self._baseDecomposition = baseDecomposition
-        self._placeAndRoute = placeAndRoute
+        self._place = place,
+        self._route = route,
         self._optimization = optimization, 
         self._nativeDecomposition = nativeDecomposition 
         self._use_benchmarking = use_benchmarking
@@ -76,8 +79,9 @@ class CalculQCDevice(Device):
         config = execution_config
 
         transform_program = TransformProgram()
-        transform_program.add_transform(get_transpiler(self._baseDecomposition, 
-                                                self._placeAndRoute, 
+        transform_program.add_transform(Transpiler.get_transpiler(self._baseDecomposition, 
+                                                self._place,
+                                                self._route, 
                                                 self._optimization, 
                                                 self._nativeDecomposition, 
                                                 self._use_benchmarking))

@@ -1,15 +1,15 @@
-from functools import partial
-from typing import Tuple
 import pennylane as qml
-from pennylane.devices import Device
+from pennylane_snowflurry.execution_config import ExecutionConfig, DefaultExecutionConfig
+from typing import Tuple
 from pennylane.transforms.core import TransformProgram
-from pennylane.tape import QuantumScript, QuantumTape
-from pennylane_snowflurry.execution_config import DefaultExecutionConfig, ExecutionConfig
-from pennylane_snowflurry.API.api_utility import instructions
+from pennylane.tape import QuantumTape, QuantumScript
 from pennylane_snowflurry.transpiler.monarq_transpile import Transpiler
+from pennylane_snowflurry.API.api_utility import instructions
 from pennylane_snowflurry.transpiler.transpiler_config import TranspilerConfig as Config
+from pennylane.devices import Device
+from pennylane_snowflurry.utility.debug_utility import add_noise
 
-class TestDevice(Device):
+class BadDevice(Device):
     name = "MonarQDevice"
     short_name = "monarq.qubit"
     pennylane_requires = ">=0.30.0"
@@ -30,26 +30,12 @@ class TestDevice(Device):
     
     @property
     def name(self):
-        return TestDevice.short_name
+        return BadDevice.short_name
     
-    def __init__(self, 
-                 wires = None, 
-                 shots = None, 
-                 baseDecomposition=Config.BaseDecomp.CLIFFORDT, 
-                 place=Config.Place.ASTAR, 
-                 route=Config.Route.ASTARSWAP,
-                 optimization=Config.Optimization.NAIVE, 
-                 nativeDecomposition=Config.NativeDecomp.MONARQ, 
-                 use_benchmark=Config.Benchmark.NONE) -> None:
+    def __init__(self, wires=None, shots=None, noise = 0.005):
         super().__init__(wires=wires, shots=shots)
+        self._noise = noise
         
-        self._baseDecomposition = baseDecomposition
-        self._place = place
-        self._route = route
-        self._optimization = optimization, 
-        self._nativeDecomposition = nativeDecomposition
-        self._use_benchmark = use_benchmark
-    
     def preprocess(
         self,
         execution_config: ExecutionConfig = DefaultExecutionConfig,
@@ -68,12 +54,12 @@ class TestDevice(Device):
         config = execution_config
 
         transform_program = TransformProgram()
-        transform_program.add_transform(Transpiler.get_transpiler(baseDecomposition=self._baseDecomposition, 
-                                                place = self._place,
-                                                route = self._route,
-                                                optimization = self._optimization, 
-                                                nativeDecomposition = self._nativeDecomposition,
-                                                use_benchmark=self._use_benchmark))
+        transform_program.add_transform(Transpiler.get_transpiler(baseDecomposition=Config.BaseDecomp.CLIFFORDT, 
+                                                place = Config.Place.NONE,
+                                                route = Config.Route.ASTARSWAP,
+                                                optimization = Config.Optimization.NONE, 
+                                                nativeDecomposition = Config.NativeDecomp.MONARQ,
+                                                use_benchmark=Config.Benchmark.NONE))
         return transform_program, config
 
     def execute(self, circuits: QuantumTape | list[QuantumTape], execution_config : ExecutionConfig = DefaultExecutionConfig):
@@ -98,6 +84,7 @@ class TestDevice(Device):
             # Fallback or default behavior if execution_config is not an instance of ExecutionConfig
             interface = None
         
-        results = [qml.execute([circuit], qml.device("default.qubit", circuit.wires, circuit.shots)) for circuit in circuits]
+        circuits = [add_noise(tape, self._noise)[0][0] for tape in circuits]
+        results = [qml.execute([circuit], qml.device("default.mixed", wires = circuit.wires, shots = circuit.shots.total_shots)) for circuit in circuits]
 
         return results if not is_single_circuit else results[0]
