@@ -7,6 +7,10 @@ from copy import deepcopy
 from itertools import combinations
 from pennylane_snowflurry.monarq_data import connectivity, build_benchmark
 from pennylane_snowflurry.API.api_utility import ApiUtility
+from pennylane_snowflurry.transpiler.transpiler_config import TranspilerConfig as Config
+
+def find_biggest_group(graph : nx.Graph):
+    return max(nx.connected_components(graph), key=len)
 
 def is_directly_connected(op : Operation, machine_topology : nx.Graph) -> bool:
     return op.wires[1] in machine_topology.neighbors(op.wires[0])
@@ -29,10 +33,11 @@ def circuit_graph(tape : QuantumTape) -> nx.Graph:
     g.add_nodes_from([w for w in tape.wires if w not in g.nodes])
     return g
 
-def machine_graph(use_benchmark = True):
-    benchmark = build_benchmark() if use_benchmark else None
-    broken_nodes = benchmark[ApiUtility.keys.qubits] if use_benchmark else []
-    broken_couplers = benchmark[ApiUtility.keys.couplers] if use_benchmark else []
+def machine_graph(use_benchmark):
+    
+    benchmark = build_benchmark() if use_benchmark == Config.Benchmark.ACCEPTANCE else None
+    broken_nodes = benchmark[ApiUtility.keys.qubits] if use_benchmark == Config.Benchmark.ACCEPTANCE else []
+    broken_couplers = benchmark[ApiUtility.keys.couplers] if use_benchmark == Config.Benchmark.ACCEPTANCE else []
 
     links = [(v[0], v[1]) for (_, v) in connectivity[ApiUtility.keys.couplers].items()]
     

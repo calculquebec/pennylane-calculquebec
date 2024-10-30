@@ -5,7 +5,7 @@ from pennylane_snowflurry.utility.graph_utility import circuit_graph, shortest_p
 
 
 # TODO : there are better alternatives than using swap gates (depth wise)
-def swap_routing(tape : QuantumTape, use_benchmark = True):
+def swap_routing(tape : QuantumTape, use_benchmark):
     """
     uses swap to permute wires when 2 qubits operation appear which are not directly mapped to a coupler in the machine
     

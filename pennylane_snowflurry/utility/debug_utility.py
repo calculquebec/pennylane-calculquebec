@@ -7,6 +7,16 @@ import numpy as np
 import pennylane_snowflurry.custom_gates as custom
 from pennylane_snowflurry.pennylane_converter import PennylaneConverter, Snowflurry
 import matplotlib.pyplot as plt
+import random
+
+
+def add_noise(tape : QuantumTape, t = 0.005) -> str:
+    new_operations = []
+    for op in tape.operations:
+        new_operations += [op] + [qml.DepolarizingChannel(random.random() * t, w) for w in op.wires]
+    
+    new_tape = type(tape)(ops=new_operations, measurements=tape.measurements, shots=tape.shots)
+    return [new_tape], lambda results : results[0]
 
 def to_qasm(tape : QuantumTape) -> str:
     """

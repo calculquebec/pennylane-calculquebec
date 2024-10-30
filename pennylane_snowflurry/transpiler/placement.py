@@ -2,13 +2,15 @@ from pennylane.tape import QuantumTape
 import pennylane_snowflurry.utility.graph_utility as graph_util
 
 
-def placement_imags(tape : QuantumTape, use_benchmark = True) -> QuantumTape:
+def placement_imags(tape : QuantumTape, use_benchmark) -> QuantumTape:
     """
     places the circuit on the machine's connectivity using IMAGS algorithm
     """
     circuit_topology = graph_util.circuit_graph(tape)
     machine_topology = graph_util.machine_graph(use_benchmark)
 
+    if len(graph_util.find_biggest_group(circuit_topology)) > len(graph_util.find_biggest_group(machine_topology)):
+        raise Exception(f"There are {machine_topology.number_of_nodes} qubits on the machine but your circuit has {circuit_topology.number_of_nodes}.")
     
     # 1. trouver un isomorphisme de sous-graph entre le circuit et la machine, maximisant le nombre de noeuds pris en compte
     mapping = graph_util.find_largest_subgraph_isomorphism_imags(circuit_topology, machine_topology)
@@ -31,13 +33,15 @@ def placement_imags(tape : QuantumTape, use_benchmark = True) -> QuantumTape:
 
     return new_tape
 
-def placement_vf2(tape : QuantumTape, use_benchmark = True) -> QuantumTape:
+def placement_vf2(tape : QuantumTape, use_benchmark) -> QuantumTape:
     """
     places the circuit on the machine's connectivity using VF2 algorithm
     """
     circuit_topology = graph_util.circuit_graph(tape)
     machine_topology = graph_util.machine_graph(use_benchmark)
 
+    if len(graph_util.find_biggest_group(circuit_topology)) > len(graph_util.find_biggest_group(machine_topology)):
+        raise Exception(f"There are {machine_topology.number_of_nodes} qubits on the machine but your circuit has {circuit_topology.number_of_nodes}.")
     
     # 1. trouver un isomorphisme de sous-graph entre le circuit et la machine, maximisant le nombre de noeuds pris en compte
     mapping = graph_util.find_largest_subgraph_isomorphism_vf2(circuit_topology, machine_topology)
@@ -73,13 +77,16 @@ def _recurse(a_key, b_key, mapping, to_explore, machine_topology, circuit_topolo
 
             _recurse(a_key2, b_key2, mapping, to_explore, machine_topology, circuit_topology)
 
-def placement_astar(tape : QuantumTape, use_benchmark = True) -> QuantumTape:
+def placement_astar(tape : QuantumTape, benchmark) -> QuantumTape:
     """
     places the circuit on the machine's connectivity using astar algorithm and comparing path lengths
     """
     circuit_topology = graph_util.circuit_graph(tape)
-    machine_topology = graph_util.machine_graph(use_benchmark)
+    machine_topology = graph_util.machine_graph(benchmark)
 
+    if len(graph_util.find_biggest_group(circuit_topology)) > len(graph_util.find_biggest_group(machine_topology)):
+        raise Exception(f"There are {machine_topology.number_of_nodes} qubits on the machine but your circuit has {circuit_topology.number_of_nodes}.")
+    
     mapping = {}
     # sort nodes by degree descending, so that we map the most connected node first
     to_explore = list(reversed(sorted([w for w in tape.wires], key=lambda w: circuit_topology.degree(w))))
