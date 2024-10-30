@@ -8,7 +8,7 @@ base_gates = ["Adjoint(T)", "Adjoint(S)", "SX", "Adjoint(SX)",
                   "CZ", "CNOT", "RZ", "RX", "RY"]
 
 def base_decomposition(tape : QuantumTape):
-    """decompose every non-standard gates (arbitrary unitaries and 3+ qubits gates) into a base set of gates"""
+    """decompose every non-standard gates (arbitrary unitaries and 3+ qubits gates) into a base set of gates (clifford + T)"""
 
     def stop_at(op : Operation):
         # TODO : voir quelles portes on veut stop at

@@ -7,7 +7,7 @@ import pennylane_snowflurry.transpiler.placement as step2
 import pennylane_snowflurry.transpiler.routing as step3
 import pennylane_snowflurry.transpiler.optimization as step4
 import pennylane_snowflurry.transpiler.native_decomposition as step5
-from pennylane_snowflurry.transpiler.transpiler_config import TranspilerConfig as Config
+import pennylane_snowflurry.transpiler.transpiler_config as Config
 
 class Transpiler:
     
@@ -67,7 +67,7 @@ class Transpiler:
         if placement == Config.Place.VF2:
             return step2.placement_vf2(tape, benchmark)
         if placement == Config.Place.ISMAGS:
-            return step2.placement_imags(tape, benchmark)
+            return step2.placement_ismags(tape, benchmark)
         return tape
     
     def routing(tape : QuantumTape, baseDecomposition, routing, benchmark):

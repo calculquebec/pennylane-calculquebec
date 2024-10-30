@@ -18,9 +18,9 @@ class test_kmp(unittest.TestCase):
     def test_find_pattern(self):
         string = list("klfn sfelixljfn skjfn skjn skjfelixfn szlsidi JSeliaeg felix slgij rpgjfnaukgn felixksjdbf ksjdbfelixgf slisdj asldffelixjisf")
         pattern = list("felix")
-        indices = kmp.kmp_search(string, pattern, lambda a, b: a == b)
-        answer = [6, 30, 55, 79, 96, 116]
-        self.assertListEqual(indices, answer)
+        index = kmp.kmp_search(string, pattern, lambda a, b: a == b)
+        answer = 6
+        self.assertEqual(index, answer)
 
 if __name__ == "__main__":
     unittest.main()

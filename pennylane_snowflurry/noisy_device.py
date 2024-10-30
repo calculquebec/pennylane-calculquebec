@@ -5,7 +5,7 @@ from pennylane.transforms.core import TransformProgram
 from pennylane.tape import QuantumTape, QuantumScript
 from pennylane_snowflurry.transpiler.monarq_transpile import Transpiler
 from pennylane_snowflurry.API.api_utility import instructions
-from pennylane_snowflurry.transpiler.transpiler_config import TranspilerConfig as Config
+import pennylane_snowflurry.transpiler.transpiler_config as config
 from pennylane.devices import Device
 from pennylane_snowflurry.utility.debug_utility import add_noise
 
