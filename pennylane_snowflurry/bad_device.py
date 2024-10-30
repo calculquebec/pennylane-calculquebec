@@ -5,7 +5,7 @@ from pennylane.transforms.core import TransformProgram
 from pennylane.tape import QuantumTape, QuantumScript
 from pennylane_snowflurry.transpiler.monarq_transpile import Transpiler
 from pennylane_snowflurry.API.api_utility import instructions
-from pennylane_snowflurry.transpiler.transpiler_config import TranspilerConfig as Config
+import pennylane_snowflurry.transpiler.transpiler_config as config
 from pennylane.devices import Device
 from pennylane_snowflurry.utility.debug_utility import add_noise
 
@@ -54,12 +54,12 @@ class BadDevice(Device):
         config = execution_config
 
         transform_program = TransformProgram()
-        transform_program.add_transform(Transpiler.get_transpiler(baseDecomposition=Config.BaseDecomp.CLIFFORDT, 
-                                                place = Config.Place.NONE,
-                                                route = Config.Route.ASTARSWAP,
-                                                optimization = Config.Optimization.NONE, 
-                                                nativeDecomposition = Config.NativeDecomp.MONARQ,
-                                                use_benchmark=Config.Benchmark.NONE))
+        transform_program.add_transform(Transpiler.get_transpiler(baseDecomposition=config.BaseDecomp.CLIFFORDT, 
+                                                place = config.Place.NONE,
+                                                route = config.Route.ASTARSWAP,
+                                                optimization = config.Optimization.NONE, 
+                                                nativeDecomposition = config.NativeDecomp.MONARQ,
+                                                use_benchmark=config.Benchmark.NONE))
         return transform_program, config
 
     def execute(self, circuits: QuantumTape | list[QuantumTape], execution_config : ExecutionConfig = DefaultExecutionConfig):

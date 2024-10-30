@@ -7,7 +7,7 @@ from pennylane.tape import QuantumScript, QuantumTape
 from pennylane_snowflurry.execution_config import DefaultExecutionConfig, ExecutionConfig
 from pennylane_snowflurry.API.api_utility import instructions
 from pennylane_snowflurry.transpiler.monarq_transpile import Transpiler
-from pennylane_snowflurry.transpiler.transpiler_config import TranspilerConfig as Config
+import pennylane_snowflurry.transpiler.transpiler_config as config
 
 class TestDevice(Device):
     name = "MonarQDevice"
@@ -35,12 +35,12 @@ class TestDevice(Device):
     def __init__(self, 
                  wires = None, 
                  shots = None, 
-                 baseDecomposition=Config.BaseDecomp.CLIFFORDT, 
-                 place=Config.Place.ASTAR, 
-                 route=Config.Route.ASTARSWAP,
-                 optimization=Config.Optimization.NAIVE, 
-                 nativeDecomposition=Config.NativeDecomp.MONARQ, 
-                 use_benchmark=Config.Benchmark.NONE) -> None:
+                 baseDecomposition=config.BaseDecomp.CLIFFORDT, 
+                 place=config.Place.ASTAR, 
+                 route=config.Route.ASTARSWAP,
+                 optimization=config.Optimization.NAIVE, 
+                 nativeDecomposition=config.NativeDecomp.MONARQ, 
+                 use_benchmark=config.Benchmark.NONE) -> None:
         super().__init__(wires=wires, shots=shots)
         
         self._baseDecomposition = baseDecomposition

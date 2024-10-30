@@ -5,7 +5,7 @@ from pennylane.tape import QuantumScript, QuantumTape
 from pennylane_snowflurry.execution_config import DefaultExecutionConfig, ExecutionConfig
 from pennylane_snowflurry.API.api_job import Job
 from pennylane_snowflurry.transpiler.monarq_transpile import Transpiler
-from pennylane_snowflurry.transpiler.transpiler_config import TranspilerConfig as Config
+import pennylane_snowflurry.transpiler.transpiler_config as config
 
 class CalculQCDevice(Device):
     """PennyLane device for interfacing with Anyon's quantum Hardware.
@@ -41,12 +41,12 @@ class CalculQCDevice(Device):
     def __init__(self, 
                  wires = None, 
                  shots = None,  
-                 baseDecomposition=Config.BaseDecomp.CLIFFORDT, 
-                 place=Config.Place.ASTAR, 
-                 route=Config.Route.ASTARSWAP,
-                 optimization=Config.Optimization.NAIVE, 
-                 nativeDecomposition=Config.NativeDecomp.MONARQ, 
-                 use_benchmarking=Config.Benchmark.ACCEPTANCE) -> None:
+                 baseDecomposition=config.BaseDecomp.CLIFFORDT, 
+                 place=config.Place.ASTAR, 
+                 route=config.Route.ASTARSWAP,
+                 optimization=config.Optimization.NAIVE, 
+                 nativeDecomposition=config.NativeDecomp.MONARQ, 
+                 use_benchmarking=config.Benchmark.ACCEPTANCE) -> None:
 
         super().__init__(wires=wires, shots=shots)
         self._baseDecomposition = baseDecomposition

@@ -2,9 +2,9 @@ from pennylane.tape import QuantumTape
 import pennylane_snowflurry.utility.graph_utility as graph_util
 
 
-def placement_imags(tape : QuantumTape, use_benchmark) -> QuantumTape:
+def placement_ismags(tape : QuantumTape, use_benchmark) -> QuantumTape:
     """
-    places the circuit on the machine's connectivity using IMAGS algorithm
+    places the circuit on the machine's connectivity using ISMAGS algorithm
     """
     circuit_topology = graph_util.circuit_graph(tape)
     machine_topology = graph_util.machine_graph(use_benchmark)

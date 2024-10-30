@@ -1,5 +1,5 @@
 import unittest.mock
-from pennylane_snowflurry.transpiler.placement import placement_imags, placement_astar
+from pennylane_snowflurry.transpiler.placement import placement_ismags, placement_astar
 from pennylane_snowflurry.transpiler.routing import swap_routing
 import unittest
 import pennylane as qml
@@ -22,7 +22,7 @@ class test_place_route(unittest.TestCase):
                qml.CNOT([0, 4])]
 
         tape = QuantumTape(ops=ops)
-        new_tape = placement_imags(tape, self.ACCEPTANCE)
+        new_tape = placement_ismags(tape, self.ACCEPTANCE)
         self.assertListEqual(sorted(answer), sorted(int(w) for w in new_tape.wires))
     
     def test_place_trivial(self):
@@ -102,8 +102,7 @@ class test_place_route(unittest.TestCase):
         machine_graph.return_value = nx.Graph([[0, 4], [1, 5]])
         ops = [qml.CNOT([0, 1])]
         tape = QuantumTape(ops=ops)
-        new_tape = swap_routing(tape, self.NONE)
-    
+        self.assertRaises(Exception, lambda : swap_routing(tape, self.NONE))
 
 if __name__ == "__main__":
     unittest.main()

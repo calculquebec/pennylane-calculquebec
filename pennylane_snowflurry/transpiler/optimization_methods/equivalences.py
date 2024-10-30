@@ -4,6 +4,8 @@ from pennylane.operation import Operation
 from pennylane.transforms.optimization.optimization_utils import find_next_gate
 import pennylane as qml
 
+"""this code is archived. do not use"""
+
 native_gate_identities = [
         [["Z90", "Z90"], [qml.PauliZ]],
         [["X90", "X90"], [qml.PauliX]],
