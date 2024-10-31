@@ -20,7 +20,7 @@ class NativeDecomp(Enum):
 
 class Optimization(Enum):
     NONE = 0
-    NAIVE = 1 << 0
+    COMMUTEANDMERGE = 1 << 0
     
 class Benchmark(Enum):
     NONE = 0

@@ -69,7 +69,7 @@ class ApiUtility:
         return f'Basic {token}'
     
     @staticmethod
-    def headers(username : str, password : str, realm : str) -> dict[str, any]:
+    def headers(username : str, password : str, realm : str) -> dict[str, str]:
         """the Thunderhead API headers
 
         Args:
