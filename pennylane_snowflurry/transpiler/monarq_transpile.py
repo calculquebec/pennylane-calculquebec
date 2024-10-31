@@ -7,17 +7,13 @@ import pennylane_snowflurry.transpiler.placement as step2
 import pennylane_snowflurry.transpiler.routing as step3
 import pennylane_snowflurry.transpiler.optimization as step4
 import pennylane_snowflurry.transpiler.native_decomposition as step5
-import pennylane_snowflurry.transpiler.transpiler_config as Config
+import pennylane_snowflurry.transpiler.transpiler_enums as enums
+from pennylane_snowflurry.device_configuration import Config
 
 class Transpiler:
     
 
-    def get_transpiler(baseDecomposition = Config.BaseDecomp.CLIFFORDT,
-                   place = Config.Place.ASTAR,
-                   route = Config.Route.ASTARSWAP,
-                   optimization = Config.Optimization.NAIVE, 
-                   nativeDecomposition = Config.NativeDecomp.MONARQ,
-                   use_benchmark = Config.Benchmark.ACCEPTANCE):
+    def get_transpiler(config : Config):
         """
         returns a transform that goes through 5 transpilation steps
         end circuit should be executable on MonarQ
@@ -44,11 +40,11 @@ class Transpiler:
             """
             optimized_tape = deepcopy(tape)
             with qml.QueuingManager.stop_recording():
-                optimized_tape = Transpiler.base_decomp(optimized_tape, baseDecomposition)
-                optimized_tape = Transpiler.placement(optimized_tape, place, use_benchmark)
-                optimized_tape = Transpiler.routing(optimized_tape, baseDecomposition, route, use_benchmark)
-                optimized_tape = Transpiler.optimize(optimized_tape, optimization)
-                optimized_tape = Transpiler.native_decomp(optimized_tape, nativeDecomposition, optimization)
+                optimized_tape = Transpiler.base_decomp(optimized_tape, config.baseDecomposition)
+                optimized_tape = Transpiler.placement(optimized_tape, config.placement, config.useBenchmark)
+                optimized_tape = Transpiler.routing(optimized_tape, config.baseDecomposition, config.routing, config.useBenchmark)
+                optimized_tape = Transpiler.optimize(optimized_tape, config.optimization)
+                optimized_tape = Transpiler.native_decomp(optimized_tape, config.nativeDecomposition, config.optimization)
                 
 
             new_tape = type(tape)(optimized_tape.operations, optimized_tape.measurements, shots=optimized_tape.shots)
@@ -57,32 +53,32 @@ class Transpiler:
         return transform(transpile)
     
     def base_decomp(tape : QuantumTape, baseDecomposition):
-        if baseDecomposition == Config.BaseDecomp.CLIFFORDT: 
+        if baseDecomposition == enums.BaseDecomp.CLIFFORDT: 
             return step1.base_decomposition(tape)
         return tape
     
     def placement(tape : QuantumTape, placement, benchmark):
-        if placement == Config.Place.ASTAR: 
+        if placement == enums.Place.ASTAR: 
             return step2.placement_astar(tape, benchmark)
-        if placement == Config.Place.VF2:
+        if placement == enums.Place.VF2:
             return step2.placement_vf2(tape, benchmark)
-        if placement == Config.Place.ISMAGS:
+        if placement == enums.Place.ISMAGS:
             return step2.placement_ismags(tape, benchmark)
         return tape
     
     def routing(tape : QuantumTape, baseDecomposition, routing, benchmark):
-        if routing == Config.Route.ASTARSWAP:
+        if routing == enums.Route.ASTARSWAP:
             tape = step3.swap_routing(tape, benchmark)
             return Transpiler.base_decomp(tape, baseDecomposition)
         return tape
     
     def optimize(tape : QuantumTape, optimization):
-        if optimization == Config.Optimization.NAIVE:
+        if optimization == enums.Optimization.COMMUTEANDMERGE:
             return step4.optimize(tape)
         return tape
     
     def native_decomp(tape : QuantumTape, nativeDecomposition, optimization):
-        if nativeDecomposition == Config.NativeDecomp.MONARQ:
+        if nativeDecomposition == enums.NativeDecomp.MONARQ:
             optimized_tape = step5.native_gate_decomposition(tape)
             if optimization:
                 optimized_tape_before = optimized_tape

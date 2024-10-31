@@ -4,8 +4,10 @@ from pennylane.transforms.core import TransformProgram
 from pennylane.tape import QuantumScript, QuantumTape
 from pennylane_snowflurry.execution_config import DefaultExecutionConfig, ExecutionConfig
 from pennylane_snowflurry.API.api_job import Job
+from pennylane_snowflurry.API.api_adapter import ApiAdapter
 from pennylane_snowflurry.transpiler.monarq_transpile import Transpiler
-import pennylane_snowflurry.transpiler.transpiler_config as config
+import pennylane_snowflurry.transpiler.transpiler_enums as enums
+from pennylane_snowflurry.device_configuration import Client, Config, MonarqConfig
 
 class CalculQCDevice(Device):
     """PennyLane device for interfacing with Anyon's quantum Hardware.
@@ -38,23 +40,25 @@ class CalculQCDevice(Device):
         "PauliZ"
     }
     
+    _config : Config
+    
     def __init__(self, 
                  wires = None, 
                  shots = None,  
-                 baseDecomposition=config.BaseDecomp.CLIFFORDT, 
-                 place=config.Place.ASTAR, 
-                 route=config.Route.ASTARSWAP,
-                 optimization=config.Optimization.NAIVE, 
-                 nativeDecomposition=config.NativeDecomp.MONARQ, 
-                 use_benchmarking=config.Benchmark.ACCEPTANCE) -> None:
+                 client : Client = None,
+                 config : Config = None) -> None:
 
         super().__init__(wires=wires, shots=shots)
-        self._baseDecomposition = baseDecomposition
-        self._place = place,
-        self._route = route,
-        self._optimization = optimization, 
-        self._nativeDecomposition = nativeDecomposition 
-        self._use_benchmarking = use_benchmarking
+        
+        if not client:
+            raise Exception("The client has not been defined")
+        
+        if not config:
+            config = MonarqConfig()
+        
+        ApiAdapter.initialize(client)
+        
+        self._config = config
     
 
     @property
@@ -79,12 +83,7 @@ class CalculQCDevice(Device):
         config = execution_config
 
         transform_program = TransformProgram()
-        transform_program.add_transform(Transpiler.get_transpiler(self._baseDecomposition, 
-                                                self._place,
-                                                self._route, 
-                                                self._optimization, 
-                                                self._nativeDecomposition, 
-                                                self._use_benchmarking))
+        transform_program.add_transform(Transpiler.get_transpiler(self._config))
         return transform_program, config
 
     def execute(self, circuits: QuantumTape | list[QuantumTape], execution_config : ExecutionConfig = DefaultExecutionConfig):

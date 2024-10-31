@@ -17,7 +17,6 @@ class Job:
     realm : str
     
     def __init__(self, circuit : QuantumTape, circuit_name = "default"):
-        self.adapter = ApiAdapter()
         self.circuit_dict = ApiUtility.convert_circuit(circuit)
         self.circuit_name = circuit_name
         self.shots = circuit.shots.total_shots
@@ -31,14 +30,14 @@ class Job:
 
         if max_tries == -1: max_tries = 2 ** 15
 
-        response = self.adapter.create_job(self.circuit_dict, self.circuit_name, self.shots)
+        response = ApiAdapter.create_job(self.circuit_dict, self.circuit_name, self.shots)
         
         if(response.status_code == 200):
             current_status = ""
             job_id = json.loads(response.text)["job"]["id"]
             for i in range(max_tries):
                 time.sleep(0.2)
-                response = self.adapter.job_by_id(job_id)
+                response = ApiAdapter.job_by_id(job_id)
 
                 if response.status_code != 200: 
                     continue

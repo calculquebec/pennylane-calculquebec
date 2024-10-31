@@ -72,8 +72,7 @@ def build_benchmark():
     val = get_acceptances()
 
     # call to api to get qubit and couplers benchmark
-    api = ApiAdapter()
-    qubits_and_couplers = api.get_qubits_and_couplers()
+    qubits_and_couplers = ApiAdapter.get_qubits_and_couplers()
 
     the_benchmark = { ApiUtility.keys.qubits : [], ApiUtility.keys.couplers : [] }
 

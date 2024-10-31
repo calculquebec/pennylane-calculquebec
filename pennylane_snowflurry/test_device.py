@@ -7,7 +7,8 @@ from pennylane.tape import QuantumScript, QuantumTape
 from pennylane_snowflurry.execution_config import DefaultExecutionConfig, ExecutionConfig
 from pennylane_snowflurry.API.api_utility import instructions
 from pennylane_snowflurry.transpiler.monarq_transpile import Transpiler
-import pennylane_snowflurry.transpiler.transpiler_config as config
+import pennylane_snowflurry.transpiler.transpiler_enums as enums
+from pennylane_snowflurry.device_configuration import MonarqConfig
 
 class TestDevice(Device):
     name = "MonarQDevice"
@@ -35,20 +36,18 @@ class TestDevice(Device):
     def __init__(self, 
                  wires = None, 
                  shots = None, 
-                 baseDecomposition=config.BaseDecomp.CLIFFORDT, 
-                 place=config.Place.ASTAR, 
-                 route=config.Route.ASTARSWAP,
-                 optimization=config.Optimization.NAIVE, 
-                 nativeDecomposition=config.NativeDecomp.MONARQ, 
-                 use_benchmark=config.Benchmark.NONE) -> None:
+                 config = None) -> None:
         super().__init__(wires=wires, shots=shots)
         
-        self._baseDecomposition = baseDecomposition
-        self._place = place
-        self._route = route
-        self._optimization = optimization, 
-        self._nativeDecomposition = nativeDecomposition
-        self._use_benchmark = use_benchmark
+        if config is None:
+            config = MonarqConfig()
+            
+        self._baseDecomposition = config.baseDecomposition
+        self._place = config.placement
+        self._route = config.routing
+        self._optimization = config.optimization, 
+        self._nativeDecomposition = config.nativeDecomposition
+        self._use_benchmark = config.useBenchmark
     
     def preprocess(
         self,
