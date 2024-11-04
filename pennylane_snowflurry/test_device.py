@@ -11,6 +11,8 @@ import pennylane_snowflurry.transpiler.transpiler_enums as enums
 from pennylane_snowflurry.device_configuration import MonarqConfig
 
 class TestDevice(Device):
+    """a device that uses the monarq transpiler but simulates results using default.qubit
+    """
     name = "MonarQDevice"
     short_name = "monarq.qubit"
     pennylane_requires = ">=0.30.0"

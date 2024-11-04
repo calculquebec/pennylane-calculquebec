@@ -64,10 +64,22 @@ class MonarqClicent(CalculQuebecClient):
 
 
 class Config:
+    """a parameter object that can be passed to devices for changing its default behaviour
+    """
     pass
 
 
 class MonarqConfig(Config):
+    """a parameter object that can be passed to MonarqDevice for changing its default transpiling behaviour
+
+    Args:
+        baseDecomposition (NONE, CLIFFORDT)
+        placement (NONE, ASTAR, ISMAGS, VF2)
+        routing (NONE, ASTARSWAP)
+        optimization (NONE, COMMUTEANDMERGE)
+        nativeDecomposition (NONE, MONARQ)
+        useBenchmark (NONE, ACCEPTANCE)
+    """
     baseDecomposition : Enums.BaseDecomp
     placement : Enums.Place
     routing : Enums.Route

@@ -10,6 +10,10 @@ from pennylane.devices import Device
 from pennylane_snowflurry.utility.debug_utility import add_noise
 
 class NoisyDevice(Device):
+    """
+    a device that wraps around default.mixed device, and adds a depolarizing channel for each operation. 
+    useful for simulation noise on a circuit
+    """
     name = "MonarQDevice"
     short_name = "monarq.qubit"
     pennylane_requires = ">=0.30.0"
