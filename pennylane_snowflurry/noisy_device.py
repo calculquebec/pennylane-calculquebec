@@ -54,7 +54,7 @@ class NoisyDevice(Device):
         config = execution_config
 
         transform_program = TransformProgram()
-        transform_program.add_transform(qml.transform(add_noise))
+        transform_program.add_transform(qml.transform(lambda tape : add_noise(tape, noise = self._noise)))
         return transform_program, config
 
     def execute(self, circuits: QuantumTape | list[QuantumTape], execution_config : ExecutionConfig = DefaultExecutionConfig):
