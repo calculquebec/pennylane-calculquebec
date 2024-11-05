@@ -9,7 +9,7 @@ from pennylane_snowflurry.transpiler.monarq_transpile import Transpiler
 import pennylane_snowflurry.transpiler.transpiler_enums as enums
 from pennylane_snowflurry.device_configuration import Client, Config, MonarqConfig
 
-class CalculQCDevice(Device):
+class MonarqDevice(Device):
     """PennyLane device for interfacing with Anyon's quantum Hardware.
 
     * Extends the PennyLane :class:`~.pennylane.Device` class.
@@ -27,7 +27,7 @@ class CalculQCDevice(Device):
     """
 
     name = "CalculQCDevice"
-    short_name = "calculqc.qubit"
+    short_name = "calculqc.default"
     pennylane_requires = ">=0.30.0"
     author = "CalculQuebec"
     
@@ -40,30 +40,30 @@ class CalculQCDevice(Device):
         "PauliZ"
     }
     
-    _config : Config
+    _behaviour_config : Config
     
     def __init__(self, 
                  wires = None, 
                  shots = None,  
                  client : Client = None,
-                 config : Config = None) -> None:
+                 behaviour_config : Config = None) -> None:
 
         super().__init__(wires=wires, shots=shots)
         
         if not client:
             raise Exception("The client has not been defined")
         
-        if not config:
-            config = MonarqConfig()
+        if not behaviour_config:
+            behaviour_config = MonarqConfig()
         
         ApiAdapter.initialize(client)
         
-        self._config = config
+        self._behaviour_config = behaviour_config
     
 
     @property
     def name(self):
-        return CalculQCDevice.short_name
+        return MonarqDevice.short_name
     
     def preprocess(
         self,
@@ -83,7 +83,7 @@ class CalculQCDevice(Device):
         config = execution_config
 
         transform_program = TransformProgram()
-        transform_program.add_transform(Transpiler.get_transpiler(self._config))
+        transform_program.add_transform(Transpiler.get_transpiler(self._behaviour_config))
         return transform_program, config
 
     def execute(self, circuits: QuantumTape | list[QuantumTape], execution_config : ExecutionConfig = DefaultExecutionConfig):
