@@ -80,9 +80,9 @@ The default behaviour of MonarqDevice's transpiler goes as such :
 4. Optimize the circuit (commute gates, merge rotations, remove inverses and trivial gates)
 5. Decompose non-native gates to native ones
 
-The transpiler uses benchmarks of the machine's fiability in the placement and routing part.
+The transpiler uses benchmarks of the machine's accuracy in the placement and routing part.
 
-You can change the behaviour of the transpiler by passing a MonarqConfig object to the device. This should only be done if you know what your doing because it could lead to your circuit not being ran.
+You can change the behaviour of the transpiler by passing a MonarqConfig object to the device. Tread carefully while using this feature because it could lead to your circuit not being ran.
 
 Here's how to do it :
 
