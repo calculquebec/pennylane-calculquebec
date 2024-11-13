@@ -10,6 +10,8 @@ REQUIRED_PACKAGES = [
     ),
 ]
 
+JULIA_TARGET_VERSION = "1.9 - 1.10"
+
 IS_USER_CONFIGURED = False
 
 
