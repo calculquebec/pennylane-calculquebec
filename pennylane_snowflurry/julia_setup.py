@@ -38,9 +38,9 @@ class JuliaEnv:
     """
 
     def __init__(self):
-        self.julia_env_path = juliapkg.project()
-        self.json_path = self.julia_env_path + "/pyjuliapkg/juliapkg.json"
-        self.json_pkg_list = self.get_json_pkg_list()
+        self.julia_env_path = None
+        self.json_path = None
+        self.json_pkg_list = None
         self.required_packages = REQUIRED_PACKAGES
 
     def update(self):
@@ -51,6 +51,10 @@ class JuliaEnv:
         """
         if IS_USER_CONFIGURED:
             return
+
+        self.julia_env_path = juliapkg.project()
+        self.json_path = self.julia_env_path + "/pyjuliapkg/juliapkg.json"
+        self.json_pkg_list = self.get_json_pkg_list()
 
         for required_pkg in self.required_packages:
             if required_pkg.name in self.json_pkg_list:
