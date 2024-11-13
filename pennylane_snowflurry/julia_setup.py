@@ -90,16 +90,6 @@ class JuliaEnv:
         except:
             LookupError("Package not found")
 
-    def write_json(self):
-        """
-        This function writes the updated list of packages to the JSON file
-        It also creates the JSON file if it does not exist.
-        """
-        if "packages" not in self.json_pkg_list:
-            self.json_pkg_list = {"packages": self.json_pkg_list}
-        with open(self.json_path, "w") as f:
-            json.dump(self.json_pkg_list, f)
-
     def new_json_pkg_list(self):
         """
         This function updates the list of packages with the required packages
@@ -110,3 +100,13 @@ class JuliaEnv:
                 "uuid": required_pkg.uuid,
                 "version": required_pkg.version,
             }
+
+    def write_json(self):
+        """
+        This function writes the updated list of packages to the JSON file
+        It also creates the JSON file if it does not exist.
+        """
+        if "packages" not in self.json_pkg_list:
+            self.json_pkg_list = {"packages": self.json_pkg_list}
+        with open(self.json_path, "w") as f:
+            json.dump(self.json_pkg_list, f)
