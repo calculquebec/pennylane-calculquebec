@@ -24,7 +24,7 @@ native_gate_identities = [
 
 def _apply_equivalence(gates, pattern, replacement):
         wires = gates[0].wires
-        from kmp import kmp_search
+        from pennylane_snowflurry.utility.kmp import kmp_search
         new_gates = []
         list_copy = gates.copy()
         while len(list_copy) > 0:

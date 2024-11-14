@@ -22,7 +22,33 @@ def sum_m_k(m, k, num_wires):
     qml.adjoint(qml.QFT)(wires=wires)
     return qml.counts(wires=wires)
 
-def circuit_qpe(num_wires = 5, angle = 2 * np.pi / 5):
+def grover4():
+    """
+    an implementation of grover that should find 0110 and 1001
+    """
+    num_qubits = 4
+    for i in range(num_qubits):
+        qml.Hadamard(i)
+        
+    qml.CNOT([0, 1])
+    qml.CNOT([2, 3])
+    qml.CNOT([0, 2])
+    qml.CCZ([1,2,3])
+    qml.CNOT([0, 2])
+    qml.CNOT([0, 1])
+    qml.CNOT([2, 3])
+        
+    for i in range(num_qubits):
+        qml.Hadamard(i)
+        qml.PauliX(i)
+    qml.ControlledQubitUnitary(qml.Z(0), [1, 2, 3])
+    for i in range(num_qubits):
+        qml.PauliX(i)
+        qml.Hadamard(i)
+    return qml.counts(wires = [0, 1, 2, 3])
+
+
+def circuit_qpe(num_wires = 5, angle = 2 * np.pi / 5, measurement = qml.counts):
     """quantum phase estimation algorithm using given angle and number of qubits
     """
     wires = [i for i in range(num_wires)]
@@ -31,19 +57,19 @@ def circuit_qpe(num_wires = 5, angle = 2 * np.pi / 5):
     qml.PauliX(wires=num_wires - 1)
 
     for wire in estimation_wires:
-        qml.Hadamard(wires=wire)
+        qml.Hadamard(wires=wire)    
 
     qml.ControlledSequence(U(num_wires - 1, angle), control=estimation_wires)
     qml.adjoint(qml.QFT)(wires=estimation_wires)
 
-    return qml.counts(wires=estimation_wires)
+    return measurement(wires=estimation_wires)
 
-def GHZ(num_wires):
+def GHZ(num_wires, measurement=qml.counts):
     """ghz on given number of qubits
     """
     qml.Hadamard(0)
     [qml.CNOT([0, i]) for i in range(1, num_wires)]
-    return qml.counts(wires = range(num_wires))
+    return measurement(wires = range(num_wires))
 
 def Toffoli():
     """toffoli with hadamards on control wires
@@ -53,7 +79,7 @@ def Toffoli():
     [qml.Toffoli([0, 1, 2])]
     return qml.probs(wires = [0, 1, 2])
 
-def bernstein_vazirani(number : int):
+def bernstein_vazirani(number : int, measurement = qml.counts):
     """bernstein vazirani for encoding given number
     """
     value = []
@@ -69,5 +95,5 @@ def bernstein_vazirani(number : int):
     [qml.CNOT([i, num_wires - 1]) for i, should in enumerate(value) if should]
         
     [qml.Hadamard(i) for i in range(num_wires - 1)]
-    return qml.counts(wires=[i for i in range(num_wires - 1)])
+    return measurement(wires=[i for i in range(num_wires - 1)])
     

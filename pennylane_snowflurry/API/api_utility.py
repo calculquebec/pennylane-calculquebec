@@ -1,9 +1,7 @@
 from pennylane.tape import QuantumTape
 from pennylane.operation import Operation
 from pennylane.measurements import MeasurementProcess
-from dotenv import dotenv_values
-import requests
-import json
+import numpy as np
 
 class ApiUtility:
     @staticmethod
@@ -21,7 +19,9 @@ class ApiUtility:
             ApiUtility.keys.qubits : [w for w in instruction.wires],
             ApiUtility.keys.type : instructions[instruction.name]
         }
-        if instruction.name == "PhaseShift": operation[ApiUtility.keys.parameters] = {"lambda" : instruction.parameters[0]}
+        if instruction.name == "PhaseShift": 
+            value = instruction.parameters[0][0] if isinstance(instruction.parameters[0], np.ndarray) else instruction.parameters[0]
+            operation[ApiUtility.keys.parameters] = {"lambda" : value}
             
         return operation
     
@@ -130,6 +130,8 @@ class ApiUtility:
         qubits = "qubits"
         parameters = "parameters"
         couplers = "couplers"
+        singleQubitGateFidelity = "singleQubitGateFidelity"
+        readoutState0Fidelity = "readoutState0Fidelity"
         readoutState1Fidelity = "readoutState1Fidelity"
         czGateFidelity = "czGateFidelity"
         resultsPerDevice = "resultsPerDevice"

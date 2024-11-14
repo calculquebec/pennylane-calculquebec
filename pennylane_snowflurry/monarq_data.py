@@ -58,23 +58,16 @@ connectivity = {
   }
 }
 
-def get_acceptances():
-    config = dotenv_values(".env")
-    q1 = float(config["Q1_ACCEPTANCE"])
-    q2 = float(config["Q2_ACCEPTANCE"])
-    
-    return q1, q2
-
-def build_benchmark():
+def build_benchmark(q1Acceptance, q2Acceptance):
     """
     creates a dictionary that contains unreliable qubits and couplers
     """
-    val = get_acceptances()
+    val = (q1Acceptance, q2Acceptance)
 
     # call to api to get qubit and couplers benchmark
     qubits_and_couplers = ApiAdapter.get_qubits_and_couplers()
 
-    the_benchmark = { ApiUtility.keys.qubits : [], ApiUtility.keys.couplers : [] }
+    broken_qubits_and_couplers = { ApiUtility.keys.qubits : [], ApiUtility.keys.couplers : [] }
 
     for coupler_id in qubits_and_couplers[ApiUtility.keys.couplers]:
         benchmark_coupler = qubits_and_couplers[ApiUtility.keys.couplers][coupler_id]
@@ -83,7 +76,7 @@ def build_benchmark():
         if benchmark_coupler[ApiUtility.keys.czGateFidelity] >= val[1]:
             continue
 
-        the_benchmark[ApiUtility.keys.couplers].append(conn_coupler)
+        broken_qubits_and_couplers[ApiUtility.keys.couplers].append(conn_coupler)
 
     for qubit_id in qubits_and_couplers[ApiUtility.keys.qubits]:
         benchmark_qubit = qubits_and_couplers[ApiUtility.keys.qubits][qubit_id]
@@ -91,5 +84,5 @@ def build_benchmark():
         if benchmark_qubit[ApiUtility.keys.readoutState1Fidelity] >= val[0]:
             continue
 
-        the_benchmark[ApiUtility.keys.qubits].append(int(qubit_id))
-    return the_benchmark
+        broken_qubits_and_couplers[ApiUtility.keys.qubits].append(int(qubit_id))
+    return broken_qubits_and_couplers

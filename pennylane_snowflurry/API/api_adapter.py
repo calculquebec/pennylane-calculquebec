@@ -5,7 +5,7 @@ from pennylane_snowflurry.API.api_utility import ApiUtility
 from dotenv import dotenv_values
 import requests
 import json
-from pennylane_snowflurry.device_configuration import Client
+from pennylane_snowflurry.API.api_client import ApiClient
 class ApiAdapter(object):
     """
     a wrapper around Thunderhead. Provide a host, user, access token and realm, and you can :
@@ -16,7 +16,7 @@ class ApiAdapter(object):
     def __init__(self):
         raise Exception("Call instance() instead")
     
-    client : Client
+    client : ApiClient
     headers : dict[str, str]
     _instance : "ApiAdapter"
     
@@ -25,7 +25,7 @@ class ApiAdapter(object):
         return cls._instance
     
     @classmethod
-    def initialize(cls, client : Client):
+    def initialize(cls, client : ApiClient):
         cls._instance = cls.__new__(cls)
         cls._instance.headers = ApiUtility.headers(client.user, client.access_token, client.realm)
         cls.client = client
