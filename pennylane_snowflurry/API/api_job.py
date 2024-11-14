@@ -21,7 +21,7 @@ class Job:
         self.circuit_name = circuit_name
         self.shots = circuit.shots.total_shots
 
-    def run(self, max_tries : int = -1):
+    def run(self, max_tries : int = -1) -> dict:
         """
         converts a quantum tape into a dictionary, readable by thunderhead
         creates a job on thunderhead
@@ -29,9 +29,11 @@ class Job:
         """
 
         if max_tries == -1: max_tries = 2 ** 15
-
-        response = ApiAdapter.create_job(self.circuit_dict, self.circuit_name, self.shots)
-        
+        response = None
+        try:
+            response = ApiAdapter.create_job(self.circuit_dict, self.circuit_name, self.shots)
+        except:
+            raise
         if(response.status_code == 200):
             current_status = ""
             job_id = json.loads(response.text)["job"]["id"]

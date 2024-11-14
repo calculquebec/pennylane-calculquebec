@@ -3,11 +3,13 @@ from pennylane.devices import Device
 from pennylane.transforms.core import TransformProgram
 from pennylane.tape import QuantumScript, QuantumTape
 from pennylane_snowflurry.execution_config import DefaultExecutionConfig, ExecutionConfig
-from pennylane_snowflurry.API.api_job import Job
 from pennylane_snowflurry.API.api_adapter import ApiAdapter
 from pennylane_snowflurry.transpiler.monarq_transpile import Transpiler
-import pennylane_snowflurry.transpiler.transpiler_enums as enums
-from pennylane_snowflurry.device_configuration import Client, Config, MonarqConfig
+from pennylane_snowflurry.transpiler.transpiler_config import TranspilerConfig, MonarqDefaultConfig
+from pennylane_snowflurry.API.api_client import ApiClient
+from pennylane_snowflurry.measurements.monarq_device.counts import Counts as MonarqCounts
+from pennylane_snowflurry.measurements.monarq_device.sample import Sample as MonarqSample
+import pennylane.measurements as measurements
 
 class MonarqDevice(Device):
     """PennyLane device for interfacing with Anyon's quantum Hardware.
@@ -21,9 +23,8 @@ class MonarqDevice(Device):
             (``['ancilla', 'q1', 'q2']``). Default ``None`` if not specified.
         shots (int, Sequence[int], Sequence[Union[int, Sequence[int]]]): The default number of shots
             to use in executions involving this device.
-        host (str): URL of the QPU server.
-        user (str): Username.
-        access_token (str): User access token.
+        client (Client) : client information for connecting to MonarQ
+        behaviour_config (Config) : behaviour changes to apply to the transpiler
     """
 
     name = "CalculQCDevice"
@@ -40,13 +41,13 @@ class MonarqDevice(Device):
         "PauliZ"
     }
     
-    _behaviour_config : Config
+    _behaviour_config : TranspilerConfig
     
     def __init__(self, 
                  wires = None, 
                  shots = None,  
-                 client : Client = None,
-                 behaviour_config : Config = None) -> None:
+                 client : ApiClient = None,
+                 behaviour_config : TranspilerConfig = None) -> None:
 
         super().__init__(wires=wires, shots=shots)
         
@@ -54,7 +55,7 @@ class MonarqDevice(Device):
             raise Exception("The client has not been defined")
         
         if not behaviour_config:
-            behaviour_config = MonarqConfig()
+            behaviour_config = MonarqDefaultConfig()
         
         ApiAdapter.initialize(client)
         
@@ -111,8 +112,18 @@ class MonarqDevice(Device):
         else:
             # Fallback or default behavior if execution_config is not an instance of ExecutionConfig
             interface = None
-            
-        results = [Job(circ).run() for circ in circuits]
         
+        results = [self._measure(tape) for tape in circuits]
         return results if not is_single_circuit else results[0]
 
+    def _measure(self, tape : QuantumTape):
+        meas = set([type(mp).__name__ for mp in tape.measurements])
+        if len(meas) != 1:
+            raise Exception("multiple measurement types not supported yet")
+        meas = tape.measurements[0]
+        if isinstance(meas, measurements.CountsMP):
+            return MonarqCounts().measure(tape)
+        elif isinstance(meas, measurements.SampleMP):
+            return MonarqSample().measure(tape)
+        else:
+            raise Exception("Measurement process " + type(meas).__name__ + " is not supported by this device.")

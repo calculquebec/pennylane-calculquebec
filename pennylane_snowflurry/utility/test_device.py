@@ -1,18 +1,15 @@
-import pennylane as qml
-from pennylane_snowflurry.execution_config import ExecutionConfig, DefaultExecutionConfig
 from typing import Tuple
-from pennylane.transforms.core import TransformProgram
-from pennylane.tape import QuantumTape, QuantumScript
-from pennylane_snowflurry.transpiler.monarq_transpile import Transpiler
-from pennylane_snowflurry.API.api_utility import instructions
-import pennylane_snowflurry.transpiler.transpiler_enums as enums
+import pennylane as qml
 from pennylane.devices import Device
-from pennylane_snowflurry.utility.debug_utility import add_noise
+from pennylane.transforms.core import TransformProgram
+from pennylane.tape import QuantumScript, QuantumTape
+from pennylane_snowflurry.execution_config import DefaultExecutionConfig, ExecutionConfig
+from pennylane_snowflurry.API.api_utility import instructions
+from pennylane_snowflurry.transpiler.monarq_transpile import Transpiler
+from pennylane_snowflurry.transpiler.transpiler_config import MonarqDefaultConfig
 
-class NoisyDevice(Device):
-    """
-    a device that wraps around default.mixed device, and adds a depolarizing channel for each operation. 
-    useful for simulation noise on a circuit
+class TestDevice(Device):
+    """a device that uses the monarq transpiler but simulates results using default.qubit
     """
     name = "MonarQDevice"
     short_name = "monarq.qubit"
@@ -34,12 +31,19 @@ class NoisyDevice(Device):
     
     @property
     def name(self):
-        return NoisyDevice.short_name
+        return TestDevice.short_name
     
-    def __init__(self, wires=None, shots=None, noise = 0.005):
+    def __init__(self, 
+                 wires = None, 
+                 shots = None, 
+                 behaviour_config = None) -> None:
         super().__init__(wires=wires, shots=shots)
-        self._noise = noise
         
+        if behaviour_config is None:
+            behaviour_config = MonarqDefaultConfig(useBenchmark=False)
+        
+        self._behaviour_config = behaviour_config
+    
     def preprocess(
         self,
         execution_config: ExecutionConfig = DefaultExecutionConfig,
@@ -58,7 +62,7 @@ class NoisyDevice(Device):
         config = execution_config
 
         transform_program = TransformProgram()
-        transform_program.add_transform(qml.transform(lambda tape : add_noise(tape, noise = self._noise)))
+        transform_program.add_transform(Transpiler.get_transpiler(self._behaviour_config))
         return transform_program, config
 
     def execute(self, circuits: QuantumTape | list[QuantumTape], execution_config : ExecutionConfig = DefaultExecutionConfig):
@@ -83,6 +87,6 @@ class NoisyDevice(Device):
             # Fallback or default behavior if execution_config is not an instance of ExecutionConfig
             interface = None
         
-        results = [qml.execute([circuit], qml.device("default.mixed", wires = circuit.wires, shots = circuit.shots.total_shots)) for circuit in circuits]
+        results = [qml.execute([circuit], qml.device("default.qubit", circuit.wires, circuit.shots)) for circuit in circuits]
 
         return results if not is_single_circuit else results[0]

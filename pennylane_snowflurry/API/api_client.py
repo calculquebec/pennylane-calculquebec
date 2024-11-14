@@ -1,6 +1,5 @@
-import pennylane_snowflurry.transpiler.transpiler_enums as Enums
 
-class Client:
+class ApiClient:
     """
     data object that is used to pass client information to CalculQCDevice
     
@@ -29,7 +28,7 @@ class Client:
         self.project_name = project_name
 
     
-class CalculQuebecClient(Client):
+class CalculQuebecClient(ApiClient):
     """
     specialization of Client for Calcul Quebec infrastructures
     
@@ -46,7 +45,7 @@ class CalculQuebecClient(Client):
         super().__init__(host, user, token, "calculqc", machine_name, project_name)
 
 
-class MonarqClicent(CalculQuebecClient):
+class MonarqClient(CalculQuebecClient):
     """
     specialization of CalculQuebecClient for MonarQ infrastructure
     
@@ -62,39 +61,3 @@ class MonarqClicent(CalculQuebecClient):
     def __init__(self, host, user, token, project_name = ""):
         super().__init__(host, user, token, "yamaska", project_name)
 
-
-class Config:
-    """a parameter object that can be passed to devices for changing its default behaviour
-    """
-    pass
-
-
-class MonarqConfig(Config):
-    """a parameter object that can be passed to MonarqDevice for changing its default transpiling behaviour
-
-    Args:
-        baseDecomposition (NONE, CLIFFORDT)
-        placement (NONE, ASTAR, ISMAGS, VF2)
-        routing (NONE, ASTARSWAP)
-        optimization (NONE, COMMUTEANDMERGE)
-        nativeDecomposition (NONE, MONARQ)
-        useBenchmark (NONE, ACCEPTANCE)
-    """
-    baseDecomposition : Enums.BaseDecomp
-    placement : Enums.Place
-    routing : Enums.Route
-    optimization : Enums.Optimization
-    nativeDecomposition : Enums.NativeDecomp
-    useBenchmark : Enums.Benchmark
-    def __init__(self, baseDecomposition = Enums.BaseDecomp.CLIFFORDT, 
-                 placement = Enums.Place.ASTAR, 
-                 routing = Enums.Route.ASTARSWAP,
-                 optimization = Enums.Optimization.COMMUTEANDMERGE,
-                 nativeDecomposition = Enums.NativeDecomp.MONARQ, 
-                 useBenchmark = Enums.Benchmark.ACCEPTANCE):
-        self.baseDecomposition = baseDecomposition
-        self.placement = placement
-        self.routing = routing
-        self.optimization = optimization
-        self.nativeDecomposition = nativeDecomposition
-        self.useBenchmark = useBenchmark

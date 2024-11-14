@@ -74,7 +74,7 @@ def commute_and_merge(tape : QuantumTape) -> QuantumTape:
         new_tape = _remove_trivials(new_tape)
         if tape.operations == new_tape.operations:
             tape = new_tape
-            break;
+            break
         else:
             tape = new_tape
     return tape

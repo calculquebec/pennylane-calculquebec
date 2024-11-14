@@ -16,7 +16,7 @@ This device lets you communicate directly with MonarQ without using Snowflurry a
    ```
 3. create a device 
    ```python
-   dev = qml.device("monarq.qubit", client=MonarqClient("host", "user", "access token", "realm"), wires=[0, 1, 2], shots=1000)
+   dev = qml.device("monarq.default", client=MonarqClient("host", "user", "access token", "realm"), wires=[0, 1, 2], shots=1000)
    ```
 4. create your circuit
    ```python
