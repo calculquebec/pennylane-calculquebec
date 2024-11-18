@@ -6,7 +6,7 @@ from pennylane_snowflurry.execution_config import DefaultExecutionConfig, Execut
 from pennylane_snowflurry.API.api_adapter import ApiAdapter
 from pennylane_snowflurry.transpiler.monarq_transpile import Transpiler
 from pennylane_snowflurry.transpiler.transpiler_config import TranspilerConfig, MonarqDefaultConfig
-from pennylane_snowflurry.API.api_client import ApiClient
+from pennylane_snowflurry.API.api_client import ApiClient, MonarqClient
 from pennylane_snowflurry.measurements.monarq_device.counts import Counts as MonarqCounts
 from pennylane_snowflurry.measurements.monarq_device.sample import Sample as MonarqSample
 import pennylane.measurements as measurements
@@ -43,17 +43,25 @@ class MonarqDevice(Device):
     
     _behaviour_config : TranspilerConfig
     
+    # def __init__(self, 
+    #              wires = None, 
+    #              shots = None,  
+    #              client : ApiClient = None,
+    #              behaviour_config : TranspilerConfig = None) -> None:
     def __init__(self, 
                  wires = None, 
                  shots = None,  
-                 client : ApiClient = None,
+                 host : str = "",
+                 user : str = "",
+                 access_token : str = "",
+                 project_name : str = "",
                  behaviour_config : TranspilerConfig = None) -> None:
 
         super().__init__(wires=wires, shots=shots)
         
-        if not client:
-            raise Exception("The client has not been defined")
-        
+        # if not client:
+        #     raise Exception("The client has not been defined")
+        client = MonarqClient(host, user, access_token, project_name)
         if not behaviour_config:
             behaviour_config = MonarqDefaultConfig()
         
