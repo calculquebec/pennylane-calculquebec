@@ -117,7 +117,7 @@ class SnowflurryUtility:
         sf_circuit = Snowflurry.transpile(Snowflurry.get_transpiler(qpu), sf_circuit)
         Snowflurry.sf_circuit = sf_circuit
 
-def arbitrary_circuit(tape : QuantumTape, measurement = qml.probs):
+def arbitrary_circuit(tape : QuantumTape, measurement = qml.counts):
     """
     create a quantum function out of a tape and a default measurement to use (overrides the measurements in the qtape)
     """

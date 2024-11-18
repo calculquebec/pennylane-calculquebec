@@ -28,7 +28,7 @@ class MonarqDevice(Device):
     """
 
     name = "CalculQCDevice"
-    short_name = "calculqc.default"
+    short_name = "monarq.default"
     pennylane_requires = ">=0.30.0"
     author = "CalculQuebec"
     

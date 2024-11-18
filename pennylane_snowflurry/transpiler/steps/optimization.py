@@ -7,9 +7,14 @@ from pennylane_snowflurry.transpiler.optimization_methods.commute_and_merge impo
 from pennylane_snowflurry.transpiler.steps.base_step import BaseStep
 
 class Optimize(BaseStep):
+    """Optimization step base class. Inherits from BaseStep
+    """
     pass
 
 class IterativeCommuteAndMerge(Optimize):
+    """
+    Decomposes iteratively until the circuit contains only rotations. For each decomposition step, applies commutations, merges and cancellations
+    """
     def execute(self, tape):
         tape = commute_and_merge(tape)
 

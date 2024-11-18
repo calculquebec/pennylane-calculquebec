@@ -5,7 +5,7 @@ import numpy as np
 
 def remove_root_zs(tape : QuantumTape, iterations = 3) -> QuantumTape:
     """
-    removes all heading z operations
+    removes all heading z operations (the ones on the first layer of a tape)
     """
     new_operations = tape.operations.copy()
     for i in range(iterations):
@@ -22,7 +22,7 @@ def remove_root_zs(tape : QuantumTape, iterations = 3) -> QuantumTape:
 
 def remove_leaf_zs(tape : QuantumTape, iterations = 3) -> QuantumTape:
     """
-    removes all tailing z operations
+    removes all tailing z operations (the ones just before a measure with observable Z)
     """
     new_operations = tape.operations.copy()
 

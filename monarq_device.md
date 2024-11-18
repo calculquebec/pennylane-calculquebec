@@ -55,7 +55,7 @@ in order to provide those informations to the device, you will need to store the
 - importing the client class :
 
     ```python
-    from pennylane_snowflurry.device_configuration import MonarqClient
+    from pennylane_snowflurry.API.api_client import MonarqClient
     ```
 
 - creating a client and suplying your informations to it :
@@ -86,22 +86,27 @@ You can change the behaviour of the transpiler by passing a MonarqConfig object 
 
 Here's how to do it :
 
-1. import the config and enums classes :
+1. import the config and classes that interest you:
 
    ```python
-   from pennylane_snowflurry.device_configuration import MonarqConfig
-   import pennylane_snowflurry.transpiler.transpiler_enums as enums
+   from pennylane_snowflurry.transpiler.transpiler_config import MonarqConfig, TranspilerConfig
    ```
 
 2. create a config object and set the behaviour you want
 
    ```python
-   # Disables placement, routing and benchmarking features, leaving decompositions and optimization unchanged from the base configuration
-   config = MonarqConfig(placement=enums.Place.NONE, routing=enums.Route.NONE, useBenchmarking=enums.Benchmark.NONE) 
-   ```
+   from pennylane_snowflurry.transpiler.steps.base_decomposition import CliffordTDecomposition
+   from pennylane_snowflurry.transpiler.steps.placement import ASTAR
+   from pennylane_snowflurry.transpiler.steps.routing import Swaps
+   from pennylane_snowflurry.transpiler.steps.optimization import IterativeCommuteAndMerge
+   from pennylane_snowflurry.transpiler.steps.native_decomposition import MonarqDecomposition
+   # this is how you create a default configuration
+   default_config = MonarqConfig()
+   # It is the equivalent of this line : 
+   default_config = TranpilerConfig(CliffordTDecomposition(), ASTAR(), Swaps(), IterativeCommuteAndMerge(), MonarqDecomposition())
 
 3. pass the config object to the device, along with the client and other arguments
 
    ```python
-   dev = qml.device("monarq.qubit", client=client, config=config, ...)
+   dev = qml.device("monarq.default", client=client, config=config, ...)
    ```
