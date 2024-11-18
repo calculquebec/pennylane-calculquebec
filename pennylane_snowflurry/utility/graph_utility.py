@@ -32,12 +32,14 @@ def circuit_graph(tape : QuantumTape) -> nx.Graph:
     g.add_nodes_from([w for w in tape.wires if w not in g.nodes])
     return g
 
-def machine_graph(use_benchmark, q1Acceptance, q2Acceptance):
+def machine_graph(use_benchmark, q1Acceptance, q2Acceptance, excluded_qubits = [], excluded_couplers = []):
     
     broken_qubits_and_couplers = build_benchmark(q1Acceptance, q2Acceptance) if use_benchmark else None
-    broken_nodes = broken_qubits_and_couplers[ApiUtility.keys.qubits] if use_benchmark else []
-    broken_couplers = broken_qubits_and_couplers[ApiUtility.keys.couplers] if use_benchmark else []
-
+    broken_nodes = [q for q in broken_qubits_and_couplers[ApiUtility.keys.qubits]] if use_benchmark else []
+    broken_nodes += [q for q in excluded_qubits if q not in broken_nodes]
+    
+    broken_couplers = [q for q in broken_qubits_and_couplers[ApiUtility.keys.couplers]] if use_benchmark else []
+    broken_couplers += [q for q in excluded_couplers if not any([b[0] == q[0] and b[1] == q[1] or b[1]== q[0] and b[0] == q[1] for b in broken_couplers])]
     links = [(v[0], v[1]) for (_, v) in connectivity[ApiUtility.keys.couplers].items()]
     
     return nx.Graph([i for i in links if i[0] not in broken_nodes and i[1] not in broken_nodes \

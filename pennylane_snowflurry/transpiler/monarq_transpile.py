@@ -2,11 +2,6 @@ from copy import deepcopy
 from pennylane.tape import QuantumTape
 import pennylane as qml
 from pennylane.transforms import transform
-import pennylane_snowflurry.transpiler.steps.base_decomposition as step1
-import pennylane_snowflurry.transpiler.steps.placement as step2
-import pennylane_snowflurry.transpiler.steps.routing as step3
-import pennylane_snowflurry.transpiler.steps.optimization as step4
-import pennylane_snowflurry.transpiler.steps.native_decomposition as step5
 from pennylane_snowflurry.transpiler.transpiler_config import TranspilerConfig
 
 class Transpiler:
@@ -18,8 +13,8 @@ class Transpiler:
         every step is optional and new steps can be added, leaving modularity to the end user\n
 
         Args\n
-            config (Config) : contains which transpilation steps you want to run on your code\n
-                Default value contains those steps : \n
+            config (Config) : defines which transpilation steps you want to run on your code\n
+                Default value applies those steps : \n
                     1. decomposition to clifford + t set\n
                     2. placement using a pathfinding heuristic\n
                     3. routing using swaps\n
@@ -28,9 +23,11 @@ class Transpiler:
         """
         def transpile(tape : QuantumTape):
             """
-            goes through 5 transpilation steps
-            end circuit should be executable on MonarQ
-            every step is optional, leaving modularity to the end user
+            Args:
+                tape (QuantumTape) : the tape you want to transpile
+            
+            Returns : 
+                A transform dispatcher object that can be used in the preprocess method of pennylane Devices
             """
             optimized_tape = deepcopy(tape)
             with qml.QueuingManager.stop_recording():

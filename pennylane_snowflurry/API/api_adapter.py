@@ -26,6 +26,7 @@ class ApiAdapter(object):
     
     @classmethod
     def initialize(cls, client : ApiClient):
+        if hasattr(cls, "_instance"): return
         cls._instance = cls.__new__(cls)
         cls._instance.headers = ApiUtility.headers(client.user, client.access_token, client.realm)
         cls.client = client
