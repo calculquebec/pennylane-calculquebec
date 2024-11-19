@@ -1,4 +1,5 @@
 from functools import partial
+from pennylane.ops.op_math.adjoint import Adjoint
 from pennylane.measurements import MeasurementProcess
 from pennylane.operation import Operation
 from pennylane.tape import QuantumTape
@@ -124,9 +125,9 @@ def arbitrary_circuit(tape : QuantumTape, measurement = qml.counts):
     def _arbitrary_circuit(operations : list[Operation], measurements : list[MeasurementProcess]):
         for op in operations:
             if len(op.parameters) > 0:
-                type(op)(op.parameters, op.wires)
+                qml.apply(op)
             else:
-                type(op)(wires=op.wires)
+                qml.apply(op)
         
         def get_wires(mp : MeasurementProcess):
             return [w for w in mp.wires] if mp is not None and mp.wires is not None and len(mp.wires) > 0 else tape.wires

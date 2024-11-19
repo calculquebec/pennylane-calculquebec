@@ -16,12 +16,12 @@ class ApiUtility:
             dict[str, any]: a dictionary representation of the operation that can be read by the Thunderhead API
         """
         operation = {
-            ApiUtility.keys.qubits : [w for w in instruction.wires],
-            ApiUtility.keys.type : instructions[instruction.name]
+            keys.qubits : [w for w in instruction.wires],
+            keys.type : instructions[instruction.name]
         }
         if instruction.name == "PhaseShift": 
             value = instruction.parameters[0][0] if isinstance(instruction.parameters[0], np.ndarray) else instruction.parameters[0]
-            operation[ApiUtility.keys.parameters] = {"lambda" : value}
+            operation[keys.parameters] = {"lambda" : value}
             
         return operation
     
@@ -37,19 +37,19 @@ class ApiUtility:
         """
 
         circuit_dict = {
-            ApiUtility.keys.bitCount : 24,
-            ApiUtility.keys.operations : [ApiUtility.convert_instruction(op) for op in circuit.operations if not isinstance(op, MeasurementProcess)],
-            ApiUtility.keys.qubitCount : 24
+            keys.bitCount : 24,
+            keys.operations : [ApiUtility.convert_instruction(op) for op in circuit.operations if not isinstance(op, MeasurementProcess)],
+            keys.qubitCount : 24
         }
         for m in circuit.measurements:
             wires = m.wires if len(m.wires) > 0 else [_ for _ in range(len(circuit.wires))]
             for i, w in enumerate(wires):
-                if i in [w2[ApiUtility.keys.qubits] for w2 in circuit_dict[ApiUtility.keys.operations]]:
+                if i in [w2[keys.qubits] for w2 in circuit_dict[keys.operations]]:
                     continue
-                circuit_dict[ApiUtility.keys.operations].append({
-                    ApiUtility.keys.qubits : [circuit.wires[i]],
-                    ApiUtility.keys.bits : [i],
-                    ApiUtility.keys.type : "readout"
+                circuit_dict[keys.operations].append({
+                    keys.qubits : [circuit.wires[i]],
+                    keys.bits : [i],
+                    keys.type : "readout"
                 })
         return circuit_dict
     
@@ -101,42 +101,42 @@ class ApiUtility:
             dict[str, any]: the body for the job creation request
         """
         body = {
-            ApiUtility.keys.name : circuit_name,
-            ApiUtility.keys.projectID : project_id,
-            ApiUtility.keys.machineName : machine_name,
-            ApiUtility.keys.shotCount : shots,
-            ApiUtility.keys.circuit : circuit,
+            keys.name : circuit_name,
+            keys.projectID : project_id,
+            keys.machineName : machine_name,
+            keys.shotCount : shots,
+            keys.circuit : circuit,
         }
         return body
 
-    class routes:
-        jobs = "/jobs"
-        projects = "/projects"
-        machines = "/machines"
-        benchmarking = "/benchmarking"
-        machineName = "?machineName"
-        
-    class keys:
-        bitCount = "bitCount"
-        qubitCount = "qubitCount"
-        operations = "operations"
-        circuit = "circuit"
-        name = "name"
-        machineName = "machineName"
-        projectID = "projectID"
-        shotCount = "shotCount"
-        type = "type"
-        bits = "bits"
-        qubits = "qubits"
-        parameters = "parameters"
-        couplers = "couplers"
-        singleQubitGateFidelity = "singleQubitGateFidelity"
-        readoutState0Fidelity = "readoutState0Fidelity"
-        readoutState1Fidelity = "readoutState1Fidelity"
-        czGateFidelity = "czGateFidelity"
-        resultsPerDevice = "resultsPerDevice"
-        items = "items"
-        id = "id"
+class routes:
+    jobs = "/jobs"
+    projects = "/projects"
+    machines = "/machines"
+    benchmarking = "/benchmarking"
+    machineName = "?machineName"
+    
+class keys:
+    bitCount = "bitCount"
+    qubitCount = "qubitCount"
+    operations = "operations"
+    circuit = "circuit"
+    name = "name"
+    machineName = "machineName"
+    projectID = "projectID"
+    shotCount = "shotCount"
+    type = "type"
+    bits = "bits"
+    qubits = "qubits"
+    parameters = "parameters"
+    couplers = "couplers"
+    singleQubitGateFidelity = "singleQubitGateFidelity"
+    readoutState0Fidelity = "readoutState0Fidelity"
+    readoutState1Fidelity = "readoutState1Fidelity"
+    czGateFidelity = "czGateFidelity"
+    resultsPerDevice = "resultsPerDevice"
+    items = "items"
+    id = "id"
 
 
 instructions : dict[str, str] = {

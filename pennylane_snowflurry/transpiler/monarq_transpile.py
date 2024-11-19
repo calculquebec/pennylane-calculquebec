@@ -29,7 +29,8 @@ class Transpiler:
             Returns : 
                 A transform dispatcher object that can be used in the preprocess method of pennylane Devices
             """
-            optimized_tape = deepcopy(tape)
+            optimized_tape = Transpiler.expand_full_measurements(tape)
+            
             with qml.QueuingManager.stop_recording():
                 for step in behaviour_config.steps:
                     optimized_tape = step.execute(optimized_tape)
@@ -37,4 +38,12 @@ class Transpiler:
             return [new_tape], lambda results : results[0]
 
         return transform(transpile)
-    
+
+    def expand_full_measurements(tape):
+        mps = []
+        for mp in tape.measurements:
+            if mp.wires == None or len(mp.wires) < 1:
+                mps.append(type(mp)(wires=tape.wires))
+        
+        return type(tape)(tape.operations, mps, shots=tape.shots)
+            

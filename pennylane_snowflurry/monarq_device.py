@@ -6,9 +6,8 @@ from pennylane_snowflurry.execution_config import DefaultExecutionConfig, Execut
 from pennylane_snowflurry.API.api_adapter import ApiAdapter
 from pennylane_snowflurry.transpiler.monarq_transpile import Transpiler
 from pennylane_snowflurry.transpiler.transpiler_config import TranspilerConfig, MonarqDefaultConfig
-from pennylane_snowflurry.API.api_client import ApiClient, MonarqClient
+from pennylane_snowflurry.API.api_client import MonarqClient
 from pennylane_snowflurry.measurements.monarq_device.counts import Counts as MonarqCounts
-from pennylane_snowflurry.measurements.monarq_device.sample import Sample as MonarqSample
 import pennylane.measurements as measurements
 
 class MonarqDevice(Device):
@@ -131,7 +130,5 @@ class MonarqDevice(Device):
         meas = tape.measurements[0]
         if isinstance(meas, measurements.CountsMP):
             return MonarqCounts().measure(tape)
-        elif isinstance(meas, measurements.SampleMP):
-            return MonarqSample().measure(tape)
         else:
             raise Exception("Measurement process " + type(meas).__name__ + " is not supported by this device.")

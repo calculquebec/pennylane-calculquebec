@@ -5,8 +5,12 @@ import pennylane.transforms as transforms
 
 
 class BaseDecomposition(BaseStep):
+    """The purpose of this transpiler step is to turn the gates in a circuit to a simpler, more easily usable set of gates
+    """
     @property
     def base_gates(self):
+        """the base set of gates the circuit should be turned into
+        """
         return []
     
     def execute(self, tape : QuantumTape) -> QuantumTape:

@@ -6,7 +6,7 @@ from typing import Tuple
 from copy import deepcopy
 from itertools import combinations
 from pennylane_snowflurry.monarq_data import connectivity, build_benchmark
-from pennylane_snowflurry.API.api_utility import ApiUtility
+from pennylane_snowflurry.utility.api_utility import keys
 
 def find_biggest_group(graph : nx.Graph):
     return max(nx.connected_components(graph), key=len)
@@ -35,12 +35,12 @@ def circuit_graph(tape : QuantumTape) -> nx.Graph:
 def machine_graph(use_benchmark, q1Acceptance, q2Acceptance, excluded_qubits = [], excluded_couplers = []):
     
     broken_qubits_and_couplers = build_benchmark(q1Acceptance, q2Acceptance) if use_benchmark else None
-    broken_nodes = [q for q in broken_qubits_and_couplers[ApiUtility.keys.qubits]] if use_benchmark else []
+    broken_nodes = [q for q in broken_qubits_and_couplers[keys.qubits]] if use_benchmark else []
     broken_nodes += [q for q in excluded_qubits if q not in broken_nodes]
     
-    broken_couplers = [q for q in broken_qubits_and_couplers[ApiUtility.keys.couplers]] if use_benchmark else []
+    broken_couplers = [q for q in broken_qubits_and_couplers[keys.couplers]] if use_benchmark else []
     broken_couplers += [q for q in excluded_couplers if not any([b[0] == q[0] and b[1] == q[1] or b[1]== q[0] and b[0] == q[1] for b in broken_couplers])]
-    links = [(v[0], v[1]) for (_, v) in connectivity[ApiUtility.keys.couplers].items()]
+    links = [(v[0], v[1]) for (_, v) in connectivity[keys.couplers].items()]
     
     return nx.Graph([i for i in links if i[0] not in broken_nodes and i[1] not in broken_nodes \
             and i not in broken_couplers and list(reversed(i)) not in broken_couplers])
