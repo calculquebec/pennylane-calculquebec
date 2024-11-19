@@ -2,7 +2,7 @@ from pennylane.tape import QuantumTape
 import json
 import time
 from pennylane_snowflurry.API.api_adapter import ApiAdapter
-from pennylane_snowflurry.API.api_utility import ApiUtility
+from pennylane_snowflurry.utility.api_utility import ApiUtility
 
 class JobException(Exception):
     def __init__(self, message : str):
@@ -11,10 +11,16 @@ class JobException(Exception):
     def __str__(self): self.message
     
 class Job:
-    host : str
-    user : str
-    access_token : str
-    realm : str
+    """A wrapper around Thunderhead's jobs operations. 
+    - converts your circuit to an http request
+    - posts a job on monarq
+    - periodically checks if the job is done
+    - returns results when it's done
+
+    Args : 
+        - circuit (QuantumTape) : the circuit you want to execute
+        - circuit_name (str) : the name of the circuit
+    """
     
     def __init__(self, circuit : QuantumTape, circuit_name = "default"):
         self.circuit_dict = ApiUtility.convert_circuit(circuit)
@@ -56,6 +62,3 @@ class Job:
             raise JobException("Couldn't finish job. Stuck on status : " + str(current_status))
         else:
             raise JobException(response.text)
-    
-    
-

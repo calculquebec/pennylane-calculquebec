@@ -1,6 +1,6 @@
 from dotenv import dotenv_values
 from pennylane_snowflurry.API.api_adapter import ApiAdapter
-from pennylane_snowflurry.API.api_utility import ApiUtility
+from pennylane_snowflurry.utility.api_utility import keys
 
 """
 #       00
@@ -18,8 +18,11 @@ from pennylane_snowflurry.API.api_utility import ApiUtility
 #          23
 """
 connectivity = {
-  ApiUtility.keys.qubits : [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 ],
-  ApiUtility.keys.couplers : {
+  keys.qubits : [ 0, 1, 2, 3, 4, 5, 
+                6, 7, 8, 9, 10, 11, 
+                12, 13, 14, 15, 16, 17, 
+                18, 19, 20, 21, 22, 23 ],
+  keys.couplers : {
       "0": [0, 4],
       "1": [4, 1],
       "2": [1, 5],
@@ -67,22 +70,22 @@ def build_benchmark(q1Acceptance, q2Acceptance):
     # call to api to get qubit and couplers benchmark
     qubits_and_couplers = ApiAdapter.get_qubits_and_couplers()
 
-    broken_qubits_and_couplers = { ApiUtility.keys.qubits : [], ApiUtility.keys.couplers : [] }
+    broken_qubits_and_couplers = { keys.qubits : [], keys.couplers : [] }
 
-    for coupler_id in qubits_and_couplers[ApiUtility.keys.couplers]:
-        benchmark_coupler = qubits_and_couplers[ApiUtility.keys.couplers][coupler_id]
-        conn_coupler = connectivity[ApiUtility.keys.couplers][coupler_id]
+    for coupler_id in qubits_and_couplers[keys.couplers]:
+        benchmark_coupler = qubits_and_couplers[keys.couplers][coupler_id]
+        conn_coupler = connectivity[keys.couplers][coupler_id]
 
-        if benchmark_coupler[ApiUtility.keys.czGateFidelity] >= val[1]:
+        if benchmark_coupler[keys.czGateFidelity] >= val[1]:
             continue
 
-        broken_qubits_and_couplers[ApiUtility.keys.couplers].append(conn_coupler)
+        broken_qubits_and_couplers[keys.couplers].append(conn_coupler)
 
-    for qubit_id in qubits_and_couplers[ApiUtility.keys.qubits]:
-        benchmark_qubit = qubits_and_couplers[ApiUtility.keys.qubits][qubit_id]
+    for qubit_id in qubits_and_couplers[keys.qubits]:
+        benchmark_qubit = qubits_and_couplers[keys.qubits][qubit_id]
 
-        if benchmark_qubit[ApiUtility.keys.readoutState1Fidelity] >= val[0]:
+        if benchmark_qubit[keys.readoutState1Fidelity] >= val[0]:
             continue
 
-        broken_qubits_and_couplers[ApiUtility.keys.qubits].append(int(qubit_id))
+        broken_qubits_and_couplers[keys.qubits].append(int(qubit_id))
     return broken_qubits_and_couplers

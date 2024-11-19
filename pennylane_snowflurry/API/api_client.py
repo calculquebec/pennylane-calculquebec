@@ -3,13 +3,13 @@ class ApiClient:
     """
     data object that is used to pass client information to CalculQCDevice
     
-    Properties : 
-    host : the server address for the machine
-    user : the users identifier
-    access_token : the unique access key provided to the user
-    realm : the organisational group associated with the machine
-    machine_name : the name of the machine
-    project_name : the name of the project
+    Args : 
+        host (str) : the server address for the machine
+        user (str) : the users identifier
+        access_token (str) : the unique access key provided to the user
+        realm (str) : the organisational group associated with the machine
+        machine_name (str) : the name of the machine
+        project_name (str) : the name of the project
      
     """
     host : str
@@ -32,13 +32,12 @@ class CalculQuebecClient(ApiClient):
     """
     specialization of Client for Calcul Quebec infrastructures
     
-    Properties : 
-    host : the server address for the machine
-    user : the users identifier
-    access_token : the unique access key provided to the user
-    realm : the organisational group associated with the machine (calculqc)
-    machine_name : the name of the machine
-    project_name : the name of the project
+    Args : 
+        host (str) : the server address for the machine
+        user (str) : the users identifier
+        access_token (str) : the unique access key provided to the user
+        machine_name (str) : the name of the machine
+        project_name (str) : the name of the project
      
     """
     def __init__(self, host, user, token, machine_name, project_name):
@@ -49,13 +48,11 @@ class MonarqClient(CalculQuebecClient):
     """
     specialization of CalculQuebecClient for MonarQ infrastructure
     
-    Properties : 
-    host : the server address for the machine
-    user : the users identifier
-    access_token : the unique access key provided to the user
-    realm : the organisational group associated with the machine (calculqc)
-    machine_name : the name of the machine (yamaska)
-    project_name : the name of the project
+    Args : 
+        host (str) : the server address for the machine
+        user (str) : the users identifier
+        access_token (str) : the unique access key provided to the user
+        project_name (str) : the name of the project
      
     """
     def __init__(self, host, user, token, project_name = ""):
