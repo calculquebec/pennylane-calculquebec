@@ -1,13 +1,14 @@
 import numpy as np
 from pennylane_snowflurry.transpiler.steps.base_decomposition import CliffordTDecomposition
 from pennylane_snowflurry.transpiler.steps.optimization import IterativeCommuteAndMerge
-import unittest
 import pennylane as qml
 from pennylane.tape import QuantumTape
+import pytest
 
-class test_optimization(unittest.TestCase):
-    def __init__(self, _):
-        super().__init__(_)
+class TestOptimization:
+        
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.dev = qml.device("default.qubit")
 
     def test_optimize_qubit_unitary(self):
@@ -19,7 +20,7 @@ class test_optimization(unittest.TestCase):
         self.assertTrue(len(new_tape.operations), 1)
         a = qml.execute([tape], self.dev)
         b = qml.execute([new_tape], self.dev)
-        self.assertTrue(all(abs(c[0] - c[1]) < 1E-8) for c in zip(a[0], b[0]))
+        assert all(abs(c[0] - c[1]) < 1E-8 for c in zip(a[0], b[0]))
 
     def test_optimize_toffoli(self):
         ops = [qml.Hadamard(0), qml.Hadamard(1), qml.Hadamard(2), qml.Toffoli([0, 1, 2])]
@@ -30,7 +31,7 @@ class test_optimization(unittest.TestCase):
         self.assertTrue(len(new_tape.operations), 33)
         a = qml.execute([tape], self.dev)
         b = qml.execute([new_tape], self.dev)
-        self.assertTrue(all(abs(c[0] - c[1]) < 1E-8) for c in zip(a[0], b[0]))
+        assert all(abs(c[0] - c[1]) < 1E-8 for c in zip(a[0], b[0]))
 
     def test_optimize_cu(self):
         ops = [qml.Hadamard(0), qml.Hadamard(1), qml.Hadamard(2), qml.ControlledQubitUnitary(np.array([[0, 1], [1, 0]]), [0, 1], [2], [0, 1])]
@@ -41,7 +42,4 @@ class test_optimization(unittest.TestCase):
         self.assertTrue(len(new_tape.operations), 62)
         a = qml.execute([tape], self.dev)
         b = qml.execute([new_tape], self.dev)
-        self.assertTrue(all(abs(c[0] - c[1]) < 1E-8) for c in zip(a[0], b[0]))
-
-if __name__ == "__main__":
-    unittest.main()
+        assert all(abs(c[0] - c[1]) < 1E-8 for c in zip(a[0], b[0]))

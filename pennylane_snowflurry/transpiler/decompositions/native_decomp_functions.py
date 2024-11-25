@@ -2,6 +2,9 @@ import pennylane_snowflurry.custom_gates as custom
 import numpy as np
 import pennylane as qml
 
+def is_close_enough_to(angle, other_angle, epsilon = 1E-7):
+   return np.abs(angle - other_angle) < epsilon
+
 def _custom_tdag(wires):
     """
     a MonarQ native implementation of the adjoint(T) operation
@@ -60,15 +63,20 @@ def _custom_rz(angle : float, wires, epsilon = 1E-8):
     """
     while angle < 0: angle += np.pi * 2
     angle %= np.pi * 2
-    is_close_enough_to = lambda other_angle: np.abs(angle - other_angle) < epsilon
-
-    if is_close_enough_to(0): return []
-    elif is_close_enough_to(np.pi/4): return [qml.T(wires = wires)]
-    elif is_close_enough_to(7 * np.pi/4): return [custom.TDagger(wires = wires)]
-    elif is_close_enough_to(np.pi/2): return [custom.Z90(wires = wires)]
-    elif is_close_enough_to(3 * np.pi/2): return [custom.ZM90(wires = wires)]
-    elif is_close_enough_to(np.pi): return [qml.PauliZ(wires = wires)]
-    else: return [qml.PhaseShift(angle, wires)]
+    if is_close_enough_to(angle, 0): 
+        return []
+    elif is_close_enough_to(angle, 7 * np.pi/4):
+        return [custom.TDagger(wires = wires)]
+    elif is_close_enough_to(angle, 3 * np.pi/2):
+        return [custom.ZM90(wires = wires)]
+    elif is_close_enough_to(angle, np.pi): 
+        return [qml.PauliZ(wires = wires)]
+    elif is_close_enough_to(angle, np.pi/2): 
+        return [custom.Z90(wires = wires)]
+    elif is_close_enough_to(angle, np.pi/4): 
+        return [qml.T(wires = wires)]
+    else: 
+        return [qml.PhaseShift(angle, wires)]
 
 def _custom_rx(angle : float, wires, epsilon = 1E-8):
     """
@@ -76,15 +84,14 @@ def _custom_rx(angle : float, wires, epsilon = 1E-8):
     """
     while angle < 0: angle += np.pi * 2
     angle %= np.pi * 2
-    is_close_enough_to = lambda other_angle: np.abs(angle - other_angle) < epsilon
 
-    if is_close_enough_to(0): 
+    if is_close_enough_to(angle, 0): 
         return []
-    elif is_close_enough_to(np.pi/2): 
+    elif is_close_enough_to(angle, np.pi/2): 
         return [custom.X90(wires = wires)]
-    elif is_close_enough_to(3 * np.pi/2): 
+    elif is_close_enough_to(angle, 3 * np.pi/2): 
         return [custom.XM90(wires = wires)]
-    elif is_close_enough_to(np.pi): 
+    elif is_close_enough_to(angle, np.pi): 
         return [qml.PauliX(wires = wires)]
     else: 
         return _custom_h(wires) + [qml.PhaseShift(angle, wires)] + _custom_h(wires)
@@ -95,13 +102,17 @@ def _custom_ry(angle : float, wires, epsilon = 1E-8):
     """
     while angle < 0: angle += np.pi * 2
     angle %= np.pi * 2
-    is_close_enough_to = lambda other_angle: np.abs(angle - other_angle) < epsilon
-
-    if is_close_enough_to(0): return []
-    elif is_close_enough_to(np.pi/2): return [custom.Y90(wires = wires)]
-    elif is_close_enough_to(3 * np.pi/2): return [custom.YM90(wires = wires)]
-    elif is_close_enough_to(np.pi): return [qml.PauliY(wires = wires)]
-    else: return _custom_s(wires) + _custom_h(wires) \
+    
+    if is_close_enough_to(angle, 0):
+        return []
+    elif is_close_enough_to(angle, np.pi/2): 
+        return [custom.Y90(wires = wires)]
+    elif is_close_enough_to(angle, 3 * np.pi/2): 
+        return [custom.YM90(wires = wires)]
+    elif is_close_enough_to(angle, np.pi): 
+        return [qml.PauliY(wires = wires)]
+    else: 
+        return _custom_s(wires) + _custom_h(wires) \
                 + [qml.PhaseShift(angle, wires = wires)] + _custom_h(wires) + _custom_s(wires)
 
 def _custom_swap(wires):
