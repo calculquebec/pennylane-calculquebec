@@ -3,7 +3,7 @@ from pennylane.tape import QuantumTape
 import pennylane as qml
 from pennylane.transforms import transform
 from pennylane_snowflurry.transpiler.transpiler_config import TranspilerConfig
-
+from pennylane_snowflurry.transpiler.steps.interfaces.pre_processing import PreProcStep
 class Transpiler:
     
 
@@ -32,7 +32,8 @@ class Transpiler:
             optimized_tape = Transpiler.expand_full_measurements(tape)
             
             with qml.QueuingManager.stop_recording():
-                for step in behaviour_config.steps:
+                prerpoc_steps = [step for step in behaviour_config.steps if isinstance(step, PreProcStep)]
+                for step in prerpoc_steps:
                     optimized_tape = step.execute(optimized_tape)
             new_tape = type(tape)(optimized_tape.operations, optimized_tape.measurements, shots=optimized_tape.shots)
             return [new_tape], lambda results : results[0]
@@ -44,6 +45,8 @@ class Transpiler:
         for mp in tape.measurements:
             if mp.wires == None or len(mp.wires) < 1:
                 mps.append(type(mp)(wires=tape.wires))
+            else:
+                mps.append(mp)
         
         return type(tape)(tape.operations, mps, shots=tape.shots)
             

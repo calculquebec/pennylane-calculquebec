@@ -1,10 +1,10 @@
 from pennylane.tape import QuantumTape
 from pennylane.operation import Operation
 import pennylane as qml
-from pennylane_snowflurry.transpiler.steps.base_step import BaseStep
+from pennylane_snowflurry.transpiler.steps.interfaces.pre_processing import PreProcStep
 from pennylane_snowflurry.utility.graph_utility import circuit_graph, shortest_path, machine_graph, is_directly_connected
 
-class Routing(BaseStep):
+class Routing(PreProcStep):
     def __init__(self, use_benchmark = True, q1_acceptance = 0.5, q2_acceptance = 0.5, excluded_qubits=[], excluded_couplers=[]):
         self.use_benchmark = use_benchmark
         self.q1_acceptance = q1_acceptance

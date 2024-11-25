@@ -1,4 +1,4 @@
-from pennylane_snowflurry.transpiler.steps.base_step import BaseStep
+from pennylane_snowflurry.transpiler.steps.interfaces.base_step import BaseStep
 from pennylane_snowflurry.transpiler.steps.base_decomposition import CliffordTDecomposition
 from pennylane_snowflurry.transpiler.steps.placement import ASTAR
 from pennylane_snowflurry.transpiler.steps.routing import Swaps

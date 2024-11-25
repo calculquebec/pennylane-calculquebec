@@ -6,6 +6,7 @@ from pennylane.tape import QuantumScript, QuantumTape
 from pennylane_snowflurry.execution_config import DefaultExecutionConfig, ExecutionConfig
 from pennylane_snowflurry.utility.api_utility import instructions
 from pennylane_snowflurry.transpiler.monarq_transpile import Transpiler
+from pennylane_snowflurry.transpiler.monarq_postproc import PostProcessor
 from pennylane_snowflurry.transpiler.transpiler_config import MonarqDefaultConfig
 
 class TestDevice(Device):
@@ -40,7 +41,7 @@ class TestDevice(Device):
         super().__init__(wires=wires, shots=shots)
         
         if behaviour_config is None:
-            behaviour_config = MonarqDefaultConfig(useBenchmark=False)
+            behaviour_config = MonarqDefaultConfig(use_benchmark=False)
         
         self._behaviour_config = behaviour_config
     
@@ -88,5 +89,6 @@ class TestDevice(Device):
             interface = None
         
         results = [qml.execute([circuit], qml.device("default.qubit", circuit.wires, circuit.shots)) for circuit in circuits]
+        post_processed_results = [PostProcessor.get_processor(self._behaviour_config)(circuits[i], res) for i, res in enumerate(results)]
 
-        return results if not is_single_circuit else results[0]
+        return post_processed_results if not is_single_circuit else post_processed_results[0]

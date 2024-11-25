@@ -1,9 +1,9 @@
 from pennylane.tape import QuantumTape
 import pennylane_snowflurry.utility.graph_utility as graph_util
-from pennylane_snowflurry.transpiler.steps.base_step import BaseStep
+from pennylane_snowflurry.transpiler.steps.interfaces.pre_processing import PreProcStep
 
 
-class Placement(BaseStep):
+class Placement(PreProcStep):
     def __init__(self, use_benchmark = True, q1_acceptance = 0.5, q2_acceptance = 0.5, excluded_qubits=[], excluded_couplers=[]):
         self.use_benchmark = use_benchmark
         self.q1_acceptance = q1_acceptance

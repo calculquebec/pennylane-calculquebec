@@ -5,8 +5,9 @@ from pennylane.tape import QuantumScript, QuantumTape
 from pennylane_snowflurry.execution_config import DefaultExecutionConfig, ExecutionConfig
 from pennylane_snowflurry.API.api_adapter import ApiAdapter
 from pennylane_snowflurry.transpiler.monarq_transpile import Transpiler
+from pennylane_snowflurry.transpiler.monarq_postproc import PostProcessor
 from pennylane_snowflurry.transpiler.transpiler_config import TranspilerConfig, MonarqDefaultConfig
-from pennylane_snowflurry.API.api_client import MonarqClient
+from pennylane_snowflurry.API.api_client import ApiClient
 from pennylane_snowflurry.measurements.monarq_device.counts import Counts as MonarqCounts
 import pennylane.measurements as measurements
 
@@ -42,25 +43,17 @@ class MonarqDevice(Device):
     
     _behaviour_config : TranspilerConfig
     
-    # def __init__(self, 
-    #              wires = None, 
-    #              shots = None,  
-    #              client : ApiClient = None,
-    #              behaviour_config : TranspilerConfig = None) -> None:
     def __init__(self, 
                  wires = None, 
                  shots = None,  
-                 host : str = "",
-                 user : str = "",
-                 access_token : str = "",
-                 project_name : str = "",
+                 client : ApiClient = None,
                  behaviour_config : TranspilerConfig = None) -> None:
 
         super().__init__(wires=wires, shots=shots)
+        if client is None:
+            raise Exception("The client has not been defined. Cannot establish connection with MonarQ.")
         
-        # if not client:
-        #     raise Exception("The client has not been defined")
-        client = MonarqClient(host, user, access_token, project_name)
+        self.client = client
         if not behaviour_config:
             behaviour_config = MonarqDefaultConfig()
         
@@ -97,7 +90,8 @@ class MonarqDevice(Device):
     def execute(self, circuits: QuantumTape | list[QuantumTape], execution_config : ExecutionConfig = DefaultExecutionConfig):
         """
         This function runs provided quantum circuit on MonarQ
-        A job is first created, and then ran. Results are returned to the user.
+        A job is first created, and then ran. 
+        Results are then post-processed and returned to the user.
         """
         is_single_circuit : bool = isinstance(circuits, QuantumScript)
         if is_single_circuit:
@@ -121,7 +115,9 @@ class MonarqDevice(Device):
             interface = None
         
         results = [self._measure(tape) for tape in circuits]
-        return results if not is_single_circuit else results[0]
+        post_processed_results = [PostProcessor.get_processor(self._behaviour_config)(circuits[i], res) for i, res in enumerate(results)]
+       
+        return post_processed_results if not is_single_circuit else post_processed_results[0]
 
     def _measure(self, tape : QuantumTape):
         meas = set([type(mp).__name__ for mp in tape.measurements])
@@ -132,3 +128,4 @@ class MonarqDevice(Device):
             return MonarqCounts().measure(tape)
         else:
             raise Exception("Measurement process " + type(meas).__name__ + " is not supported by this device.")
+        

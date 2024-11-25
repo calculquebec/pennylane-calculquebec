@@ -55,6 +55,6 @@ class MonarqClient(CalculQuebecClient):
         project_name (str) : the name of the project
      
     """
-    def __init__(self, host, user, token, project_name = ""):
-        super().__init__(host, user, token, "yamaska", project_name)
+    def __init__(self, host, user, access_token, project_name = ""):
+        super().__init__(host, user, access_token, "yamaska", project_name)
 
