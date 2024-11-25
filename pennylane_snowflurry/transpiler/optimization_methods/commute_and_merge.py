@@ -8,12 +8,13 @@ def remove_root_zs(tape : QuantumTape, iterations = 3) -> QuantumTape:
     removes all heading z operations (the ones on the first layer of a tape)
     """
     new_operations = tape.operations.copy()
-    for i in range(iterations):
+    for _ in range(iterations):
         list_copy = new_operations.copy()
         new_operations = []
 
         for i, op in enumerate(list_copy):
-            if op.num_wires != 1 or op.basis != "Z" or find_previous_gate(i, op.wires, list_copy) is not None:
+            previous =  find_previous_gate(i, op.wires, list_copy)
+            if op.basis != "Z" or previous is not None:
                 new_operations.append(op)
 
         if new_operations == list_copy:
@@ -25,14 +26,14 @@ def remove_leaf_zs(tape : QuantumTape, iterations = 3) -> QuantumTape:
     removes all tailing z operations (the ones just before a measure with observable Z)
     """
     new_operations = tape.operations.copy()
-
-    
-    for i in range(iterations):
+    for _ in range(iterations):
         list_copy = new_operations.copy()
         new_operations = []
         for i in reversed(range(len(list_copy))):
             op = list_copy[i]
-            if op.num_wires != 1 or op.basis != "Z" or find_next_gate(i, op.wires, list_copy) is not None:
+            
+            next = find_next_gate(i, op.wires, list_copy)
+            if op.basis != "Z" or next is not None:
                 new_operations.insert(0, op)
                 continue
 
@@ -66,9 +67,16 @@ def commute_and_merge(tape : QuantumTape) -> QuantumTape:
 
     for _ in range(iterations):
         new_tape = tape
-        new_tape = remove_root_zs(tape)
-        new_tape = remove_leaf_zs(new_tape)
         new_tape = transforms.commute_controlled(new_tape)[0][0]
+        new_tape = remove_root_zs(new_tape)
+        new_tape = remove_leaf_zs(new_tape)
+        new_tape = transforms.cancel_inverses(new_tape)[0][0]
+        new_tape = transforms.merge_rotations(new_tape)[0][0]
+        new_tape = _remove_trivials(new_tape)
+        
+        new_tape = transforms.commute_controlled(new_tape, "left")[0][0]
+        new_tape = remove_root_zs(new_tape)
+        new_tape = remove_leaf_zs(new_tape)
         new_tape = transforms.cancel_inverses(new_tape)[0][0]
         new_tape = transforms.merge_rotations(new_tape)[0][0]
         new_tape = _remove_trivials(new_tape)

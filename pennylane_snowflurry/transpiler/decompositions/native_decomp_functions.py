@@ -4,43 +4,49 @@ import pennylane as qml
 
 def _custom_tdag(wires):
     """
-    a native implementation of the adjoint(T) operation
+    a MonarQ native implementation of the adjoint(T) operation
     """
     return [custom.TDagger(wires)]
 
 def _custom_sx(wires):
+    """
+    a MonarQ native implementation of the SX operation
+    """
     return [custom.X90(wires)]
 
 def _custom_sxdag(wires):
+    """
+    a MonarQ native implementation of the adjoint(SX) operation 
+    """
     return [custom.XM90(wires)]
 
 def _custom_s(wires):
     """
-    a native implementation of the S operation
+    a MonarQ native implementation of the S operation
     """
     return [custom.Z90(wires)]
 
 def _custom_sdag(wires):
     """
-    a native implementation of the adjoint(S) operation
+    a MonarQ native implementation of the adjoint(S) operation
     """
     return [custom.ZM90(wires)]
 
 def _custom_h(wires):
     """
-    a native implementation of the Hadamard operation
+    a MonarQ native implementation of the Hadamard operation
     """
     return [custom.Z90(wires), custom.X90(wires), custom.Z90(wires)]
 
 def _custom_cnot(wires):
     """
-    a native implementation of the CNOT operation
+    a MonarQ native implementation of the CNOT operation
     """
     return _custom_h(wires[1]) + [qml.CZ(wires)] + _custom_h(wires[1])
 
 def _custom_cy(wires):
     """
-    a native implementation of the CY operation
+    a MonarQ native implementation of the CY operation
     """
     return _custom_h(wires[1]) \
         + _custom_s(wires[1]) \
@@ -50,7 +56,7 @@ def _custom_cy(wires):
 
 def _custom_rz(angle : float, wires, epsilon = 1E-8):
     """
-    a native implementation of the RZ operation
+    a MonarQ native implementation of the RZ operation
     """
     while angle < 0: angle += np.pi * 2
     angle %= np.pi * 2
@@ -66,7 +72,7 @@ def _custom_rz(angle : float, wires, epsilon = 1E-8):
 
 def _custom_rx(angle : float, wires, epsilon = 1E-8):
     """
-    a native implementation of the RX operation
+    a MonarQ native implementation of the RX operation
     """
     while angle < 0: angle += np.pi * 2
     angle %= np.pi * 2
@@ -85,7 +91,7 @@ def _custom_rx(angle : float, wires, epsilon = 1E-8):
 
 def _custom_ry(angle : float, wires, epsilon = 1E-8):
     """
-    a native implementation of the RY operation
+    a MonarQ native implementation of the RY operation
     """
     while angle < 0: angle += np.pi * 2
     angle %= np.pi * 2
@@ -100,8 +106,6 @@ def _custom_ry(angle : float, wires, epsilon = 1E-8):
 
 def _custom_swap(wires):
     """
-    a native implementation of the SWAP operation
+    a MonarQ native implementation of the SWAP operation
     """
-    return _custom_cnot(wires) + _custom_h(wires[0]) + _custom_h(wires[1]) \
-            + _custom_cnot(wires) + _custom_h(wires[0]) + _custom_h(wires[1]) \
-            + _custom_cnot(wires)
+    return _custom_cnot([wires[0], wires[1]]) + _custom_cnot([wires[1], wires[0]]) + _custom_cnot([wires[0], wires[1]])

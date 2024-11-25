@@ -79,21 +79,20 @@ def Toffoli():
     [qml.Toffoli([0, 1, 2])]
     return qml.probs(wires = [0, 1, 2])
 
-def bernstein_vazirani(number : int, measurement = qml.counts):
-    """bernstein vazirani for encoding given number
-    """
+def bernstein_vazirani(number : int, num_qubits : int, measurement = qml.counts):
     value = []
-    while number > 0:
-        value.insert(0, (number & 1) != 0)
-        number = number >> 1
+    for i in range(num_qubits - 1):
+        value.insert(0, (number & (1 << i)) != 0)
 
-    num_wires = len(value) + 1
-    [qml.Hadamard(i) for i in range(num_wires)]
-    qml.Z(num_wires-1)
+    qml.X(num_qubits-1)
         
+    [qml.Hadamard(i) for i in range(num_qubits)]
+    
     # Uf
-    [qml.CNOT([i, num_wires - 1]) for i, should in enumerate(value) if should]
+    [qml.CNOT([i, num_qubits - 1]) for i, should in enumerate(value) if should]
         
-    [qml.Hadamard(i) for i in range(num_wires - 1)]
-    return measurement(wires=[i for i in range(num_wires - 1)])
+    [qml.Hadamard(i) for i in range(num_qubits - 1)]
+    
+    wires = [i for i in range(num_qubits - 1)]
+    return measurement(wires=wires)
     

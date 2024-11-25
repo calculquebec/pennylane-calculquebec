@@ -1,10 +1,10 @@
 from pennylane.tape import QuantumTape
 from pennylane.operation import Operation
-from pennylane_snowflurry.transpiler.steps.base_step import BaseStep
+from pennylane_snowflurry.transpiler.steps.interfaces.pre_processing import PreProcStep
 import pennylane.transforms as transforms
 
 
-class BaseDecomposition(BaseStep):
+class BaseDecomposition(PreProcStep):
     """The purpose of this transpiler step is to turn the gates in a circuit to a simpler, more easily usable set of gates
     """
     @property

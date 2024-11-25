@@ -3,13 +3,12 @@ import pennylane as qml
 import pennylane_snowflurry.transpiler.decompositions.native_decomp_functions as decomp_funcs
 import numpy as np
 from pennylane.ops.op_math import SProd
-from pennylane_snowflurry.transpiler.steps.base_step import BaseStep
+from pennylane_snowflurry.transpiler.steps.interfaces.pre_processing import PreProcStep
 
-class NativeDecomposition(BaseStep):
+class NativeDecomposition(PreProcStep):
     """
     the purpose of this transpiler step is to turn the gates in the circuit into a set of gate that's readable by a specific machine
     """
-    @property
     def native_gates(self):
         return []
 
@@ -30,7 +29,6 @@ class MonarqDecomposition(NativeDecomposition):
         "SWAP" : decomp_funcs._custom_swap
     }
     
-    @property
     def native_gates(self):
         return  [
             "T", "TDagger",
@@ -54,7 +52,7 @@ class MonarqDecomposition(NativeDecomposition):
                     else:
                         new_operations.extend(MonarqDecomposition._decomp_map[op.name](wires=op.wires))
                 else:
-                    if op.name in MonarqDecomposition.native_gates:
+                    if op.name in self.native_gates():
                         new_operations.append(op)
                     else:
                         raise Exception(f"gate {op.name} is not handled by the native decomposition step. Did you bypass the base decomposition step?")
