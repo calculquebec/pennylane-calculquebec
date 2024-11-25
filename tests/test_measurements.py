@@ -9,13 +9,13 @@ import networkx as nx
 from dotenv import dotenv_values
 from pennylane_snowflurry.monarq_device import MonarqDevice
 from pennylane_snowflurry.API.api_client import MonarqClient
-class test_measurements(unittest.TestCase):
+# class test_measurements(unittest.TestCase):
     
-    def __init__(self):
-        self.conf = dotenv_values(".env")
-        self.dev = MonarqDevice(MonarqClient(self.conf["HOST"], self.conf["USER"], self.conf["ACCESS_TOKEN"]))
+#     def __init__(self):
+#         self.conf = dotenv_values(".env")
+#         self.dev = MonarqDevice(MonarqClient(self.conf["HOST"], self.conf["USER"], self.conf["ACCESS_TOKEN"]))
     
-    @unittest.mock.patch("pennylane_snowflurry.utility.graph_utility.machine_graph")
-    def test_place_no_4(self, machine_graph):
-        pass
+#     @unittest.mock.patch("pennylane_snowflurry.utility.graph_utility.machine_graph")
+#     def test_place_no_4(self, machine_graph):
+#         pass
     

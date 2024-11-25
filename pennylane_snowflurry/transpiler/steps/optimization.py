@@ -18,6 +18,9 @@ class IterativeCommuteAndMerge(Optimize):
     def execute(self, tape):
         tape = commute_and_merge(tape)
 
+        tape = expand(tape, { "SWAP" : IterativeCommuteAndMerge.swap_cnot})
+        tape = commute_and_merge(tape)
+        
         tape = expand(tape, { "CNOT" : IterativeCommuteAndMerge.HCZH_cnot })
         tape = commute_and_merge(tape)
         
@@ -31,6 +34,14 @@ class IterativeCommuteAndMerge(Optimize):
         tape = commute_and_merge(tape)
         return tape    
     
+    def swap_cnot(wires):
+        return [ 
+            qml.CNOT([wires[0], wires[1]]),
+            qml.CNOT([wires[1], wires[0]]),
+            qml.CNOT([wires[0], wires[1]])
+        ]
+            
+            
     def HCZH_cnot(wires):
         return [
             qml.Hadamard(wires[1]),

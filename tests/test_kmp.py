@@ -1,9 +1,8 @@
 import copy
 import pennylane_snowflurry.utility.kmp as kmp
-import unittest
 import random as rand
 
-class test_kmp(unittest.TestCase):
+class TestKmp:
     def alter(pattern):
         result = copy.deepcopy(pattern)
         test = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
@@ -20,7 +19,4 @@ class test_kmp(unittest.TestCase):
         pattern = list("felix")
         index = kmp.kmp_search(string, pattern, lambda a, b: a == b)
         answer = 6
-        self.assertEqual(index, answer)
-
-if __name__ == "__main__":
-    unittest.main()
+        assert index == answer
