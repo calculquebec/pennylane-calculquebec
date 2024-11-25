@@ -1,0 +1,37 @@
+@startuml monarq.default sequence
+participant user
+participant MonarqDevice as dev
+participant Transpiler as trans
+participant PostProcessor as post
+participant PreProcStep as preproc
+participant PostProcStep as postproc
+participant ApiJob as job
+participant ApiAdapter as adapter
+
+user -> dev : run job
+dev -> trans : transpile
+loop all preprocessing steps
+    trans -> preproc : execute
+    opt benchmark is needed
+        preproc -> adapter : get benchmarks
+        preproc <-- adapter
+    end opt
+    trans <-- preproc
+end loop 
+trans --> dev
+dev -> job : execute
+job -> adapter : submit job
+job <-- adapter 
+loop until job.state == SUCCESS
+job -> adapter : get job state
+job <-- adapter
+end loop
+dev <-- job
+dev -> post : post-process results
+loop all postprocessing steps
+post -> postproc : execute
+post <-- postproc
+end loop
+dev <-- post
+dev --> user
+@enduml
