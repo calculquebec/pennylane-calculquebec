@@ -17,7 +17,7 @@ class TestOptimization:
         new_tape = CliffordTDecomposition().execute(tape)
         new_tape = IterativeCommuteAndMerge().execute(new_tape)
 
-        self.assertTrue(len(new_tape.operations), 1)
+        assert len(new_tape.operations) == 1
         a = qml.execute([tape], self.dev)
         b = qml.execute([new_tape], self.dev)
         assert all(abs(c[0] - c[1]) < 1E-8 for c in zip(a[0], b[0]))
@@ -28,7 +28,7 @@ class TestOptimization:
         new_tape = CliffordTDecomposition().execute(tape)
         new_tape = IterativeCommuteAndMerge().execute(new_tape)
         
-        self.assertTrue(len(new_tape.operations), 33)
+        assert len(new_tape.operations) == 33
         a = qml.execute([tape], self.dev)
         b = qml.execute([new_tape], self.dev)
         assert all(abs(c[0] - c[1]) < 1E-8 for c in zip(a[0], b[0]))
@@ -39,7 +39,7 @@ class TestOptimization:
         new_tape = CliffordTDecomposition().execute(tape)
         new_tape = IterativeCommuteAndMerge().execute(new_tape)
         
-        self.assertTrue(len(new_tape.operations), 62)
+        assert len(new_tape.operations) == 61
         a = qml.execute([tape], self.dev)
         b = qml.execute([new_tape], self.dev)
         assert all(abs(c[0] - c[1]) < 1E-8 for c in zip(a[0], b[0]))
