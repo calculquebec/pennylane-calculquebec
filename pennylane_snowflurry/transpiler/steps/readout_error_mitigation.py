@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from pennylane_snowflurry.transpiler.steps.interfaces.post_processing import PostProcStep
 
-class ErrorMitigation(PostProcStep):
+class ReadoutErrorMitigation(PostProcStep):
     @property
     def all_combinations(self):
         return get_labels((2 ** self.num_qubits) - 1)
