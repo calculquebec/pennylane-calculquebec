@@ -8,7 +8,7 @@ from pennylane_snowflurry.transpiler.steps.interfaces.post_processing import Pos
 class PostProcessor:
     
 
-    def get_processor(behaviour_config : TranspilerConfig):
+    def get_processor(behaviour_config : TranspilerConfig, circuit_wires):
         def process(tape : QuantumTape, results : dict[str, int]):
             """
             Args:
@@ -18,7 +18,8 @@ class PostProcessor:
             Returns : 
                 The processed results
             """
-            expanded_tape = PostProcessor.expand_full_measurements(tape)
+            wires = tape.wires if circuit_wires is None or len(tape.wires) > len(circuit_wires) else circuit_wires
+            expanded_tape = PostProcessor.expand_full_measurements(tape, wires)
             
             postproc_steps = [step for step in behaviour_config.steps if isinstance(step, PostProcStep)]
             processed_results = deepcopy(results)
@@ -28,11 +29,11 @@ class PostProcessor:
 
         return process
 
-    def expand_full_measurements(tape):
+    def expand_full_measurements(tape, wires):
         mps = []
         for mp in tape.measurements:
             if mp.wires == None or len(mp.wires) < 1:
-                mps.append(type(mp)(wires=tape.wires))
+                mps.append(type(mp)(wires=wires))
             else:
                 mps.append(mp)
         

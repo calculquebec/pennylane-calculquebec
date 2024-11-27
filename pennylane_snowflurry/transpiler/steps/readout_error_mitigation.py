@@ -5,7 +5,6 @@ from pennylane_snowflurry.API.api_adapter import ApiAdapter
 import json
 from datetime import datetime, timedelta
 import numpy as np
-import pandas as pd
 from pennylane_snowflurry.transpiler.steps.interfaces.post_processing import PostProcStep
 
 class ReadoutErrorMitigation(PostProcStep):

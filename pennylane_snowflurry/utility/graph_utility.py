@@ -8,7 +8,7 @@ from itertools import combinations
 from pennylane_snowflurry.monarq_data import connectivity, build_benchmark
 from pennylane_snowflurry.utility.api_utility import keys
 
-def find_biggest_group(graph : nx.Graph):
+def find_biggest_group(graph : nx.Graph) -> list:
     return max(nx.connected_components(graph), key=len)
 
 def is_directly_connected(op : Operation, machine_topology : nx.Graph) -> bool:

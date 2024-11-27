@@ -2,6 +2,7 @@ from pennylane.tape import QuantumTape
 from pennylane.operation import Operation
 from pennylane.measurements import MeasurementProcess
 import numpy as np
+from base64 import b64encode
 
 class ApiUtility:
     @staticmethod
@@ -64,7 +65,6 @@ class ApiUtility:
         Returns:
             str: the basic authentification string that will authenticate you with the API
         """
-        from base64 import b64encode
         token = b64encode(f"{username}:{password}".encode('ascii')).decode("ascii")
         return f'Basic {token}'
     

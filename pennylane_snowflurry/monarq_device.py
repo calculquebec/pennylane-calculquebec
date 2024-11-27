@@ -84,7 +84,7 @@ class MonarqDevice(Device):
         config = execution_config
 
         transform_program = TransformProgram()
-        transform_program.add_transform(Transpiler.get_transpiler(self._behaviour_config))
+        transform_program.add_transform(Transpiler.get_transpiler(self._behaviour_config, self.wires))
         return transform_program, config
 
     def execute(self, circuits: QuantumTape | list[QuantumTape], execution_config : ExecutionConfig = DefaultExecutionConfig):
@@ -115,7 +115,7 @@ class MonarqDevice(Device):
             interface = None
         
         results = [self._measure(tape) for tape in circuits]
-        post_processed_results = [PostProcessor.get_processor(self._behaviour_config)(circuits[i], res) for i, res in enumerate(results)]
+        post_processed_results = [PostProcessor.get_processor(self._behaviour_config, self.wires)(circuits[i], res) for i, res in enumerate(results)]
        
         return post_processed_results if not is_single_circuit else post_processed_results[0]
 
