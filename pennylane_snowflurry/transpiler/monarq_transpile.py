@@ -7,7 +7,7 @@ from pennylane_snowflurry.transpiler.steps.interfaces.pre_processing import PreP
 class Transpiler:
     
 
-    def get_transpiler(behaviour_config : TranspilerConfig):
+    def get_transpiler(behaviour_config : TranspilerConfig, circuit_wires):
         """
         returns a transform that goes through given transpilation steps\n
         every step is optional and new steps can be added, leaving modularity to the end user\n
@@ -29,7 +29,8 @@ class Transpiler:
             Returns : 
                 A transform dispatcher object that can be used in the preprocess method of pennylane Devices
             """
-            optimized_tape = Transpiler.expand_full_measurements(tape)
+            wires = tape.wires if circuit_wires is None or len(tape.wires) > len(circuit_wires) else circuit_wires
+            optimized_tape = Transpiler.expand_full_measurements(tape, wires)
             
             with qml.QueuingManager.stop_recording():
                 prerpoc_steps = [step for step in behaviour_config.steps if isinstance(step, PreProcStep)]
@@ -40,11 +41,11 @@ class Transpiler:
 
         return transform(transpile)
 
-    def expand_full_measurements(tape):
+    def expand_full_measurements(tape, wires):
         mps = []
         for mp in tape.measurements:
             if mp.wires == None or len(mp.wires) < 1:
-                mps.append(type(mp)(wires=tape.wires))
+                mps.append(type(mp)(wires=wires))
             else:
                 mps.append(mp)
         

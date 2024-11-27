@@ -1,5 +1,4 @@
 from functools import partial
-from pennylane.ops.op_math.adjoint import Adjoint
 from pennylane.measurements import MeasurementProcess
 from pennylane.operation import Operation
 from pennylane.tape import QuantumTape
@@ -7,7 +6,6 @@ import pennylane as qml
 import numpy as np
 import pennylane_snowflurry.custom_gates as custom
 from pennylane_snowflurry.pennylane_converter import PennylaneConverter, Snowflurry
-import matplotlib.pyplot as plt
 import random
 
 
@@ -141,35 +139,11 @@ def get_labels(up_to : int):
     """
     gets bitstrings from 0 to "up_to" value
     """
+    
+    if not isinstance(up_to, int): 
+        raise ValueError("up_to must be an int")
+    if up_to < 0:
+        raise ValueError("up_to must be >= 0")
+    
     num = int(np.log2(up_to)) + 1
     return [format(i, f"0{num}b") for i in range(up_to + 1)]
-
-def bar_plot(labels, *values):
-    
-    for value in values:
-        if len(labels) != len(value):
-            raise Exception("all columns should have the same number of lines")
-    
-    plot_infos = zip(labels, values)
-
-    x = np.arange(len(labels))
-    width = 1/len(labels)
-    multiplier = 0
-
-    fig, ax = plt.subplots(layout="constrained")
-
-    for attribute, measurement in plot_infos:
-        offset = width * multiplier
-        rects = ax.bar(x + offset, measurement, width, label = attribute)
-        ax.bar_label(rects, padding=3)
-        multiplier += 1
-    
-    ax.set_ylabel('Counts')
-    ax.set_title('Measure comparison between different environments')
-    ax.set_xticks(x + width, labels)
-    ax.set_ylim(0, 250)
-    plt.show()
-
-def verbosePrint(content, verbose : bool = False):
-    if verbose:
-        print(content)
