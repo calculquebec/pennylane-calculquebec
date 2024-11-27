@@ -3,8 +3,8 @@ import pennylane as qml
 from pennylane.tape import QuantumTape
 from pennylane_snowflurry.utility.optimization import expand, is_single_axis_gate
 import pennylane.transforms as transforms
-from pennylane_snowflurry.transpiler.optimization_methods.commute_and_merge import commute_and_merge
-from pennylane_snowflurry.transpiler.interfaces import PreProcStep
+from pennylane_snowflurry.processing.optimization_methods.commute_and_merge import commute_and_merge
+from pennylane_snowflurry.processing.interfaces import PreProcStep
 
 class Optimize(PreProcStep):
     """Optimization step base class. Inherits from BaseStep

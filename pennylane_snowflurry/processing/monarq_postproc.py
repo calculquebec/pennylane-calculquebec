@@ -1,12 +1,12 @@
 from copy import deepcopy
 from pennylane.tape import QuantumTape
-from pennylane_snowflurry.transpiler.config import TranspilerConfig
-from pennylane_snowflurry.transpiler.interfaces import PostProcStep
+from pennylane_snowflurry.processing.config import ProcessingConfig
+from pennylane_snowflurry.processing.interfaces import PostProcStep
 
 class PostProcessor:
     
 
-    def get_processor(behaviour_config : TranspilerConfig, circuit_wires):
+    def get_processor(behaviour_config : ProcessingConfig, circuit_wires):
         def process(tape : QuantumTape, results : dict[str, int]):
             """
             Args:

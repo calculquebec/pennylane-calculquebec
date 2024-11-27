@@ -1,4 +1,4 @@
-from pennylane_snowflurry.transpiler.interfaces.base_step import BaseStep
+from pennylane_snowflurry.processing.interfaces.base_step import BaseStep
 from pennylane.tape import QuantumTape
 
 class PostProcStep(BaseStep):

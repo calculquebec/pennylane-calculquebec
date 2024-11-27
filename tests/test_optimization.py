@@ -1,6 +1,6 @@
 import numpy as np
-from pennylane_snowflurry.transpiler.steps.base_decomposition import CliffordTDecomposition
-from pennylane_snowflurry.transpiler.steps.optimization import IterativeCommuteAndMerge
+from pennylane_snowflurry.processing.steps.base_decomposition import CliffordTDecomposition
+from pennylane_snowflurry.processing.steps.optimization import IterativeCommuteAndMerge
 import pennylane as qml
 from pennylane.tape import QuantumTape
 import pytest

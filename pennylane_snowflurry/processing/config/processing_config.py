@@ -1,7 +1,7 @@
-from pennylane_snowflurry.transpiler.interfaces.base_step import BaseStep
-from pennylane_snowflurry.transpiler.steps import CliffordTDecomposition, ASTAR, Swaps, IterativeCommuteAndMerge, MonarqDecomposition
+from pennylane_snowflurry.processing.interfaces.base_step import BaseStep
+from pennylane_snowflurry.processing.steps import CliffordTDecomposition, ASTAR, Swaps, IterativeCommuteAndMerge, MonarqDecomposition
 
-class TranspilerConfig:
+class ProcessingConfig:
     """a parameter object that can be passed to devices for changing its default behaviour
     """
     _steps : list[BaseStep]
@@ -15,7 +15,7 @@ class TranspilerConfig:
     def steps(self): return self._steps
     
     
-class MonarqDefaultConfig(TranspilerConfig):
+class MonarqDefaultConfig(ProcessingConfig):
     def __init__(self, 
                  use_benchmark = True, 
                  q1_acceptance = 0.5, 

@@ -1,4 +1,4 @@
-import pennylane_snowflurry.transpiler.custom_gates as custom
+import pennylane_snowflurry.processing.custom_gates as custom
 from pennylane.tape import QuantumTape
 from pennylane.operation import Operation
 from pennylane.transforms.optimization.optimization_utils import find_next_gate

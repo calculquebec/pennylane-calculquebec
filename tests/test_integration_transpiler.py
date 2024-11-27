@@ -1,10 +1,10 @@
 import numpy as np
 import pennylane as qml
-from pennylane_snowflurry.transpiler.monarq_transpile import PreProcessor
-from pennylane_snowflurry.transpiler.config.transpiler_config import MonarqDefaultConfig
+from pennylane_snowflurry.processing.monarq_preproc import PreProcessor
+from pennylane_snowflurry.processing.config.processing_config import MonarqDefaultConfig
 import pennylane_snowflurry.utility.test_circuits as test_circuits
 from pennylane_snowflurry.utility.debug import arbitrary_circuit
-from pennylane_snowflurry.transpiler.steps.placement import ISMAGS
+from pennylane_snowflurry.processing.steps.placement import ISMAGS
 import pytest
 
 def count_gates(tape):

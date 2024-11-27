@@ -4,8 +4,8 @@ import pennylane_snowflurry.utility.test_circuits as test_circuits
 from pennylane_snowflurry.monarq_device import MonarqDevice
 from pennylane_snowflurry.utility.test_device import TestDevice
 from pennylane_snowflurry.API.client import MonarqClient
-from pennylane_snowflurry.transpiler.config import MonarqDefaultConfig
-from pennylane_snowflurry.transpiler.steps import ReadoutErrorMitigation
+from pennylane_snowflurry.processing.config import MonarqDefaultConfig
+from pennylane_snowflurry.processing.steps import ReadoutErrorMitigation
 from dotenv import dotenv_values
 from pennylane_snowflurry.utility.debug import arbitrary_circuit
 
