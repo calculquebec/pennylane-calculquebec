@@ -1,6 +1,6 @@
 import unittest.mock
-from pennylane_snowflurry.transpiler.steps.placement import ISMAGS, ASTAR
-from pennylane_snowflurry.transpiler.steps.routing import Swaps
+from pennylane_snowflurry.processing.steps.placement import ISMAGS, ASTAR
+from pennylane_snowflurry.processing.steps.routing import Swaps
 import unittest
 import pennylane as qml
 from pennylane.tape import QuantumTape

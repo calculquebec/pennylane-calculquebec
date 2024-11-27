@@ -2,12 +2,12 @@ from copy import deepcopy
 from pennylane.tape import QuantumTape
 import pennylane as qml
 from pennylane.transforms import transform
-from pennylane_snowflurry.transpiler.config import TranspilerConfig
-from pennylane_snowflurry.transpiler.interfaces import PreProcStep
+from pennylane_snowflurry.processing.config import ProcessingConfig
+from pennylane_snowflurry.processing.interfaces import PreProcStep
 class PreProcessor:
     
 
-    def get_processor(behaviour_config : TranspilerConfig, circuit_wires):
+    def get_processor(behaviour_config : ProcessingConfig, circuit_wires):
         """
         returns a transform that goes through given transpilation steps\n
         every step is optional and new steps can be added, leaving modularity to the end user\n

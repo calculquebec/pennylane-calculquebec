@@ -4,7 +4,7 @@ from pennylane_snowflurry.API.adapter import ApiAdapter
 import json
 from datetime import datetime, timedelta
 import numpy as np
-from pennylane_snowflurry.transpiler.interfaces import PostProcStep
+from pennylane_snowflurry.processing.interfaces import PostProcStep
 
 class ReadoutErrorMitigation(PostProcStep):
     @property

@@ -4,8 +4,8 @@ from pennylane.transforms.core import TransformProgram
 from pennylane.tape import QuantumScript, QuantumTape
 from pennylane_snowflurry.execution_config import DefaultExecutionConfig, ExecutionConfig
 from pennylane_snowflurry.API.adapter import ApiAdapter
-from pennylane_snowflurry.transpiler import PreProcessor, PostProcessor
-from pennylane_snowflurry.transpiler.config import TranspilerConfig, MonarqDefaultConfig
+from pennylane_snowflurry.processing import PreProcessor, PostProcessor
+from pennylane_snowflurry.processing.config import ProcessingConfig, MonarqDefaultConfig
 from pennylane_snowflurry.API.client import ApiClient
 from pennylane_snowflurry.measurements.monarq_device.counts import Counts
 import pennylane.measurements as measurements
@@ -40,25 +40,25 @@ class MonarqDevice(Device):
         "PauliZ"
     }
     
-    _behaviour_config : TranspilerConfig
+    _behaviour_config : ProcessingConfig
     
     def __init__(self, 
                  wires = None, 
                  shots = None,  
                  client : ApiClient = None,
-                 behaviour_config : TranspilerConfig = None) -> None:
+                 processing_config : ProcessingConfig = None) -> None:
 
         super().__init__(wires=wires, shots=shots)
         if client is None:
             raise Exception("The client has not been defined. Cannot establish connection with MonarQ.")
         
         self.client = client
-        if not behaviour_config:
-            behaviour_config = MonarqDefaultConfig()
+        if not processing_config:
+            processing_config = MonarqDefaultConfig()
         
         ApiAdapter.initialize(client)
         
-        self._behaviour_config = behaviour_config
+        self._behaviour_config = processing_config
     
 
     @property

@@ -1,7 +1,7 @@
 from pennylane.tape import QuantumTape
 from pennylane.operation import Operation
 import pennylane as qml
-from pennylane_snowflurry.transpiler.interfaces import PreProcStep
+from pennylane_snowflurry.processing.interfaces import PreProcStep
 from pennylane_snowflurry.utility.graph import circuit_graph, shortest_path, machine_graph, is_directly_connected
 
 class Routing(PreProcStep):

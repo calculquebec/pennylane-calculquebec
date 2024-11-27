@@ -5,9 +5,9 @@ from pennylane.transforms.core import TransformProgram
 from pennylane.tape import QuantumScript, QuantumTape
 from pennylane_snowflurry.execution_config import DefaultExecutionConfig, ExecutionConfig
 from pennylane_snowflurry.utility.api import instructions
-from pennylane_snowflurry.transpiler.monarq_postproc import PostProcessor
-from pennylane_snowflurry.transpiler.monarq_transpile import PreProcessor
-from pennylane_snowflurry.transpiler.config import MonarqDefaultConfig
+from pennylane_snowflurry.processing.monarq_postproc import PostProcessor
+from pennylane_snowflurry.processing.monarq_preproc import PreProcessor
+from pennylane_snowflurry.processing.config import MonarqDefaultConfig
 
 class TestDevice(Device):
     """a device that uses the monarq transpiler but simulates results using default.qubit
