@@ -1,6 +1,6 @@
 from pennylane.tape import QuantumTape
-import pennylane_snowflurry.utility.graph_utility as graph_util
-from pennylane_snowflurry.transpiler.steps.interfaces.pre_processing import PreProcStep
+import pennylane_snowflurry.utility.graph as graph_util
+from pennylane_snowflurry.transpiler.interfaces import PreProcStep
 
 
 class Placement(PreProcStep):

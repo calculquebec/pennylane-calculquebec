@@ -3,12 +3,11 @@ from pennylane.devices import Device
 from pennylane.transforms.core import TransformProgram
 from pennylane.tape import QuantumScript, QuantumTape
 from pennylane_snowflurry.execution_config import DefaultExecutionConfig, ExecutionConfig
-from pennylane_snowflurry.API.api_adapter import ApiAdapter
-from pennylane_snowflurry.transpiler.monarq_transpile import Transpiler
-from pennylane_snowflurry.transpiler.monarq_postproc import PostProcessor
-from pennylane_snowflurry.transpiler.transpiler_config import TranspilerConfig, MonarqDefaultConfig
-from pennylane_snowflurry.API.api_client import ApiClient
-from pennylane_snowflurry.measurements.monarq_device.counts import Counts as MonarqCounts
+from pennylane_snowflurry.API.adapter import ApiAdapter
+from pennylane_snowflurry.transpiler import PreProcessor, PostProcessor
+from pennylane_snowflurry.transpiler.config import TranspilerConfig, MonarqDefaultConfig
+from pennylane_snowflurry.API.client import ApiClient
+from pennylane_snowflurry.measurements.monarq_device.counts import Counts
 import pennylane.measurements as measurements
 
 class MonarqDevice(Device):
@@ -84,7 +83,7 @@ class MonarqDevice(Device):
         config = execution_config
 
         transform_program = TransformProgram()
-        transform_program.add_transform(Transpiler.get_transpiler(self._behaviour_config, self.wires))
+        transform_program.add_transform(PreProcessor.get_processor(self._behaviour_config, self.wires))
         return transform_program, config
 
     def execute(self, circuits: QuantumTape | list[QuantumTape], execution_config : ExecutionConfig = DefaultExecutionConfig):
@@ -125,7 +124,7 @@ class MonarqDevice(Device):
             raise Exception("multiple measurement types not supported yet")
         meas = tape.measurements[0]
         if isinstance(meas, measurements.CountsMP):
-            return MonarqCounts().measure(tape)
+            return Counts().measure(tape)
         else:
             raise Exception("Measurement process " + type(meas).__name__ + " is not supported by this device.")
         

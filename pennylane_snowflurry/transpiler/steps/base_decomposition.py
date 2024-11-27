@@ -1,6 +1,6 @@
 from pennylane.tape import QuantumTape
 from pennylane.operation import Operation
-from pennylane_snowflurry.transpiler.steps.interfaces.pre_processing import PreProcStep
+from pennylane_snowflurry.transpiler.interfaces import PreProcStep
 import pennylane.transforms as transforms
 
 

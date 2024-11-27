@@ -1,8 +1,8 @@
 from pennylane.tape import QuantumTape
 import json
 import time
-from pennylane_snowflurry.API.api_adapter import ApiAdapter
-from pennylane_snowflurry.utility.api_utility import ApiUtility
+from pennylane_snowflurry.API.adapter import ApiAdapter
+from pennylane_snowflurry.utility.api import ApiUtility
 
 class JobException(Exception):
     def __init__(self, message : str):
