@@ -3,9 +3,9 @@ from pennylane_snowflurry.execution_config import ExecutionConfig, DefaultExecut
 from typing import Tuple
 from pennylane.transforms.core import TransformProgram
 from pennylane.tape import QuantumTape, QuantumScript
-from pennylane_snowflurry.utility.api_utility import instructions
+from pennylane_snowflurry.utility.api import instructions
 from pennylane.devices import Device
-from pennylane_snowflurry.utility.debug_utility import add_noise
+from pennylane_snowflurry.utility.debug import add_noise
 
 class NoisyDevice(Device):
     """

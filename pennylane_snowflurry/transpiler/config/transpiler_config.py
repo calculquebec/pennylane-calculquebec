@@ -1,9 +1,5 @@
-from pennylane_snowflurry.transpiler.steps.interfaces.base_step import BaseStep
-from pennylane_snowflurry.transpiler.steps.base_decomposition import CliffordTDecomposition
-from pennylane_snowflurry.transpiler.steps.placement import ASTAR
-from pennylane_snowflurry.transpiler.steps.routing import Swaps
-from pennylane_snowflurry.transpiler.steps.optimization import IterativeCommuteAndMerge
-from pennylane_snowflurry.transpiler.steps.native_decomposition import MonarqDecomposition
+from pennylane_snowflurry.transpiler.interfaces.base_step import BaseStep
+from pennylane_snowflurry.transpiler.steps import CliffordTDecomposition, ASTAR, Swaps, IterativeCommuteAndMerge, MonarqDecomposition
 
 class TranspilerConfig:
     """a parameter object that can be passed to devices for changing its default behaviour

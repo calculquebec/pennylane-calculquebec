@@ -1,9 +1,7 @@
 from copy import deepcopy
 from pennylane.tape import QuantumTape
-import pennylane as qml
-from pennylane.transforms import transform
-from pennylane_snowflurry.transpiler.transpiler_config import TranspilerConfig
-from pennylane_snowflurry.transpiler.steps.interfaces.post_processing import PostProcStep
+from pennylane_snowflurry.transpiler.config import TranspilerConfig
+from pennylane_snowflurry.transpiler.interfaces import PostProcStep
 
 class PostProcessor:
     

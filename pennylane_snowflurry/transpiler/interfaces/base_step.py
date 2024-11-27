@@ -1,5 +1,3 @@
-from pennylane.tape import QuantumTape
-
 class BaseStep:
     """
     a step that can be inherited in order to be appended to a TranspilerConfig. 

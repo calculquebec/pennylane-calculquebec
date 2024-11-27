@@ -8,7 +8,7 @@ from pennylane_snowflurry.monarq_data import connectivity
 import networkx as nx
 from dotenv import dotenv_values
 from pennylane_snowflurry.monarq_device import MonarqDevice
-from pennylane_snowflurry.API.api_client import MonarqClient
+from pennylane_snowflurry.API.client import MonarqClient
 # class test_measurements(unittest.TestCase):
     
 #     def __init__(self):

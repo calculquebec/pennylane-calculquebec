@@ -1,11 +1,10 @@
 from pennylane.tape import QuantumTape
-from pennylane.wires import Wires
-from pennylane_snowflurry.utility.debug_utility import get_labels
-from pennylane_snowflurry.API.api_adapter import ApiAdapter
+from pennylane_snowflurry.utility.debug import get_labels
+from pennylane_snowflurry.API.adapter import ApiAdapter
 import json
 from datetime import datetime, timedelta
 import numpy as np
-from pennylane_snowflurry.transpiler.steps.interfaces.post_processing import PostProcStep
+from pennylane_snowflurry.transpiler.interfaces import PostProcStep
 
 class ReadoutErrorMitigation(PostProcStep):
     @property

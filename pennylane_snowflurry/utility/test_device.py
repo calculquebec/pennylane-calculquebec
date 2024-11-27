@@ -4,10 +4,10 @@ from pennylane.devices import Device
 from pennylane.transforms.core import TransformProgram
 from pennylane.tape import QuantumScript, QuantumTape
 from pennylane_snowflurry.execution_config import DefaultExecutionConfig, ExecutionConfig
-from pennylane_snowflurry.utility.api_utility import instructions
-from pennylane_snowflurry.transpiler.monarq_transpile import Transpiler
+from pennylane_snowflurry.utility.api import instructions
 from pennylane_snowflurry.transpiler.monarq_postproc import PostProcessor
-from pennylane_snowflurry.transpiler.transpiler_config import MonarqDefaultConfig
+from pennylane_snowflurry.transpiler.monarq_transpile import PreProcessor
+from pennylane_snowflurry.transpiler.config import MonarqDefaultConfig
 
 class TestDevice(Device):
     """a device that uses the monarq transpiler but simulates results using default.qubit
@@ -63,7 +63,7 @@ class TestDevice(Device):
         config = execution_config
 
         transform_program = TransformProgram()
-        transform_program.add_transform(Transpiler.get_transpiler(self._behaviour_config))
+        transform_program.add_transform(PreProcessor.get_processor(self._behaviour_config))
         return transform_program, config
 
     def execute(self, circuits: QuantumTape | list[QuantumTape], execution_config : ExecutionConfig = DefaultExecutionConfig):

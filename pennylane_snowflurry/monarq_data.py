@@ -1,6 +1,5 @@
-from dotenv import dotenv_values
-from pennylane_snowflurry.API.api_adapter import ApiAdapter
-from pennylane_snowflurry.utility.api_utility import keys
+from pennylane_snowflurry.API.adapter import ApiAdapter
+from pennylane_snowflurry.utility.api import keys
 
 """
 #       00

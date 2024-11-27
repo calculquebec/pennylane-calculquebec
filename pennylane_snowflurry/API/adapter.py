@@ -1,7 +1,7 @@
-from pennylane_snowflurry.utility.api_utility import ApiUtility, routes, keys
+from pennylane_snowflurry.utility.api import ApiUtility, routes, keys
 import requests
 import json
-from pennylane_snowflurry.API.api_client import ApiClient
+from pennylane_snowflurry.API.client import ApiClient
 
 
 class ApiAdapter(object):

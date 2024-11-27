@@ -1,4 +1,4 @@
-import pennylane_snowflurry.custom_gates as custom
+import pennylane_snowflurry.transpiler.custom_gates as custom
 import numpy as np
 import pennylane as qml
 

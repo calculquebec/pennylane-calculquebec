@@ -1,4 +1,4 @@
-from pennylane_snowflurry.API.api_job import Job
+from pennylane_snowflurry.API.job import Job
 from pennylane.tape import QuantumTape
 
 class Counts:

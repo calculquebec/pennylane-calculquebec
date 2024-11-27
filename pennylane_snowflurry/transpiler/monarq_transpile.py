@@ -2,12 +2,12 @@ from copy import deepcopy
 from pennylane.tape import QuantumTape
 import pennylane as qml
 from pennylane.transforms import transform
-from pennylane_snowflurry.transpiler.transpiler_config import TranspilerConfig
-from pennylane_snowflurry.transpiler.steps.interfaces.pre_processing import PreProcStep
-class Transpiler:
+from pennylane_snowflurry.transpiler.config import TranspilerConfig
+from pennylane_snowflurry.transpiler.interfaces import PreProcStep
+class PreProcessor:
     
 
-    def get_transpiler(behaviour_config : TranspilerConfig, circuit_wires):
+    def get_processor(behaviour_config : TranspilerConfig, circuit_wires):
         """
         returns a transform that goes through given transpilation steps\n
         every step is optional and new steps can be added, leaving modularity to the end user\n
@@ -30,7 +30,7 @@ class Transpiler:
                 A transform dispatcher object that can be used in the preprocess method of pennylane Devices
             """
             wires = tape.wires if circuit_wires is None or len(tape.wires) > len(circuit_wires) else circuit_wires
-            optimized_tape = Transpiler.expand_full_measurements(tape, wires)
+            optimized_tape = PreProcessor.expand_full_measurements(tape, wires)
             
             with qml.QueuingManager.stop_recording():
                 prerpoc_steps = [step for step in behaviour_config.steps if isinstance(step, PreProcStep)]

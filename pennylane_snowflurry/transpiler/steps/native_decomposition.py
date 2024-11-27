@@ -3,7 +3,7 @@ import pennylane as qml
 import pennylane_snowflurry.transpiler.decompositions.native_decomp_functions as decomp_funcs
 import numpy as np
 from pennylane.ops.op_math import SProd
-from pennylane_snowflurry.transpiler.steps.interfaces.pre_processing import PreProcStep
+from pennylane_snowflurry.transpiler.interfaces import PreProcStep
 
 class NativeDecomposition(PreProcStep):
     """

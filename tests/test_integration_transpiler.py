@@ -1,9 +1,9 @@
 import numpy as np
 import pennylane as qml
-from pennylane_snowflurry.transpiler.monarq_transpile import Transpiler
-from pennylane_snowflurry.transpiler.transpiler_config import MonarqDefaultConfig
+from pennylane_snowflurry.transpiler.monarq_transpile import PreProcessor
+from pennylane_snowflurry.transpiler.config.transpiler_config import MonarqDefaultConfig
 import pennylane_snowflurry.utility.test_circuits as test_circuits
-from pennylane_snowflurry.utility.debug_utility import arbitrary_circuit
+from pennylane_snowflurry.utility.debug import arbitrary_circuit
 from pennylane_snowflurry.transpiler.steps.placement import ISMAGS
 import pytest
 
@@ -31,7 +31,7 @@ class TestIntegrationTranspiler:
         qnode = qml.QNode(lambda : test_circuits.GHZ(6), self.dev)
         qnode()
         
-        transpiler = Transpiler.get_transpiler(self.conf)
+        transpiler = PreProcessor.get_processor(self.conf, [0, 1, 2, 3, 4, 5])
         tape = transpiler(qnode.tape)[0][0]
         counts = count_gates(tape)
         
@@ -44,7 +44,7 @@ class TestIntegrationTranspiler:
         qnode = qml.QNode(lambda : test_circuits.bernstein_vazirani(54, 7), self.dev)
         result = qnode()
         
-        transpiler = Transpiler.get_transpiler(MonarqDefaultConfig(use_benchmark=False))
+        transpiler = PreProcessor.get_processor(MonarqDefaultConfig(use_benchmark=False), [0, 1, 2, 3, 4, 5, 6, 7])
         tape = transpiler(qnode.tape)[0][0]
         counts = count_gates(tape)
         
@@ -60,7 +60,7 @@ class TestIntegrationTranspiler:
         
         qnode = qml.QNode(AQFT, self.dev)
         qnode()
-        transpiler = Transpiler.get_transpiler(MonarqDefaultConfig(use_benchmark=False))
+        transpiler = PreProcessor.get_processor(MonarqDefaultConfig(use_benchmark=False), [0, 1, 2, 3, 4, 5])
         tape = transpiler(qnode.tape)[0][0]
         counts = count_gates(tape)
         
