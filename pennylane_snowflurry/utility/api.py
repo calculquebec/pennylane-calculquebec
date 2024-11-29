@@ -20,7 +20,7 @@ class ApiUtility:
             keys.qubits : [w for w in instruction.wires],
             keys.type : instructions[instruction.name]
         }
-        if instruction.name == "PhaseShift": 
+        if instruction.name in parametered_ops: 
             value = instruction.parameters[0][0] if isinstance(instruction.parameters[0], np.ndarray) else instruction.parameters[0]
             operation[keys.parameters] = {"lambda" : value}
             
@@ -28,6 +28,8 @@ class ApiUtility:
     
     @staticmethod
     def convert_circuit(circuit : QuantumTape) -> dict[str, any]:
+        from pennylane_snowflurry.utility.debug import to_qasm
+        print(to_qasm(circuit))
         """converts a pennylane quantum script to a dictionary that can be read by the Thunderhead API
 
         Args:
@@ -42,13 +44,12 @@ class ApiUtility:
             keys.operations : [ApiUtility.convert_instruction(op) for op in circuit.operations if not isinstance(op, MeasurementProcess)],
             keys.qubitCount : 24
         }
+        wires = [w for w in circuit.wires]
         for m in circuit.measurements:
-            wires = m.wires if len(m.wires) > 0 else [_ for _ in range(len(circuit.wires))]
-            for i, w in enumerate(wires):
-                if i in [w2[keys.qubits] for w2 in circuit_dict[keys.operations]]:
-                    continue
+            for w in m.wires:
+                i = wires.index(w)
                 circuit_dict[keys.operations].append({
-                    keys.qubits : [circuit.wires[i]],
+                    keys.qubits : [w],
                     keys.bits : [i],
                     keys.type : "readout"
                 })
@@ -155,5 +156,11 @@ instructions : dict[str, str] = {
     "CZ" : "cz",
     "PhaseShift" : "p",
     "Hadamard" : "h",
-    "CNOT" : "cnot"
+    "CNOT" : "cnot",
+    "RZ" : "rz"
 }
+
+parametered_ops : list[str] = [
+    "RZ", 
+    "PhaseShift"
+]

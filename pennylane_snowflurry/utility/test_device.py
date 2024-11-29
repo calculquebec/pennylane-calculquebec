@@ -37,13 +37,13 @@ class TestDevice(Device):
     def __init__(self, 
                  wires = None, 
                  shots = None, 
-                 behaviour_config = None) -> None:
+                 processing_config = None) -> None:
         super().__init__(wires=wires, shots=shots)
         
-        if behaviour_config is None:
-            behaviour_config = MonarqDefaultConfig(use_benchmark=False)
+        if processing_config is None:
+            processing_config = MonarqDefaultConfig(use_benchmark=False)
         
-        self._behaviour_config = behaviour_config
+        self._processing_config = processing_config
     
     def preprocess(
         self,
@@ -63,7 +63,7 @@ class TestDevice(Device):
         config = execution_config
 
         transform_program = TransformProgram()
-        transform_program.add_transform(PreProcessor.get_processor(self._behaviour_config))
+        transform_program.add_transform(PreProcessor.get_processor(self._processing_config, self.wires))
         return transform_program, config
 
     def execute(self, circuits: QuantumTape | list[QuantumTape], execution_config : ExecutionConfig = DefaultExecutionConfig):
@@ -89,6 +89,6 @@ class TestDevice(Device):
             interface = None
         
         results = [qml.execute([circuit], qml.device("default.qubit", circuit.wires, circuit.shots)) for circuit in circuits]
-        post_processed_results = [PostProcessor.get_processor(self._behaviour_config)(circuits[i], res) for i, res in enumerate(results)]
+        post_processed_results = [PostProcessor.get_processor(self._processing_config, self.wires)(circuits[i], res) for i, res in enumerate(results)]
 
         return post_processed_results if not is_single_circuit else post_processed_results[0]
