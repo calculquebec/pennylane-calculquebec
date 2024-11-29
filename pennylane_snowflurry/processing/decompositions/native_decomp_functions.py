@@ -76,7 +76,7 @@ def _custom_rz(angle : float, wires, epsilon = 1E-8):
     elif is_close_enough_to(angle, np.pi/4): 
         return [qml.T(wires = wires)]
     else: 
-        return [qml.PhaseShift(angle, wires)]
+        return [qml.RZ(angle, wires)]
 
 def _custom_rx(angle : float, wires, epsilon = 1E-8):
     """
@@ -94,7 +94,7 @@ def _custom_rx(angle : float, wires, epsilon = 1E-8):
     elif is_close_enough_to(angle, np.pi): 
         return [qml.PauliX(wires = wires)]
     else: 
-        return _custom_h(wires) + [qml.PhaseShift(angle, wires)] + _custom_h(wires)
+        return _custom_h(wires) + [qml.RZ(angle, wires)] + _custom_h(wires)
 
 def _custom_ry(angle : float, wires, epsilon = 1E-8):
     """
@@ -113,7 +113,8 @@ def _custom_ry(angle : float, wires, epsilon = 1E-8):
         return [qml.PauliY(wires = wires)]
     else: 
         return _custom_s(wires) + _custom_h(wires) \
-                + [qml.PhaseShift(angle, wires = wires)] + _custom_h(wires) + _custom_s(wires)
+                + [qml.RZ(angle, wires = wires)] \
+                + _custom_h(wires) + _custom_s(wires)
 
 def _custom_swap(wires):
     """
