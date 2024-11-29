@@ -1,30 +1,23 @@
 import numpy as np
 import pennylane as qml
-import pennylane_snowflurry.utility.test_circuits as test_circuits
 from pennylane_snowflurry.monarq_device import MonarqDevice
 from pennylane_snowflurry.utility.test_device import TestDevice
 from pennylane_snowflurry.API.client import MonarqClient
-from pennylane_snowflurry.processing.config import MonarqDefaultConfig
-from pennylane_snowflurry.processing.steps import ReadoutErrorMitigation
+from pennylane_snowflurry.processing.config import NoPlaceNoRouteConfig
 from dotenv import dotenv_values
-from pennylane_snowflurry.utility.debug import arbitrary_circuit
-
+from pennylane.devices import DefaultQubit
 conf = dotenv_values(".env")
 
 client = MonarqClient(conf["HOST"], conf["USER"], conf["ACCESS_TOKEN"], conf["PROJECT_NAME"])
 
-transpiler_config = MonarqDefaultConfig()
-transpiler_config.steps.append(ReadoutErrorMitigation())
-dev_transpiler = MonarqDevice(wires=[0, 1, 2], shots=1000, client=client)
-
+transpiler_config = NoPlaceNoRouteConfig()
+# transpiler_config.steps.append(ReadoutErrorMitigation())
+dev_transpiler = MonarqDevice(shots=1000, client = client)
 @qml.qnode(dev_transpiler)
 def circuit():
-    qml.X(0)
+    qml.RX(np.pi/2, 0)
     return qml.counts()
+
 results = circuit()
 print(results)
 exit()
-for i in range(8):
-    node = qml.QNode(lambda : test_circuits.bernstein_vazirani(i, 4), dev_transpiler)
-    print(node())
-    node = qml.QNode(lambda : arbitrary_circuit(node.tape), dev_transpiler)
