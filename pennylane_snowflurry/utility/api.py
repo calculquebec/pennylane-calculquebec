@@ -28,8 +28,6 @@ class ApiUtility:
     
     @staticmethod
     def convert_circuit(circuit : QuantumTape) -> dict[str, any]:
-        from pennylane_snowflurry.utility.debug import to_qasm
-        print(to_qasm(circuit))
         """converts a pennylane quantum script to a dictionary that can be read by the Thunderhead API
 
         Args:
