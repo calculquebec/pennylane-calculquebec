@@ -40,6 +40,10 @@ class ApiAdapter(object):
         cls.client = client
     
     @staticmethod
+    def is_last_update_expired():
+        return datetime.now() - ApiAdapter._last_update > timedelta(hours=24)
+    
+    @staticmethod
     def get_machine_id_by_name():
         """
         get the id of a machine by using the machine's name stored in the client
@@ -49,7 +53,7 @@ class ApiAdapter(object):
         if ApiAdapter._machine is None:
             route = ApiAdapter.instance().client.host + routes.machines + routes.machineName + "=" + ApiAdapter.instance().client.machine_name
             res = requests.get(route, headers=ApiAdapter.instance().headers)
-            if res != 200:
+            if res.status_code != 200:
                 return None
             ApiAdapter._machine = json.loads(res.text)
             
@@ -61,7 +65,7 @@ class ApiAdapter(object):
         get qubits and couplers informations from latest benchmark
         """
         
-        benchmark = ApiAdapter.instance().get_benchmark()
+        benchmark = ApiAdapter.get_benchmark()
         return benchmark[keys.resultsPerDevice]
 
     @staticmethod
@@ -71,13 +75,13 @@ class ApiAdapter(object):
         """
 
         # put benchmark in cache
-        if ApiAdapter._benchmark is None or ApiAdapter._last_update - datetime.now() > timedelta(hours=24):
-            machine = ApiAdapter.instance().get_machine_id_by_name()
+        if ApiAdapter._benchmark is None or ApiAdapter.is_last_update_expired():
+            machine = ApiAdapter.get_machine_id_by_name()
             machine_id = machine[keys.items][0][keys.id]
 
             route = ApiAdapter.instance().client.host + routes.machines + "/" + machine_id + routes.benchmarking
             res = requests.get(route, headers=ApiAdapter.instance().headers)
-            if res != 200:
+            if res.status_code != 200:
                 return None
             ApiAdapter._benchmark = json.loads(res.text)
             ApiAdapter._last_update = datetime.now()
