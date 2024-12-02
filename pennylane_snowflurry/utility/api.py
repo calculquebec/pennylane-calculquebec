@@ -137,7 +137,6 @@ class keys:
     items = "items"
     id = "id"
 
-
 instructions : dict[str, str] = {
     "Identity" : "i",
     "PauliX" : "x",
