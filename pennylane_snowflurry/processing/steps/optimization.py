@@ -7,7 +7,8 @@ from pennylane_snowflurry.processing.optimization_methods.commute_and_merge impo
 from pennylane_snowflurry.processing.interfaces import PreProcStep
 
 class Optimize(PreProcStep):
-    """Optimization step base class. Inherits from BaseStep
+    """
+    Optimization step base class.
     """
     pass
 
@@ -16,6 +17,16 @@ class IterativeCommuteAndMerge(Optimize):
     Decomposes iteratively until the circuit contains only rotations. For each decomposition step, applies commutations, merges and cancellations
     """
     def execute(self, tape):
+        """
+        decomposes swaps, cnots and hadamards iteratively. Then turns everything to Z and X rotations. \n
+        at each iteration, apply commutations, rotation merges, and trivial and inverse gates cancellations
+
+        Args:
+            tape (QuantumTape): the tape to optimize
+
+        Returns:
+            QuantumTape: an optimized QuantumTape
+        """
         tape = commute_and_merge(tape)
 
         tape = expand(tape, { "SWAP" : IterativeCommuteAndMerge.swap_cnot})
@@ -35,6 +46,8 @@ class IterativeCommuteAndMerge(Optimize):
         return tape    
     
     def swap_cnot(wires):
+        """turns swaps into cnots
+        """
         return [ 
             qml.CNOT([wires[0], wires[1]]),
             qml.CNOT([wires[1], wires[0]]),
@@ -43,6 +56,8 @@ class IterativeCommuteAndMerge(Optimize):
             
             
     def HCZH_cnot(wires):
+        """turns cnots into H - CZ - H
+        """
         return [
             qml.Hadamard(wires[1]),
             qml.CZ(wires),
@@ -50,6 +65,8 @@ class IterativeCommuteAndMerge(Optimize):
         ]
 
     def ZXZ_Hadamard(wires):
+        """turns H into S - SX - S
+        """
         return [
             qml.S(wires),
             qml.SX(wires),
@@ -57,10 +74,12 @@ class IterativeCommuteAndMerge(Optimize):
         ]
 
     def Y_to_ZXZ(op):
+        """turns RY into RZ - RX - RZ"""
         rot_angles = op.single_qubit_rot_angles()
         return [qml.RZ(np.pi/2, op.wires), qml.RX(rot_angles[1], op.wires), qml.RZ(-np.pi/2, op.wires)]
 
     def get_rid_of_y_rotations(tape : QuantumTape):
+        """removes all Y rotations"""
         list_copy = tape.operations.copy()
         new_operations = []
         for op in list_copy:

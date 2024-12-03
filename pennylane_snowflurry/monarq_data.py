@@ -61,7 +61,10 @@ connectivity = {
   }
 }
 
-def build_benchmark(q1Acceptance, q2Acceptance):
+class cache:
+    _readout1_cz_fidelities : dict = None
+
+def get_broken_qubits_and_couplers(q1Acceptance, q2Acceptance):
     """
     creates a dictionary that contains unreliable qubits and couplers
     """
@@ -89,3 +92,22 @@ def build_benchmark(q1Acceptance, q2Acceptance):
 
         broken_qubits_and_couplers[keys.qubits].append(int(qubit_id))
     return broken_qubits_and_couplers
+
+def get_readout1_and_cz_fidelities():
+    """get state 1 fidelities and cz fidelities
+    """
+    if cache._readout1_cz_fidelities is None:
+        cache._readout1_cz_fidelities = {keys.readoutState1Fidelity:{}, keys.czGateFidelity:{}}
+        benchmark = ApiAdapter.get_benchmark()[keys.resultsPerDevice]
+    
+        # build state 1 fidelity
+        for key in benchmark[keys.qubits]:
+            cache._readout1_cz_fidelities[keys.readoutState1Fidelity][key] = benchmark[keys.qubits][key][keys.readoutState1Fidelity]
+        
+        # build cz fidelity
+        for key in benchmark[keys.couplers]:
+            link = connectivity[keys.couplers][key]
+            cache._readout1_cz_fidelities[keys.czGateFidelity][(link[0], link[1])] = benchmark[keys.couplers][key][keys.czGateFidelity]
+        
+    return cache._readout1_cz_fidelities
+

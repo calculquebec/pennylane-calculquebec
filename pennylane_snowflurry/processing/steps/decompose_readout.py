@@ -3,8 +3,23 @@ from pennylane.tape import QuantumTape
 import pennylane as qml
 import numpy as np
 class DecomposeReadout(PreProcStep):
-    
+    """
+    a pre-processing step that decomposes readouts so they are all made in the computational basis \n
+    Supported observables are : X, Y, Z and H
+    """
     def get_ops_for_product(self, obs):
+        """
+        decomposes a product of observables to separated operations on different wires
+
+        Args:
+            obs : a product of observables
+
+        Raises:
+            ValueError: will be risen if the observable is not supported. 
+
+        Returns:
+            A list of operations
+        """
         ops = []
         for op in obs.operands:
             if op.name in self.obs_dict:
@@ -21,6 +36,8 @@ class DecomposeReadout(PreProcStep):
         
     @property
     def obs_dict(self):
+        """a dictionary of observables and their respective rotation operations
+        """
         return {
             "PauliZ" : lambda w : qml.Identity(w),
             "PauliX" : lambda w : qml.RY(np.pi / 2, w),
@@ -29,6 +46,21 @@ class DecomposeReadout(PreProcStep):
         }
         
     def execute(self, tape : QuantumTape):
+        """
+        implementation of the execution method from pre-processing steps. \n
+        for each observable, if it is a product, decompose it. \n
+        if it is a single observable, add the right rotation before the readout, 
+        and change the observable to computational basis
+
+        Args:
+            tape (QuantumTape): the tape with the readouts to decompose
+
+        Raises:
+            ValueError: risen if an observable is not supported
+
+        Returns:
+            _type_: a readout with only computational basis observables
+        """
         ops = tape.operations.copy()
         mps = []
         for mp in tape.measurements:

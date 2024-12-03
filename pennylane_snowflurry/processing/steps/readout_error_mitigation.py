@@ -7,6 +7,8 @@ import numpy as np
 from pennylane_snowflurry.processing.interfaces import PostProcStep
 
 class ReadoutErrorMitigation(PostProcStep):
+    """a post-processing step that applies error mitigation based on the readout fidelities
+    """
     _a_normalized = None
     _a_reduced = None
     _a_reduced_inverted = None
@@ -16,10 +18,26 @@ class ReadoutErrorMitigation(PostProcStep):
         return get_labels((2 ** self.num_qubits) - 1)
   
     def all_results(self, results):
+        """counts for all bitstring combinations
+
+        Args:
+            results (dict[str, int]): counts for possibilities that are not 0
+
+        Returns:
+            dict[str, int]: counts for all bitstring combinations
+        """
         all_combs = self.all_combinations
         return {bitstring:(results[bitstring] if bitstring in results else 0) for bitstring in all_combs}
         
     def _get_readout_fidelities(self, myqubits):
+        """gets fidelities for the observed qubits
+
+        Args:
+            myqubits (list[int]) : which qubits are observed
+
+        Returns:
+            dict[int, float], dict[int, float] : readout fidelities for state 0 and 1
+        """
         benchmark = ApiAdapter.get_qubits_and_couplers()
         complete_benchmark = ApiAdapter.get_benchmark()
         time_stamp = complete_benchmark["timeStamp"]
@@ -40,6 +58,9 @@ class ReadoutErrorMitigation(PostProcStep):
         return readout0, readout1
 
     def _tensor_product_calibration(self, calibration_matrices):
+        """
+        creates a matrix out of calibration matrices for each observed qubits using kronecker product
+        """
         # Initialize with the first qubit's calibration matrix
         A = calibration_matrices[0]
         
@@ -50,6 +71,11 @@ class ReadoutErrorMitigation(PostProcStep):
         return A
 
     def _get_calibration_data(self, myqubits):
+        """create calibration matrices for each observed qubits
+
+        Args:
+            myqubits (list[int]): observed qubits
+        """
         state_0_readout_fidelity, state_1_readout_fidelity = self._get_readout_fidelities(myqubits)
         calibration_data = {
             k: np.array([
@@ -60,6 +86,9 @@ class ReadoutErrorMitigation(PostProcStep):
         return calibration_data
 
     def _get_reduced_a_matrix(self, A_full, observed_bit_strings, all_bit_strings):
+        """
+        keep only observe qubit lines and columns from A matrix
+        """
         # Convert observed bit strings to their integer indices
         observed_indices = [all_bit_strings.index(bit_str) for bit_str in observed_bit_strings]
         
@@ -69,6 +98,9 @@ class ReadoutErrorMitigation(PostProcStep):
         return A_reduced
 
     def _get_inverted_reduced_a_matrix(self, myqubits, results):
+        """
+        create iverted reduced A matrix and cache it
+        """
         # Generate the full A-matrix
         if ReadoutErrorMitigation._a_normalized is None or ApiAdapter.is_last_update_expired():
             ReadoutErrorMitigation._a_reduced = None
@@ -105,7 +137,9 @@ class ReadoutErrorMitigation(PostProcStep):
         return ReadoutErrorMitigation._a_reduced_inverted
 
     def execute(self, tape : QuantumTape, results : dict[str, int]):
-        # TODO : this method currently has edge effects. should probably make it purely functional by removing state from the class
+        """
+        mitigates readout errors from results using state 0 and 1 readouts
+        """
         wires = [w for w in tape.wires]
             
         self.num_qubits = len(wires)

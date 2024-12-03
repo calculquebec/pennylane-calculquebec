@@ -80,6 +80,14 @@ def Toffoli():
     return qml.probs(wires = [0, 1, 2])
 
 def bernstein_vazirani(number : int, num_qubits : int, measurement = qml.counts):
+    """
+    a general implementation of bernstein vazirani
+
+    Args:
+        number (int): a number which will be translated to a bit string to find
+        num_qubits (int): the amount of qubits to use
+        measurement (optional): the measurement method that should be used. Defaults to qml.counts.
+    """
     value = []
     for i in range(num_qubits - 1):
         value.insert(0, (number & (1 << i)) != 0)
