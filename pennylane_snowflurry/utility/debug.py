@@ -9,7 +9,14 @@ from pennylane_snowflurry.pennylane_converter import PennylaneConverter, Snowflu
 import random
 
 
-def add_noise(tape : QuantumTape, t = 0.005) -> str:
+def add_noise(tape : QuantumTape, t = 0.005):
+    """
+    adds noise for each gate present in a quantum tape
+
+    Args:
+        tape (QuantumTape): the tape you want to noisify
+        t (float, optional): the noise quantity from 0 to 1. Defaults to 0.005.
+    """
     new_operations = []
     for op in tape.operations:
         new_operations += [op] + [qml.DepolarizingChannel(random.random() * t, w) for w in op.wires]
@@ -35,6 +42,9 @@ def to_qasm(tape : QuantumTape) -> str:
         + ";" for op in tape.operations])
 
 class SnowflurryUtility:
+    """
+    methods for interacting between pennylane and snowflurry
+    """
     def __init__(self, tape : QuantumTape, host, user, access_token, realm):
         self.converter = PennylaneConverter(tape, 
                                        wires=24,
@@ -45,6 +55,14 @@ class SnowflurryUtility:
                                        project_id="default")
     
     def gate_count(self, sf_circuit = None) -> int:
+        """method for returning the number of gates in a snowflurry circuit
+
+        Args:
+            sf_circuit (optional): a snowflurry circuit. circuit will be set to the one in the Snowflurry package if none is provided.
+
+        Returns:
+            int: the number of gates in the circuit
+        """
         if sf_circuit is None: sf_circuit = Snowflurry.sf_circuit
         return len(sf_circuit.instructions)
 
@@ -109,6 +127,9 @@ class SnowflurryUtility:
         return "\n".join(result)
 
     def transpile(self):
+        """
+        Transpiles a snowflurry circuit using the snowflurry transpiler
+        """
         sf_circuit = self.converter.convert_circuit(self.converter.pennylane_circuit)
         [[self.converter.apply_single_readout(w) for w in mp.wires] for mp in self.converter.pennylane_circuit.measurements]
 

@@ -4,11 +4,22 @@ from pennylane_snowflurry.processing.config import ProcessingConfig
 from pennylane_snowflurry.processing.interfaces import PostProcStep
 
 class PostProcessor:
-    
+    """
+    a container for post-processing functionalities that should be applied to the results of a circuit
+    """
 
     def get_processor(behaviour_config : ProcessingConfig, circuit_wires):
+        """
+        returns a function that applies the steps contained in the supplied ProcessingConfig
+
+        Args:
+            behaviour_config (ProcessingConfig): a processing config to apply
+            circuit_wires (list[int]): the wires in the circuit
+        """
         def process(tape : QuantumTape, results : dict[str, int]):
             """
+            applies a list of post-processing steps
+            
             Args:
                 tape (QuantumTape) : the tape for which the results were calculated
                 results (dict[str, int]) : the results you want to process
@@ -28,6 +39,15 @@ class PostProcessor:
         return process
 
     def expand_full_measurements(tape, wires):
+        """turns empty measurements to all-wire measurements
+
+        Args:
+            tape (QuantumTape): the quantum tape from which to expand the measurements
+            wires (list[int]): wires from the circuit
+
+        Returns:
+            QuantumTape: transformed tape 
+        """
         mps = []
         for mp in tape.measurements:
             if mp.wires == None or len(mp.wires) < 1:

@@ -25,7 +25,8 @@ MonarqDefaultConfig : Callable[[bool, float, float, list[int], list[list[int]]],
 """The default configuration preset for MonarQ"""
 
 
-MonarqDefaultConfigNoBenchmark = lambda : MonarqDefaultConfig(False)
+MonarqDefaultConfigNoBenchmark = lambda q1_acceptance = 0.5, q2_acceptance = 0.5, excluded_qubits = [], excluded_couplers = [] : \
+    MonarqDefaultConfig(False, q1_acceptance, q2_acceptance, excluded_qubits, excluded_couplers)
 """The default configuration preset, minus the benchmarking acceptance tests on qubits and couplers in the placement and routing steps."""
 
 EmptyConfig = lambda : ProcessingConfig()

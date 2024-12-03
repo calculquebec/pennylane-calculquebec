@@ -11,6 +11,16 @@ T = TypeVar("T")
 U = TypeVar("U")
             
 def expand(tape : QuantumTape, decomps : dict[str, Callable[[Wires], list[Operation]]], iterations = 1) -> QuantumTape:
+    """Decomposes a quantum tape's operations into mapped sets of given operations 
+
+    Args:
+        tape (QuantumTape): the tape you want to decompose
+        decomps (dict[str, Callable[[Wires], list[Operation]]]): a gate name, and the resulting operations
+        iterations (int, optional): the number of time it should be ran. Defaults to 1.
+
+    Returns:
+        QuantumTape: the quantum tape that results from the decomposition
+    """
     list_copy = tape.operations.copy()
     for _ in range(iterations):
         new_operations = []

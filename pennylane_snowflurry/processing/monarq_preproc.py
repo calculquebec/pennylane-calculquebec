@@ -5,7 +5,9 @@ from pennylane.transforms import transform
 from pennylane_snowflurry.processing.config import ProcessingConfig
 from pennylane_snowflurry.processing.interfaces import PreProcStep
 class PreProcessor:
-    
+    """
+    a container for pre-processing functionalities that should be applied to a circuit
+    """
 
     def get_processor(behaviour_config : ProcessingConfig, circuit_wires):
         """
@@ -14,12 +16,7 @@ class PreProcessor:
 
         Args\n
             config (Config) : defines which transpilation steps you want to run on your code\n
-                Default value applies those steps : \n
-                    1. decomposition to clifford + t set\n
-                    2. placement using a pathfinding heuristic\n
-                    3. routing using swaps\n
-                    4. optimization using commutations, merges and cancellations of inverses and trivial gates\n
-                    5. decomposition to MonarQ's native gate set\n
+            circuit_wires (list[int]) : the wires defined in the circuit
         """
         def transpile(tape : QuantumTape):
             """
@@ -42,6 +39,15 @@ class PreProcessor:
         return transform(transpile)
 
     def expand_full_measurements(tape, wires):
+        """turns empty measurements to all-wire measurements
+
+        Args:
+            tape (QuantumTape): the quantum tape from which to expand the measurements
+            wires (list[int]): wires from the circuit
+
+        Returns:
+            QuantumTape: transformed tape 
+        """
         mps = []
         for mp in tape.measurements:
             if mp.wires == None or len(mp.wires) < 1:

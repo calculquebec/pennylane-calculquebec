@@ -5,10 +5,18 @@ from networkx.algorithms.isomorphism.ismags import ISMAGS
 from typing import Tuple
 from copy import deepcopy
 from itertools import combinations
-from pennylane_snowflurry.monarq_data import connectivity, build_benchmark
+from pennylane_snowflurry.monarq_data import connectivity, get_broken_qubits_and_couplers, get_readout1_and_cz_fidelities
 from pennylane_snowflurry.utility.api import keys
 
 def find_biggest_group(graph : nx.Graph) -> list:
+    """Returns the biggest array of connected components in the graph
+
+    Args:
+        graph (nx.Graph): the graph for which you want to find the biggest group
+
+    Returns:
+        list: the biggest group
+    """
     return max(nx.connected_components(graph), key=len)
 
 def is_directly_connected(op : Operation, machine_topology : nx.Graph) -> bool:
@@ -34,7 +42,7 @@ def circuit_graph(tape : QuantumTape) -> nx.Graph:
 
 def machine_graph(use_benchmark, q1Acceptance, q2Acceptance, excluded_qubits = [], excluded_couplers = []):
     
-    broken_qubits_and_couplers = build_benchmark(q1Acceptance, q2Acceptance) if use_benchmark else None
+    broken_qubits_and_couplers = get_broken_qubits_and_couplers(q1Acceptance, q2Acceptance) if use_benchmark else None
     broken_nodes = [q for q in broken_qubits_and_couplers[keys.qubits]] if use_benchmark else []
     broken_nodes += [q for q in excluded_qubits if q not in broken_nodes]
     
@@ -65,18 +73,9 @@ def find_largest_subgraph_isomorphism_imags(circuit : nx.Graph, machine : nx.Gra
     """
     Uses IMAGS to find the largest common graph between two graphs
     """
-
     ismags = ISMAGS(machine, circuit)
     for mapping in ismags.largest_common_subgraph():
         return {v:k for (k, v) in mapping.items()} if mapping is not None and len(mapping) > 0 else mapping
-
-def most_connected_node(source : int, graph : nx.Graph):
-    """
-    find node in graph with most connections with the given source node
-    """
-    g_copy = deepcopy(graph)
-    return max(g_copy.nodes, \
-        key = lambda n : sum(1 for g in graph.edges if g[0] == n and g[1] == source or g[1] == n and g[0] == source))
 
 def shortest_path(a : int, b : int, graph : nx.Graph, excluding : list[int] = [], prioritized_nodes : list[int] = []):
     """
@@ -89,18 +88,22 @@ def shortest_path(a : int, b : int, graph : nx.Graph, excluding : list[int] = []
         excluding : nodes we dont want to use
         prioritized_nodes : nodes we want to use if possible
     """
-
+    r1_cz_fidelities = get_readout1_and_cz_fidelities()
     g_copy = deepcopy(graph)
     g_copy.remove_nodes_from(excluding)
-    max_degree = max(graph.degree(nnn) for nnn in graph.nodes)
-    def weight(nu, nv):
-        if nu == a and nv == b or nu == b and nv == a: 
-            return 1
-        va = 5
-        if nu in prioritized_nodes: va -= 1
-        if nv in prioritized_nodes: va -= 1
-        return va
 
+    def weight(node_u, node_v):
+        weights = [v for k, v in r1_cz_fidelities[keys.czGateFidelity].items() if node_u in k and node_v in k]
+        r1_node_u = r1_cz_fidelities[keys.readoutState1Fidelity][str(node_u)]
+        r1_node_v = r1_cz_fidelities[keys.readoutState1Fidelity][str(node_v)]
+        
+        if len(weights) < 1:
+            return 10
+        w = 4 - weights[0] - r1_node_u - r1_node_v
+        
+        if node_u in prioritized_nodes or node_v in prioritized_nodes:
+            return w - 1
+        return w
     
     return nx.astar_path(g_copy, a, b, weight = lambda u, v, _: weight(u, v))
 
@@ -108,7 +111,9 @@ def find_best_wire(graph : nx.Graph, excluded : list[int] = []):
     """
     find node with highest degree in graph
     """
-    return max([n for n in graph.nodes if n not in excluded], key=lambda n: graph.degree(n))
+    g = deepcopy(graph)
+    g.remove_nodes_from(excluded)
+    return max([n for n in g.nodes], key=lambda n: graph.degree(n))
 
 def find_closest_wire(a : int, machine_graph : nx.Graph, excluding : list[int] = [], prioritized : list[int] = []):
     """
@@ -136,3 +141,23 @@ def node_with_shortest_path_from_selection(source : int, selection : list[int], 
     nodes_minus_source = [node for node in selection if node != source]
     return min(nodes_minus_source, key=lambda n: len(shortest_path(source, n, graph)))
     # return min(all_unmapped_nodes, key = lambda n : len(_shortest_path(source, n, graph, mapping_minus_source)))
+
+def calculate_cost(source : int, graph : nx.Graph) -> float:
+    """Defines a cost for a node by using cz fidelities on neighbouring couplers and state 1 readout fidelity
+
+    Args:
+        source (int): the node you want to define a cost for
+        graph (nx.Graph): the graph in which the node you want to define a cost for is
+
+    Returns:
+        float : a cost, where the highest cost is the best one.
+    """
+    fidelities = get_readout1_and_cz_fidelities()
+    neighbours = [n for n in graph.neighbors(source)]
+    
+    r1 = fidelities[keys.readoutState1Fidelity][str(source)]
+    
+    all_cz = fidelities[keys.czGateFidelity]
+    cz = [all_cz[f] for f in all_cz if source in f and any(n in f for n in neighbours)]
+    n_r1 = [fidelities[keys.readoutState1Fidelity][str(n)] for n in neighbours]
+    return sum(cz)/len(neighbours) + r1 + sum(n_r1)/len(neighbours)

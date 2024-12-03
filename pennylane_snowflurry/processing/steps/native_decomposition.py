@@ -13,7 +13,11 @@ class NativeDecomposition(PreProcStep):
         return []
 
 class MonarqDecomposition(NativeDecomposition):
-    
+    """a decomposition process for turing all operations in a quantum tape to MonarQ-native ones
+
+    Raises:
+        ValueError: will be raised if an operation is not supported
+    """
     _decomp_map = {
         "Adjoint(T)" : decomp_funcs._custom_tdag,
         "S" : decomp_funcs._custom_s,
@@ -30,12 +34,13 @@ class MonarqDecomposition(NativeDecomposition):
     }
     
     def native_gates(self):
+        """the set of monarq-native gates"""
         return  [
             "T", "TDagger",
             "PauliX", "PauliY", "PauliZ", 
             "X90", "Y90", "Z90",
             "XM90", "YM90", "ZM90",
-            "PhaseShift", "CZ"
+            "PhaseShift", "CZ", "RZ"
         ]
     
     def execute(self, tape : QuantumTape):
@@ -55,7 +60,7 @@ class MonarqDecomposition(NativeDecomposition):
                     if op.name in self.native_gates():
                         new_operations.append(op)
                     else:
-                        raise Exception(f"gate {op.name} is not handled by the native decomposition step. Did you bypass the base decomposition step?")
+                        raise ValueError(f"gate {op.name} is not handled by the native decomposition step. Did you bypass the base decomposition step?")
 
         new_operations = [n.data[0][0] if isinstance(n, SProd) else n for n in new_operations]
         new_tape = type(tape)(new_operations, tape.measurements, shots=tape.shots)
