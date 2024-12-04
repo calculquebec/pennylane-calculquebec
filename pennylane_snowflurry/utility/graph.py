@@ -77,7 +77,7 @@ def find_largest_subgraph_isomorphism_imags(circuit : nx.Graph, machine : nx.Gra
     for mapping in ismags.largest_common_subgraph():
         return {v:k for (k, v) in mapping.items()} if mapping is not None and len(mapping) > 0 else mapping
 
-def shortest_path(a : int, b : int, graph : nx.Graph, excluding : list[int] = [], prioritized_nodes : list[int] = []):
+def shortest_path(a : int, b : int, graph : nx.Graph, excluding : list[int] = [], prioritized_nodes : list[int] = [], use_benchmark=True):
     """
     find the shortest path between node a and b
 
@@ -93,6 +93,9 @@ def shortest_path(a : int, b : int, graph : nx.Graph, excluding : list[int] = []
     g_copy.remove_nodes_from(excluding)
 
     def weight(node_u, node_v):
+        if not use_benchmark: 
+            return 1
+    
         weights = [v for k, v in r1_cz_fidelities[keys.czGateFidelity].items() if node_u in k and node_v in k]
         r1_node_u = r1_cz_fidelities[keys.readoutState1Fidelity][str(node_u)]
         r1_node_v = r1_cz_fidelities[keys.readoutState1Fidelity][str(node_v)]
@@ -107,15 +110,15 @@ def shortest_path(a : int, b : int, graph : nx.Graph, excluding : list[int] = []
     
     return nx.astar_path(g_copy, a, b, weight = lambda u, v, _: weight(u, v))
 
-def find_best_wire(graph : nx.Graph, excluded : list[int] = []):
+def find_best_wire(graph : nx.Graph, excluded : list[int] = [], use_benchmark = True):
     """
     find node with highest degree in graph
     """
     g = deepcopy(graph)
     g.remove_nodes_from(excluded)
-    return max([n for n in g.nodes], key=lambda n: graph.degree(n))
+    return max([n for n in g.nodes], key=lambda n: calculate_cost(n, g, use_benchmark))
 
-def find_closest_wire(a : int, machine_graph : nx.Graph, excluding : list[int] = [], prioritized : list[int] = []):
+def find_closest_wire(a : int, machine_graph : nx.Graph, excluding : list[int] = [], prioritized : list[int] = [], use_benchmark = True):
     """
     find node in graph that is closest to given node, not considering arbitrary excluding list
     """
@@ -124,14 +127,14 @@ def find_closest_wire(a : int, machine_graph : nx.Graph, excluding : list[int] =
     for b in machine_graph.nodes:
         if b in excluding:
             continue
-        value = len(shortest_path(a, b, machine_graph, prioritized_nodes=prioritized))
+        value = len(shortest_path(a, b, machine_graph, prioritized_nodes=prioritized, use_benchmark=use_benchmark))
         
         if value < min_value:
             min_value = value
             min_node = b
     return min_node
 
-def node_with_shortest_path_from_selection(source : int, selection : list[int], graph : nx.Graph):
+def node_with_shortest_path_from_selection(source : int, selection : list[int], graph : nx.Graph, use_benchmark = True):
     """
     find the unmapped node node in graph minus mapped nodes that has shortest path to given source node
     """
@@ -139,10 +142,10 @@ def node_with_shortest_path_from_selection(source : int, selection : list[int], 
     # mapping_minus_source = [n for n in mapping if n != source]
 
     nodes_minus_source = [node for node in selection if node != source]
-    return min(nodes_minus_source, key=lambda n: len(shortest_path(source, n, graph)))
+    return min(nodes_minus_source, key=lambda n: len(shortest_path(source, n, graph, use_benchmark)))
     # return min(all_unmapped_nodes, key = lambda n : len(_shortest_path(source, n, graph, mapping_minus_source)))
 
-def calculate_cost(source : int, graph : nx.Graph) -> float:
+def calculate_cost(source : int, graph : nx.Graph, use_benchmark = True) -> float:
     """Defines a cost for a node by using cz fidelities on neighbouring couplers and state 1 readout fidelity
 
     Args:
@@ -152,6 +155,10 @@ def calculate_cost(source : int, graph : nx.Graph) -> float:
     Returns:
         float : a cost, where the highest cost is the best one.
     """
+    
+    if not use_benchmark:
+        return 1
+    
     fidelities = get_readout1_and_cz_fidelities()
     neighbours = [n for n in graph.neighbors(source)]
     
