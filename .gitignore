@@ -7,4 +7,5 @@ docs/_build/*
 build
 __pycache__/
 *.whl
-.coverage*.env
+.coverage*
+.env
