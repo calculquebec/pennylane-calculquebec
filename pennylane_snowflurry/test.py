@@ -33,5 +33,5 @@ for i in range(1, 8):
     plt.bar([v for v in results.keys()], [v for v in results.values()])
     plt.show()
             
-# expliquer la diffÃ©rence entre les portes qml et custom
+# expliquer la différence entre les portes qml et custom
 # exit()
