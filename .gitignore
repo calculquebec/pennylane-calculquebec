@@ -9,3 +9,4 @@ __pycache__/
 *.whl
 .coverage*
 .env
+.vs/*
