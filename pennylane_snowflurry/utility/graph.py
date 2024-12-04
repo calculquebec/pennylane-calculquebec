@@ -88,7 +88,7 @@ def shortest_path(a : int, b : int, graph : nx.Graph, excluding : list[int] = []
         excluding : nodes we dont want to use
         prioritized_nodes : nodes we want to use if possible
     """
-    r1_cz_fidelities = get_readout1_and_cz_fidelities()
+    r1_cz_fidelities = get_readout1_and_cz_fidelities() if use_benchmark else {}
     g_copy = deepcopy(graph)
     g_copy.remove_nodes_from(excluding)
 
