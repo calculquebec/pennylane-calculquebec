@@ -45,11 +45,11 @@ class ISMAGS(Placement):
             
         for node in missing:
             # 3. Trouver le noeud le plus connecté à A dans le circuit
-            most_connected_node = graph_util.find_best_wire(node, circuit_topology)
+            most_connected_node = graph_util.find_best_wire(node, circuit_topology, self.use_benchmark)
 
             # 4. trouver un noeud dans la machine (a') qui minimise le chemin entre a' et b'  
             possibles = [n for n in machine_topology.nodes if n not in mapping.values()]
-            shortest_path_mapping = graph_util.node_with_shortest_path_from_selection(mapping[most_connected_node], possibles, machine_topology)
+            shortest_path_mapping = graph_util.node_with_shortest_path_from_selection(mapping[most_connected_node], possibles, machine_topology, self.use_benchmark)
                 
             mapping[node] = shortest_path_mapping
         
@@ -80,11 +80,11 @@ class VF2(Placement):
             
         for node in missing:
             # 3. Trouver le noeud le plus connecté à A dans le circuit
-            most_connected_node = graph_util.find_best_wire(node, circuit_topology)
+            most_connected_node = graph_util.find_best_wire(node, circuit_topology, self.use_benchmark)
 
             # 4. trouver un noeud dans la machine (a') qui minimise le chemin entre a' et b'  
             possibles = [n for n in machine_topology.nodes if n not in mapping.values()]
-            shortest_path_mapping = graph_util.node_with_shortest_path_from_selection(mapping[most_connected_node], possibles, machine_topology)
+            shortest_path_mapping = graph_util.node_with_shortest_path_from_selection(mapping[most_connected_node], possibles, machine_topology, self.use_benchmark)
                 
             mapping[node] = shortest_path_mapping
         
@@ -111,7 +111,7 @@ class ASTAR(Placement):
         if b_key in mapping:
             return
         
-        mapping[b_key] = graph_util.find_closest_wire(mapping[a_key], machine_topology, [v for (_, v) in mapping.items()], [v for _, v in mapping.items()])
+        mapping[b_key] = graph_util.find_closest_wire(mapping[a_key], machine_topology, [v for (_, v) in mapping.items()], [v for _, v in mapping.items()], self.use_benchmark)
 
         a_key2 = b_key
         for b_key2 in to_explore:
@@ -137,7 +137,7 @@ class ASTAR(Placement):
         for a_key in to_explore:
             if a_key in mapping:
                 continue
-            mapping[a_key] = graph_util.find_best_wire(machine_topology, [v for _, v in mapping.items()])
+            mapping[a_key] = graph_util.find_best_wire(machine_topology, [v for _, v in mapping.items()], self.use_benchmark)
 
             for b_key in to_explore:
                 if (a_key, b_key) not in circuit_topology.edges: 
