@@ -1,3 +1,6 @@
+"""
+Contains a wrapper around the job creation and executing process for MonarQ
+"""
 from pennylane.tape import QuantumTape
 import json
 import time

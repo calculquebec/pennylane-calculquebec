@@ -1,3 +1,7 @@
+"""
+Contains utility functions for optimization
+"""
+
 from typing import TypeVar, Callable
 from pennylane.operation import Operation
 from pennylane.ops import ControlledOp

@@ -1,3 +1,7 @@
+"""
+Contains API utility functions and constants
+"""
+
 from pennylane.tape import QuantumTape
 from pennylane.operation import Operation
 from pennylane.measurements import MeasurementProcess

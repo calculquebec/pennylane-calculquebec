@@ -1,3 +1,7 @@
+"""
+contains a pre-processing step for decomposing readouts that are not observed from the computational basis
+"""
+
 from pennylane_snowflurry.processing.interfaces import PreProcStep
 from pennylane.tape import QuantumTape
 import pennylane as qml

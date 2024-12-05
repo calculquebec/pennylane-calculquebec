@@ -1,3 +1,7 @@
+"""
+Contains utility classes for the iterative commute and merge optimization pre-processing step.
+"""
+
 from pennylane.tape import QuantumTape
 from pennylane_snowflurry.utility.optimization import  find_previous_gate, find_next_gate
 import pennylane.transforms as transforms

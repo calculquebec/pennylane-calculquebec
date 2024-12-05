@@ -1,3 +1,7 @@
+"""
+Contains a processor class for pre-processing steps
+"""
+
 from copy import deepcopy
 from pennylane.tape import QuantumTape
 import pennylane as qml

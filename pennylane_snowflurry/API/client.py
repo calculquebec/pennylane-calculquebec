@@ -1,3 +1,7 @@
+"""
+Contains base client class and implementations. \n
+MonarQ users will mostly use MonarqClient.
+"""
 
 class ApiClient:
     """

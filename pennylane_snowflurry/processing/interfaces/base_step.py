@@ -1,3 +1,8 @@
+"""
+This is a base class for every processing steps. \n
+This should probably not be used. Try using PreProcStep or PostProcStep.
+"""
+
 class BaseStep:
     """
     a step that can be inherited in order to be appended to a TranspilerConfig. 

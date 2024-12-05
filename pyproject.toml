@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "pennylane-snowflurry"
 dynamic = ["version"]
 requires-python = ">=3.9"
-dependencies = ["numpy", "juliacall >= 0.9.0", "pennylane >= 0.30.0"]
+dependencies = ["numpy", "juliacall >= 0.9.0", "pennylane >= 0.30.0", "networkx >= 3.3"]
 description = "PennyLane plugin for interfacing with Anyon's quantum computers"
 readme = "README.md"
 maintainers = [
@@ -45,7 +45,7 @@ test = ["matplotlib", "pytest", "pytest-mock", "flaky"]
 [project.entry-points."pennylane.io"]
 
 [tool.setuptools]
-packages = ["pennylane_snowflurry", "pennylane_snowflurry.measurements"]
+packages = ["pennylane_snowflurry", "pennylane_snowflurry.measurements", "pennylane_snowflurry.API", "pennylane_snowflurry.processing", "pennylane_snowflurry.processing.steps", "pennylane_snowflurry.processing.config", "pennylane_snowflurry.processing.interfaces"]
 
 [tool.setuptools.dynamic]
 version = { attr = "pennylane_snowflurry._version.__version__" }

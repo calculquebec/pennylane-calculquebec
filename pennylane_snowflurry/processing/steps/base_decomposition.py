@@ -1,3 +1,7 @@
+"""
+Contains base decomposition classes
+"""
+
 from pennylane.tape import QuantumTape
 from pennylane.operation import Operation
 from pennylane_snowflurry.processing.interfaces import PreProcStep
@@ -24,6 +28,9 @@ class BaseDecomposition(PreProcStep):
         return tape
 
 class CliffordTDecomposition(BaseDecomposition):
+    """A decompostition that should be done first in the transpiling process. \n
+    It expands gates to equivalent sets of gates, until all gates are part of the clifford + t + rz gate set. 
+    """
     @property
     def base_gates(self):
         return ["Adjoint(T)", "Adjoint(S)", "SX", "Adjoint(SX)", 

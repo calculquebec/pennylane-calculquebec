@@ -1,3 +1,7 @@
+"""
+Contains a couple of quantum circuit implementations
+"""
+
 import pennylane as qml
 import numpy as np
 

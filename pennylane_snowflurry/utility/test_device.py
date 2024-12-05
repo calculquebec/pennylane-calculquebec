@@ -1,3 +1,8 @@
+"""
+Contains a wrapper around default.qubit which uses MonarQ pre/post processing\n
+WARNING : it is not advised to use benchmarkings with this device
+"""
+
 from typing import Tuple
 import pennylane as qml
 from pennylane.devices import Device

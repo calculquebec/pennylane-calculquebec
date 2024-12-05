@@ -1,3 +1,7 @@
+"""
+Contains routing pre-processing steps
+"""
+
 from pennylane.tape import QuantumTape
 from pennylane.operation import Operation
 import pennylane as qml
@@ -5,7 +9,8 @@ from pennylane_snowflurry.processing.interfaces import PreProcStep
 from pennylane_snowflurry.utility.graph import circuit_graph, shortest_path, machine_graph, is_directly_connected
 
 class Routing(PreProcStep):
-    """base class for routing algorithms
+    """
+    base class for routing algorithms
     """
     def __init__(self, use_benchmark = True, q1_acceptance = 0.5, q2_acceptance = 0.5, excluded_qubits=[], excluded_couplers=[]):
         """constructor for usual routing algorithms

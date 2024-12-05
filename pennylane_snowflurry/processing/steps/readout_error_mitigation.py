@@ -1,3 +1,7 @@
+"""
+Contains the readout error mitigation pre-processing step
+"""
+
 from pennylane.tape import QuantumTape
 from pennylane_snowflurry.utility.debug import get_labels
 from pennylane_snowflurry.API.adapter import ApiAdapter
@@ -7,7 +11,8 @@ import numpy as np
 from pennylane_snowflurry.processing.interfaces import PostProcStep
 
 class ReadoutErrorMitigation(PostProcStep):
-    """a post-processing step that applies error mitigation based on the readout fidelities
+    """
+    a post-processing step that applies error mitigation based on the readout fidelities
     """
     _a_normalized = None
     _a_reduced = None

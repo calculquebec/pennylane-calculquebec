@@ -1,3 +1,7 @@
+"""
+Contains placement pre-processing steps
+"""
+
 from pennylane.tape import QuantumTape
 import pennylane_snowflurry.utility.graph as graph_util
 from pennylane_snowflurry.processing.interfaces import PreProcStep

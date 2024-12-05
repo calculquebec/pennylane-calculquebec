@@ -1,3 +1,7 @@
+"""
+Contains native decomposition pre-processing steps
+"""
+
 from pennylane.tape import QuantumTape
 import pennylane as qml
 import pennylane_snowflurry.processing.decompositions.native_decomp_functions as decomp_funcs

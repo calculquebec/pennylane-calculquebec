@@ -1,16 +1,13 @@
+"""
+A Test script. Not a module. Please do not include in deployment.
+"""
+
 import numpy as np
 import pennylane as qml
 from pennylane_snowflurry.monarq_device import MonarqDevice
-from pennylane_snowflurry.utility.test_device import TestDevice
 from pennylane_snowflurry.API.client import MonarqClient
 from pennylane_snowflurry.processing.config import NoPlaceNoRouteConfig, MonarqDefaultConfig
-from pennylane_snowflurry.processing.steps import ReadoutErrorMitigation, ISMAGS
 
-from pennylane.devices import DefaultQubit
-from pennylane_snowflurry.API.adapter import ApiAdapter
-from pennylane_snowflurry.utility.graph import calculate_cost, machine_graph, keys
-from pennylane_snowflurry.utility.plotting import graph
-import matplotlib.pyplot as plt
 from dotenv import dotenv_values
 conf = dotenv_values(".env")
 
@@ -30,8 +27,8 @@ for i in range(1, 8):
 
     results = circuit()
     print(results)
-    plt.bar([v for v in results.keys()], [v for v in results.values()])
-    plt.show()
+    #plt.bar([v for v in results.keys()], [v for v in results.values()])
+    #plt.show()
             
-# expliquer la différence entre les portes qml et custom
+# expliquer la diffï¿½rence entre les portes qml et custom
 # exit()

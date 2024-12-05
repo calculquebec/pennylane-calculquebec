@@ -1,3 +1,7 @@
+"""
+Contains debug utility functions
+"""
+
 from functools import partial
 from pennylane.measurements import MeasurementProcess
 from pennylane.operation import Operation

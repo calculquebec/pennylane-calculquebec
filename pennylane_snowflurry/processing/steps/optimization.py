@@ -1,3 +1,7 @@
+"""
+Contains optimization pre-processing steps
+"""
+
 import numpy as np
 import pennylane as qml
 from pennylane.tape import QuantumTape

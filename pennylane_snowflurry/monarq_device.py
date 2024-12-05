@@ -1,3 +1,7 @@
+"""
+Contains the Device implementation of monarq.default
+"""
+
 from typing import Tuple
 from pennylane.devices import Device
 from pennylane.transforms.core import TransformProgram
@@ -7,7 +11,7 @@ from pennylane_snowflurry.API.adapter import ApiAdapter
 from pennylane_snowflurry.processing import PreProcessor, PostProcessor
 from pennylane_snowflurry.processing.config import ProcessingConfig, MonarqDefaultConfig
 from pennylane_snowflurry.API.client import ApiClient
-from pennylane_snowflurry.measurements.monarq_device.counts import Counts
+from pennylane_snowflurry.API.job import Job
 import pennylane.measurements as measurements
 
 class MonarqDevice(Device):
@@ -124,7 +128,7 @@ class MonarqDevice(Device):
             raise Exception("multiple measurement types not supported yet")
         meas = tape.measurements[0]
         if isinstance(meas, measurements.CountsMP):
-            return Counts().measure(tape)
+            return Job(tape).run()
         else:
             raise Exception("Measurement process " + type(meas).__name__ + " is not supported by this device.")
         

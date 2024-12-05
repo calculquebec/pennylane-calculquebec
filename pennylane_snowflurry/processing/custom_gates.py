@@ -1,3 +1,7 @@
+"""
+Contains custom gates for completing MonarQ's native gate set
+"""
+
 from pennylane.operation import Operation
 from functools import lru_cache
 import numpy as np

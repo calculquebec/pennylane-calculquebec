@@ -1,3 +1,7 @@
+"""
+contains every equivalences needed for decomposing MonarQ non-native gates.
+"""
+
 import pennylane_snowflurry.processing.custom_gates as custom
 import numpy as np
 import pennylane as qml

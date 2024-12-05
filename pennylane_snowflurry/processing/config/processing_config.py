@@ -1,3 +1,7 @@
+"""
+contains the base configuration class and presets that can be used to specify monarq.default's processing behaviour
+"""
+
 from pennylane_snowflurry.processing.interfaces.base_step import BaseStep
 from pennylane_snowflurry.processing.steps import DecomposeReadout, CliffordTDecomposition, ASTAR, Swaps, IterativeCommuteAndMerge, MonarqDecomposition
 from typing import Callable

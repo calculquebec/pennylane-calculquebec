@@ -1,3 +1,7 @@
+"""
+Contains an experiment function for generating documentation using pydoc
+"""
+
 import os
 import pydoc
 

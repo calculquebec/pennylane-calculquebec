@@ -1,3 +1,6 @@
+"""this is the top level module for the Pennylane Snowflurry plugin. It is used for communicating with MonarQ.
+"""
+
 from .julia_setup import JuliaEnv
 
 JuliaEnv().update()

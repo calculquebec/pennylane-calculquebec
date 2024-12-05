@@ -1,3 +1,7 @@
+"""
+Contains a processor class for post-processing steps
+"""
+
 from copy import deepcopy
 from pennylane.tape import QuantumTape
 from pennylane_snowflurry.processing.config import ProcessingConfig

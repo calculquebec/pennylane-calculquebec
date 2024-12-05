@@ -1,3 +1,7 @@
+"""
+Contains graph algorithm utility functions (mainly for placement and routing steps)
+"""
+
 from pennylane.tape import QuantumTape
 from pennylane.operation import Operation
 import networkx as nx

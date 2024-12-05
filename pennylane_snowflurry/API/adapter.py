@@ -1,3 +1,5 @@
+"""Contains the ApiAdapter singleton class, which wraps every API call necessary for communicating with MonarQ
+"""
 from pennylane_snowflurry.utility.api import ApiUtility, routes, keys
 import requests
 import json

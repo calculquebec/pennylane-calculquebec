@@ -1,3 +1,7 @@
+"""
+Contains a device that simulates MonarQ's noise very naively
+"""
+
 import pennylane as qml
 from pennylane_snowflurry.execution_config import ExecutionConfig, DefaultExecutionConfig
 from typing import Tuple

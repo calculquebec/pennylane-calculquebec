@@ -1,3 +1,7 @@
+"""
+Contains a generic implementation of KMP search algorithm (could be useful for optimization)
+"""
+
 from typing import Callable
 from pennylane_snowflurry.utility.optimization import T
 

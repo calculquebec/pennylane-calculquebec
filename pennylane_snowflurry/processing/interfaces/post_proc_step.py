@@ -1,3 +1,7 @@
+"""
+Contains a base class that can be implemented for creating new post-processing steps
+"""
+
 from pennylane_snowflurry.processing.interfaces.base_step import BaseStep
 from pennylane.tape import QuantumTape
 
