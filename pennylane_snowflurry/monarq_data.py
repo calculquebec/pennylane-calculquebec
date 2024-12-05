@@ -122,28 +122,22 @@ def get_readout1_and_cz_fidelities():
         
     return cache._readout1_cz_fidelities
 
-def get_qubit_and_coupler_noise():
+def get_coupler_noise():
+    """
+    build cz gate error array
     
-    if cache._qubit_noise is None or cache._coupler_noise is None or ApiAdapter.is_last_update_expired():
+    Returns :
+        dict[Tuple[int, int], float] : a dictionary of links and values representing cz gate errors
+    """
+    if cache._coupler_noise is None or ApiAdapter.is_last_update_expired():
         benchmark = ApiAdapter.get_qubits_and_couplers()
     
-        single_qubit_gate_fidelity = {} 
         cz_gate_fidelity = {}
-        num_qubits = len(benchmark[keys.qubits])
         num_couplers = len(benchmark[keys.couplers])
-
-        for i in range(num_qubits):
-            single_qubit_gate_fidelity[i] = benchmark[keys.qubits][str(i)][keys.singleQubitGateFidelity]
-        single_qubit_gate_fidelity = list(single_qubit_gate_fidelity.values())   
 
         for i in range(num_couplers):
             cz_gate_fidelity[i] = benchmark[keys.couplers][str(i)][keys.czGateFidelity]
         cz_gate_fidelity = list(cz_gate_fidelity.values())   
-
-        cache._qubit_noise = [
-            depolarizing_noise(fidelity) if fidelity > 0 else None 
-            for fidelity in single_qubit_gate_fidelity
-        ]
 
         coupler_noise_array = [
             depolarizing_noise(fidelity) if fidelity > 0 else None 
@@ -155,11 +149,55 @@ def get_qubit_and_coupler_noise():
             cache._coupler_noise[(link[0], link[1])] = noise
             
             
-    return cache._qubit_noise, cache._coupler_noise
+    return cache._coupler_noise
 
-def get_amplitude_and_phase_damping():
+def get_qubit_noise():
+    """
+    build single qubit gate error array
     
-    if cache._relaxation is None or cache._decoherence is None or ApiAdapter.is_last_update_expired():
+    Returns :
+        list[float] : a list of values representing single qubit gate errors
+    """
+    if cache._qubit_noise is None or ApiAdapter.is_last_update_expired():
+        benchmark = ApiAdapter.get_qubits_and_couplers()
+    
+        single_qubit_gate_fidelity = {} 
+
+        num_qubits = len(benchmark[keys.qubits])
+
+        for i in range(num_qubits):
+            single_qubit_gate_fidelity[i] = benchmark[keys.qubits][str(i)][keys.singleQubitGateFidelity]
+        single_qubit_gate_fidelity = list(single_qubit_gate_fidelity.values())   
+
+        cache._qubit_noise = [
+            depolarizing_noise(fidelity) if fidelity > 0 else None 
+            for fidelity in single_qubit_gate_fidelity
+        ]
+            
+    return cache._qubit_noise
+
+def get_phase_damping():
+    """builds decoherence error arrays using t2 time
+    """
+    if cache._decoherence is None or ApiAdapter.is_last_update_expired():
+        benchmark = ApiAdapter.get_qubits_and_couplers()
+        time_step = 1e-6 # microsecond
+        num_qubits = len(benchmark[keys.qubits])
+
+        t2_values = {}
+        for i in range(num_qubits):
+            t2_values[i] = benchmark[keys.qubits][str(i)][keys.t2Ramsey]
+        t2_values = list(t2_values.values())  
+
+        cache._decoherence = [
+            phase_damping(time_step, t2) for t2 in t2_values
+        ]
+    return cache._decoherence
+
+def get_amplitude_damping():
+    """builds relaxation error arrays using t1 time
+    """
+    if cache._relaxation is None or ApiAdapter.is_last_update_expired():
         benchmark = ApiAdapter.get_qubits_and_couplers()
         time_step = 1e-6 # microsecond
         num_qubits = len(benchmark[keys.qubits])
@@ -169,23 +207,18 @@ def get_amplitude_and_phase_damping():
             t1_values[i] = benchmark[keys.qubits][str(i)][keys.t1]
         t1_values = list(t1_values.values())  
 
-        t2_values = {}
-        for i in range(num_qubits):
-            t2_values[i] = benchmark[keys.qubits][str(i)][keys.t2Ramsey]
-        t2_values = list(t2_values.values())  
-
         cache._relaxation = [
             amplitude_damping(time_step, t1) for t1 in t1_values
         ]
 
-        cache._decoherence = [
-            phase_damping(time_step, t2) for t2 in t2_values
-        ]
-    return cache._relaxation, cache._decoherence
-
+    return cache._relaxation
 
 def get_readout_noise_matrices():
-    
+    """constructs an arry of readout noise matrices
+
+    Returns:
+        np.ndarray : an array of 2x2 matrices built from state 0 / 1 fidelities
+    """
     if cache._readout_noise is None or ApiAdapter.is_last_update_expired():
         benchmark = ApiAdapter.get_qubits_and_couplers()
         num_qubits = len(benchmark[keys.qubits])

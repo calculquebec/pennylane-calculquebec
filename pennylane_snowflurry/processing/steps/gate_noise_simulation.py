@@ -1,5 +1,5 @@
 from pennylane_snowflurry.processing.interfaces import PreProcStep
-from pennylane_snowflurry.monarq_data import get_qubit_and_coupler_noise, get_amplitude_and_phase_damping
+from pennylane_snowflurry.monarq_data import get_qubit_noise, get_coupler_noise, get_amplitude_damping, get_phase_damping
 from pennylane_snowflurry.utility.noise import TypicalErrors, amplitude_damping, phase_damping
 import pennylane as qml
 
@@ -19,12 +19,10 @@ class GateNoiseSimulation(PreProcStep):
     
     def execute(self, tape):
         
-        qubit_noise, cz_noise = get_qubit_and_coupler_noise() \
-            if self.use_benchmark \
+        qubit_noise, cz_noise = (get_qubit_noise(), get_coupler_noise()) if self.use_benchmark \
             else ([TypicalErrors.qubit for _ in range(24)], [TypicalErrors.cz for _ in range(35)])
             
-        relaxation, decoherence = get_amplitude_and_phase_damping() \
-            if self.use_benchmark \
+        relaxation, decoherence = (get_amplitude_damping(), get_phase_damping()) if self.use_benchmark \
             else ([amplitude_damping(1E-6, TypicalErrors.t1) for _ in range(24)], [phase_damping(1E-6, TypicalErrors.t2Ramsey) for _ in range(24)])
                 
         ops = []
