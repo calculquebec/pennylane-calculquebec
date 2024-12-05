@@ -136,6 +136,8 @@ class keys:
     singleQubitGateFidelity = "singleQubitGateFidelity"
     readoutState0Fidelity = "readoutState0Fidelity"
     readoutState1Fidelity = "readoutState1Fidelity"
+    t1 = "t1"
+    t2Ramsey = "t2Ramsey"
     czGateFidelity = "czGateFidelity"
     resultsPerDevice = "resultsPerDevice"
     items = "items"

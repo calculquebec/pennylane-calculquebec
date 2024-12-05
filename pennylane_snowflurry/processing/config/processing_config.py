@@ -3,7 +3,7 @@ contains the base configuration class and presets that can be used to specify mo
 """
 
 from pennylane_snowflurry.processing.interfaces.base_step import BaseStep
-from pennylane_snowflurry.processing.steps import DecomposeReadout, CliffordTDecomposition, ASTAR, Swaps, IterativeCommuteAndMerge, MonarqDecomposition
+from pennylane_snowflurry.processing.steps import DecomposeReadout, CliffordTDecomposition, ASTAR, Swaps, IterativeCommuteAndMerge, MonarqDecomposition, GateNoiseSimulation, ReadoutNoiseSimulation
 from typing import Callable
 
 class ProcessingConfig:
@@ -29,8 +29,8 @@ MonarqDefaultConfig : Callable[[bool, float, float, list[int], list[list[int]]],
 """The default configuration preset for MonarQ"""
 
 
-MonarqDefaultConfigNoBenchmark = lambda q1_acceptance = 0.5, q2_acceptance = 0.5, excluded_qubits = [], excluded_couplers = [] : \
-    MonarqDefaultConfig(False, q1_acceptance, q2_acceptance, excluded_qubits, excluded_couplers)
+MonarqDefaultConfigNoBenchmark : Callable[[list[int], list[list[int]]], ProcessingConfig]= lambda excluded_qubits = [], excluded_couplers = [] : \
+    MonarqDefaultConfig(use_benchmark = False, excluded_qubits = excluded_qubits, excluded_couplers = excluded_couplers)
 """The default configuration preset, minus the benchmarking acceptance tests on qubits and couplers in the placement and routing steps."""
 
 EmptyConfig = lambda : ProcessingConfig()
@@ -41,3 +41,17 @@ NoPlaceNoRouteConfig  = lambda : ProcessingConfig(DecomposeReadout(),
                                         IterativeCommuteAndMerge(),
                                         MonarqDecomposition())
 """A configuration preset that omits placement and routing. be sure to use existing qubits and couplers """
+
+FakeMonarqConfig = lambda use_benchmark = False: ProcessingConfig(DecomposeReadout(),
+                                             CliffordTDecomposition(),
+                                             ASTAR(use_benchmark),
+                                             Swaps(use_benchmark),
+                                             IterativeCommuteAndMerge(),
+                                             MonarqDecomposition(),
+                                             IterativeCommuteAndMerge(),
+                                             MonarqDecomposition(),
+                                             GateNoiseSimulation(use_benchmark),
+                                             ReadoutNoiseSimulation(use_benchmark))
+"""
+A configuration preset that does the same thing as the default config, but adds gate and readout noise at the end
+"""

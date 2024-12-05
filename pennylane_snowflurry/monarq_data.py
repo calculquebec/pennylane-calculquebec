@@ -4,6 +4,8 @@ Contains MonarQ's connectivity + functions for retreiving broken qubits and coup
 
 from pennylane_snowflurry.API.adapter import ApiAdapter
 from pennylane_snowflurry.utility.api import keys
+from pennylane_snowflurry.utility.noise import depolarizing_noise, phase_damping, amplitude_damping
+import numpy as np
 
 """
 #       00
@@ -67,6 +69,11 @@ connectivity = {
 
 class cache:
     _readout1_cz_fidelities : dict = None
+    _relaxation : list = None
+    _decoherence : list = None
+    _qubit_noise : list = None
+    _coupler_noise : list = None
+    _readout_noise : list = None
 
 def get_broken_qubits_and_couplers(q1Acceptance, q2Acceptance):
     """
@@ -115,3 +122,87 @@ def get_readout1_and_cz_fidelities():
         
     return cache._readout1_cz_fidelities
 
+def get_qubit_and_coupler_noise():
+    
+    if cache._qubit_noise is None or cache._coupler_noise is None or ApiAdapter.is_last_update_expired():
+        benchmark = ApiAdapter.get_qubits_and_couplers()
+    
+        single_qubit_gate_fidelity = {} 
+        cz_gate_fidelity = {}
+        num_qubits = len(benchmark[keys.qubits])
+        num_couplers = len(benchmark[keys.couplers])
+
+        for i in range(num_qubits):
+            single_qubit_gate_fidelity[i] = benchmark[keys.qubits][str(i)][keys.singleQubitGateFidelity]
+        single_qubit_gate_fidelity = list(single_qubit_gate_fidelity.values())   
+
+        for i in range(num_couplers):
+            cz_gate_fidelity[i] = benchmark[keys.couplers][str(i)][keys.czGateFidelity]
+        cz_gate_fidelity = list(cz_gate_fidelity.values())   
+
+        cache._qubit_noise = [
+            depolarizing_noise(fidelity) if fidelity > 0 else None 
+            for fidelity in single_qubit_gate_fidelity
+        ]
+
+        coupler_noise_array = [
+            depolarizing_noise(fidelity) if fidelity > 0 else None 
+            for fidelity in cz_gate_fidelity
+        ]
+        cache._coupler_noise = { }
+        for i, noise in enumerate(coupler_noise_array):
+            link = connectivity[keys.couplers][str(i)]
+            cache._coupler_noise[(link[0], link[1])] = noise
+            
+            
+    return cache._qubit_noise, cache._coupler_noise
+
+def get_amplitude_and_phase_damping():
+    
+    if cache._relaxation is None or cache._decoherence is None or ApiAdapter.is_last_update_expired():
+        benchmark = ApiAdapter.get_qubits_and_couplers()
+        time_step = 1e-6 # microsecond
+        num_qubits = len(benchmark[keys.qubits])
+
+        t1_values = {}
+        for i in range(num_qubits):
+            t1_values[i] = benchmark[keys.qubits][str(i)][keys.t1]
+        t1_values = list(t1_values.values())  
+
+        t2_values = {}
+        for i in range(num_qubits):
+            t2_values[i] = benchmark[keys.qubits][str(i)][keys.t2Ramsey]
+        t2_values = list(t2_values.values())  
+
+        cache._relaxation = [
+            amplitude_damping(time_step, t1) for t1 in t1_values
+        ]
+
+        cache._decoherence = [
+            phase_damping(time_step, t2) for t2 in t2_values
+        ]
+    return cache._relaxation, cache._decoherence
+
+
+def get_readout_noise_matrices():
+    
+    if cache._readout_noise is None or ApiAdapter.is_last_update_expired():
+        benchmark = ApiAdapter.get_qubits_and_couplers()
+        num_qubits = len(benchmark[keys.qubits])
+
+        readout_state_0_fidelity = []
+        readout_state_1_fidelity = []
+        
+        for i in range(num_qubits):
+            readout_state_0_fidelity.append(benchmark[keys.qubits][str(i)][keys.readoutState0Fidelity])
+            readout_state_1_fidelity.append(benchmark[keys.qubits][str(i)][keys.readoutState1Fidelity])
+
+        cache._readout_noise = []
+
+        for f0, f1 in zip(readout_state_0_fidelity, readout_state_1_fidelity):
+            R = np.array([
+                [f0, 1 - f1],
+                [1 - f0, f1]
+            ])
+            cache._readout_noise.append(R)
+    return cache._readout_noise

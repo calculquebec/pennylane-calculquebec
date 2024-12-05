@@ -12,7 +12,8 @@ from pennylane_snowflurry.execution_config import DefaultExecutionConfig, Execut
 from pennylane_snowflurry.utility.api import instructions
 from pennylane_snowflurry.processing.monarq_postproc import PostProcessor
 from pennylane_snowflurry.processing.monarq_preproc import PreProcessor
-from pennylane_snowflurry.processing.config import MonarqDefaultConfig
+from pennylane_snowflurry.processing.config import MonarqDefaultConfig, MonarqDefaultConfigNoBenchmark
+from pennylane_snowflurry.API.adapter import ApiAdapter
 
 class TestDevice(Device):
     """a device that uses the monarq transpiler but simulates results using default.qubit
@@ -42,11 +43,15 @@ class TestDevice(Device):
     def __init__(self, 
                  wires = None, 
                  shots = None, 
+                 client = None,
                  processing_config = None) -> None:
         super().__init__(wires=wires, shots=shots)
         
         if processing_config is None:
-            processing_config = MonarqDefaultConfig(use_benchmark=False)
+            processing_config = MonarqDefaultConfigNoBenchmark() if client is None else MonarqDefaultConfig()
+        
+        if client is not None:
+            ApiAdapter.initialize(client)
         
         self._processing_config = processing_config
     
@@ -92,8 +97,8 @@ class TestDevice(Device):
         else:
             # Fallback or default behavior if execution_config is not an instance of ExecutionConfig
             interface = None
-        
-        results = [qml.execute([circuit], qml.device("default.qubit", circuit.wires, circuit.shots)) for circuit in circuits]
+            
+        results = [qml.execute([circuit], qml.device("default.mixed", wires = circuit.wires, shots = circuit.shots.total_shots)) for circuit in circuits]
         post_processed_results = [PostProcessor.get_processor(self._processing_config, self.wires)(circuits[i], res) for i, res in enumerate(results)]
 
         return post_processed_results if not is_single_circuit else post_processed_results[0]
