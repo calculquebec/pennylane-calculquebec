@@ -1,23 +1,25 @@
 """
-Contains a device that simulates MonarQ's noise very naively
+Contains a wrapper around default.mixed which uses MonarQ pre/post processing\n
 """
 
-import pennylane as qml
-from pennylane_snowflurry.execution_config import ExecutionConfig, DefaultExecutionConfig
 from typing import Tuple
-from pennylane.transforms.core import TransformProgram
-from pennylane.tape import QuantumTape, QuantumScript
-from pennylane_snowflurry.utility.api import instructions
+import pennylane as qml
 from pennylane.devices import Device
-from pennylane_snowflurry.utility.debug import add_noise
+from pennylane.transforms.core import TransformProgram
+from pennylane.tape import QuantumScript, QuantumTape
+from pennylane_snowflurry.execution_config import DefaultExecutionConfig, ExecutionConfig
+from pennylane_snowflurry.utility.api import instructions
+from pennylane_snowflurry.processing.monarq_postproc import PostProcessor
+from pennylane_snowflurry.processing.monarq_preproc import PreProcessor
+from pennylane_snowflurry.processing.config import MonarqDefaultConfig, MonarqDefaultConfigNoBenchmark, FakeMonarqConfig
+from pennylane_snowflurry.API.adapter import ApiAdapter
 
-class NoisyDevice(Device):
+class MonarqFake(Device):
     """
-    a device that wraps around default.mixed device, and adds a depolarizing channel for each operation. 
-    useful for simulation noise on a circuit
+    a device that uses the monarq transpiler but simulates results using default.mixed
     """
-    name = "MonarQDevice"
-    short_name = "monarq.qubit"
+    name = "MonarqFake"
+    short_name = "monarq.fake"
     pennylane_requires = ">=0.30.0"
     author = "CalculQuébec"
     
@@ -36,12 +38,23 @@ class NoisyDevice(Device):
     
     @property
     def name(self):
-        return NoisyDevice.short_name
+        return MonarqFake.short_name
     
-    def __init__(self, wires=None, shots=None, noise = 0.005):
+    def __init__(self, 
+                 wires = None, 
+                 shots = None, 
+                 client = None,
+                 processing_config = None) -> None:
         super().__init__(wires=wires, shots=shots)
-        self._noise = noise
         
+        if processing_config is None:
+            processing_config = FakeMonarqConfig(client is not None)
+        
+        if client is not None:
+            ApiAdapter.initialize(client)
+        
+        self._processing_config = processing_config
+    
     def preprocess(
         self,
         execution_config: ExecutionConfig = DefaultExecutionConfig,
@@ -60,7 +73,7 @@ class NoisyDevice(Device):
         config = execution_config
 
         transform_program = TransformProgram()
-        transform_program.add_transform(qml.transform(lambda tape : add_noise(tape, noise = self._noise)))
+        transform_program.add_transform(PreProcessor.get_processor(self._processing_config, self.wires))
         return transform_program, config
 
     def execute(self, circuits: QuantumTape | list[QuantumTape], execution_config : ExecutionConfig = DefaultExecutionConfig):
@@ -84,7 +97,8 @@ class NoisyDevice(Device):
         else:
             # Fallback or default behavior if execution_config is not an instance of ExecutionConfig
             interface = None
-        
+            
         results = [qml.execute([circuit], qml.device("default.mixed", wires = circuit.wires, shots = circuit.shots.total_shots)) for circuit in circuits]
+        post_processed_results = [PostProcessor.get_processor(self._processing_config, self.wires)(circuits[i], res) for i, res in enumerate(results)]
 
-        return results if not is_single_circuit else results[0]
+        return post_processed_results if not is_single_circuit else post_processed_results[0]

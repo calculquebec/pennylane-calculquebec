@@ -1,5 +1,5 @@
 """
-Contains MonarQ's connectivity + functions for retreiving broken qubits and couplers and cz / state 1 fidelities
+Contains MonarQ's connectivity + benchmarking functionalities
 """
 
 from pennylane_snowflurry.API.adapter import ApiAdapter

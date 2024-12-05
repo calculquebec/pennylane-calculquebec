@@ -1,3 +1,7 @@
+"""
+Contains a post-processing step for adding noise to the results of a circuit using a noise model.
+"""
+
 from pennylane_snowflurry.processing.interfaces import PostProcStep
 from pennylane_snowflurry.monarq_data import get_readout_noise_matrices
 import pennylane as qml
@@ -6,6 +10,9 @@ from pennylane_snowflurry.utility.debug import get_labels
 from pennylane_snowflurry.utility.noise import readout_error, TypicalErrors
 
 class ReadoutNoiseSimulation(PostProcStep):
+    """
+    Adds readout noise on the results
+    """
     def __init__(self, use_benchmark = True):
         self.use_benchmark = use_benchmark
         
@@ -20,6 +27,15 @@ class ReadoutNoiseSimulation(PostProcStep):
         ]
     
     def execute(self, tape, results):
+        """adds readout noise to the results of a circuit
+
+        Args:
+            tape (QuantumTape): the tape where the results come from
+            results (dict[str, int]) : the results from the circuit
+
+        Returns:
+            dict[str, int]: results with readout noise added to it
+        """
         results = results[0] if not isinstance(results, dict) else results
         
         readout_error_matrices = get_readout_noise_matrices() \

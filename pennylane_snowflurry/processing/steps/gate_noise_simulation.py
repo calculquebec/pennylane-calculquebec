@@ -1,9 +1,16 @@
+"""
+Contains a pre-processing step for adding noise relative to MonarQ's noise model.
+"""
+
 from pennylane_snowflurry.processing.interfaces import PreProcStep
 from pennylane_snowflurry.monarq_data import get_qubit_noise, get_coupler_noise, get_amplitude_damping, get_phase_damping
 from pennylane_snowflurry.utility.noise import TypicalErrors, amplitude_damping, phase_damping
 import pennylane as qml
 
 class GateNoiseSimulation(PreProcStep):
+    """
+    Adds gate noise to operations from a circuit using MonarQ's noise model
+    """
     def __init__(self, use_benchmark = True):
         self.use_benchmark = use_benchmark
         
