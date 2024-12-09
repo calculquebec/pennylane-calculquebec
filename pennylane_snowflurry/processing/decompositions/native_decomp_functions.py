@@ -55,11 +55,11 @@ def _custom_cy(wires):
     """
     a MonarQ native implementation of the CY operation
     """
-    return _custom_h(wires[1]) \
-        + _custom_s(wires[1]) \
+    return [custom.Y90(wires[1])] \
         + _custom_cnot(wires) \
-        + _custom_sdag(wires[1]) \
-        + _custom_h(wires[1])
+        + [custom.YM90(wires[1])] \
+        + _custom_cnot(wires) \
+        + _custom_s(wires[0])
 
 def _custom_rz(angle : float, wires, epsilon = 1E-8):
     """

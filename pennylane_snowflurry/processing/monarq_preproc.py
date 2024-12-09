@@ -8,6 +8,7 @@ import pennylane as qml
 from pennylane.transforms import transform
 from pennylane_snowflurry.processing.config import ProcessingConfig
 from pennylane_snowflurry.processing.interfaces import PreProcStep
+
 class PreProcessor:
     """
     a container for pre-processing functionalities that should be applied to a circuit

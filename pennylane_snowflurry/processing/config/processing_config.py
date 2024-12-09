@@ -18,7 +18,20 @@ class ProcessingConfig:
 
     @property
     def steps(self): return self._steps
-
+    
+    def __eq__(self, other):
+        """
+        returns true if both configs have the same number of steps, and the steps are the same, in the same order, with the same configuration
+        """
+        if len(self.steps) != len(other.steps):
+            return False
+        
+        for i, step in enumerate(self.steps):
+            step2 = other.steps[i]
+            if type(step) != type(step2) or vars(step) != vars(step):
+                return False
+        
+        return True
 
 MonarqDefaultConfig : Callable[[bool, float, float, list[int], list[list[int]]], ProcessingConfig] = \
     lambda use_benchmark = True, q1_acceptance = 0.5, q2_acceptance = 0.5, excluded_qubits = [], excluded_couplers = [] : \

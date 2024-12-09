@@ -14,6 +14,12 @@ from pennylane_snowflurry.API.client import ApiClient
 from pennylane_snowflurry.API.job import Job
 import pennylane.measurements as measurements
 
+
+class DeviceException(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+        
+
 class MonarqDevice(Device):
     """PennyLane device for interfacing with Anyon's quantum Hardware.
 
@@ -44,7 +50,7 @@ class MonarqDevice(Device):
         "PauliZ"
     }
     
-    _behaviour_config : ProcessingConfig
+    _processing_config : ProcessingConfig
     
     def __init__(self, 
                  wires = None, 
@@ -52,9 +58,12 @@ class MonarqDevice(Device):
                  client : ApiClient = None,
                  processing_config : ProcessingConfig = None) -> None:
 
+        if isinstance(shots, int) and (shots < 1 or shots > 1000) or isinstance(shots, list) and (len(shots) < 1 or len(shots) > 1000) or shots == None:
+            raise DeviceException("The number of shots must be contained between 1 and 1000")
+            
         super().__init__(wires=wires, shots=shots)
         if client is None:
-            raise Exception("The client has not been defined. Cannot establish connection with MonarQ.")
+            raise DeviceException("The client has not been defined. Cannot establish connection with MonarQ.")
         
         self.client = client
         if not processing_config:
@@ -62,12 +71,13 @@ class MonarqDevice(Device):
         
         ApiAdapter.initialize(client)
         
-        self._behaviour_config = processing_config
+        self._processing_config = processing_config
     
 
     @property
     def name(self):
         return MonarqDevice.short_name
+    
     
     def preprocess(
         self,
@@ -87,8 +97,9 @@ class MonarqDevice(Device):
         config = execution_config
 
         transform_program = TransformProgram()
-        transform_program.add_transform(PreProcessor.get_processor(self._behaviour_config, self.wires))
+        transform_program.add_transform(PreProcessor.get_processor(self._processing_config, self.wires))
         return transform_program, config
+
 
     def execute(self, circuits: QuantumTape | list[QuantumTape], execution_config : ExecutionConfig = DefaultExecutionConfig):
         """
@@ -100,12 +111,6 @@ class MonarqDevice(Device):
         if is_single_circuit:
             circuits = [circuits]
         
-        if self.tracker.active:
-            for c in circuits:
-                self.tracker.update(resources=c.specs["resources"])
-            self.tracker.update(batches=1, executions=len(circuits))
-            self.tracker.record()
-
          # Check if execution_config is an instance of ExecutionConfig
         if isinstance(execution_config, ExecutionConfig):
             interface = (
@@ -118,17 +123,18 @@ class MonarqDevice(Device):
             interface = None
         
         results = [self._measure(tape) for tape in circuits]
-        post_processed_results = [PostProcessor.get_processor(self._behaviour_config, self.wires)(circuits[i], res) for i, res in enumerate(results)]
+        post_processed_results = [PostProcessor.get_processor(self._processing_config, self.wires)(circuits[i], res) for i, res in enumerate(results)]
        
         return post_processed_results if not is_single_circuit else post_processed_results[0]
+
 
     def _measure(self, tape : QuantumTape):
         meas = set([type(mp).__name__ for mp in tape.measurements])
         if len(meas) != 1:
-            raise Exception("multiple measurement types not supported yet")
+            raise DeviceException("multiple measurements not supported")
         meas = tape.measurements[0]
         if isinstance(meas, measurements.CountsMP):
             return Job(tape).run()
         else:
-            raise Exception("Measurement process " + type(meas).__name__ + " is not supported by this device.")
+            raise DeviceException("Measurement process " + type(meas).__name__ + " is not supported by this device.")
         
