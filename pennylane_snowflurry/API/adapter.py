@@ -23,7 +23,7 @@ class ApiAdapter(object):
     
     client : ApiClient
     headers : dict[str, str]
-    _instance : "ApiAdapter"
+    _instance : "ApiAdapter" = None
     
     @classmethod
     def instance(cls):
@@ -46,17 +46,16 @@ class ApiAdapter(object):
         return datetime.now() - ApiAdapter._last_update > timedelta(hours=24)
     
     @staticmethod
-    def get_machine_id_by_name():
+    def get_machine_by_name():
         """
         get the id of a machine by using the machine's name stored in the client
         """
-        
         # put machine in cache
         if ApiAdapter._machine is None:
             route = ApiAdapter.instance().client.host + routes.machines + routes.machineName + "=" + ApiAdapter.instance().client.machine_name
             res = requests.get(route, headers=ApiAdapter.instance().headers)
             if res.status_code != 200:
-                return None
+                raise Exception(f"API ERROR : {res.status_code}")
             ApiAdapter._machine = json.loads(res.text)
             
         return ApiAdapter._machine
@@ -78,13 +77,13 @@ class ApiAdapter(object):
 
         # put benchmark in cache
         if ApiAdapter._benchmark is None or ApiAdapter.is_last_update_expired():
-            machine = ApiAdapter.get_machine_id_by_name()
+            machine = ApiAdapter.get_machine_by_name()
             machine_id = machine[keys.items][0][keys.id]
 
             route = ApiAdapter.instance().client.host + routes.machines + "/" + machine_id + routes.benchmarking
             res = requests.get(route, headers=ApiAdapter.instance().headers)
             if res.status_code != 200:
-                return None
+                raise Exception(f"API ERROR : {res.status_code}")
             ApiAdapter._benchmark = json.loads(res.text)
             ApiAdapter._last_update = datetime.now()
             

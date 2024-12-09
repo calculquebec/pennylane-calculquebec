@@ -11,7 +11,9 @@ class JobException(Exception):
     def __init__(self, message : str):
         self.message = message
     
-    def __str__(self): self.message
+    def __str__(self): return self.message
+    
+    def __repr__(self): return self.message
     
 class Job:
     """A wrapper around Thunderhead's jobs operations. 
@@ -50,9 +52,9 @@ class Job:
                 time.sleep(0.2)
                 response = ApiAdapter.job_by_id(job_id)
 
-                if response.status_code != 200: 
-                    continue
-
+                if response.status_code != 200:
+                    self.raise_api_error(response)
+                
                 content = json.loads(response.text)
                 status = content["job"]["status"]["type"]
                 if(current_status != status):
@@ -64,4 +66,11 @@ class Job:
                 return content["result"]["histogram"]
             raise JobException("Couldn't finish job. Stuck on status : " + str(current_status))
         else:
-            raise JobException(response.text)
+            self.raise_api_error(response)
+    
+    def raise_api_error(self, response):
+        """
+        this raises an error by parsing the json body of the response, and using the response text as message
+        """
+        error = json.loads(response.text)
+        raise JobException(f"API ERROR : {error["code"]}, {error["error"]}")

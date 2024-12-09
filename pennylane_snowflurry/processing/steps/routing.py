@@ -50,7 +50,7 @@ class Swaps(Routing):
             # s'il s'agit d'une porte à 2 qubit n'étant pas mappéee sur un coupleur physique, 
             # on la route avec des cnots en utilisant astar
             if oper.num_wires == 2 and not is_directly_connected(oper, machine_topology):
-                path = shortest_path(oper.wires[0], oper.wires[1], machine_topology, prioritized_nodes=[n for n in circuit_topology.nodes])
+                path = shortest_path(oper.wires[0], oper.wires[1], machine_topology, prioritized_nodes=[n for n in circuit_topology.nodes], use_benchmark=self.use_benchmark)
 
                 for i in reversed(range(1, len(path) - 1)): 
                     new_operations += [qml.SWAP([path[i], path[i+1]])]

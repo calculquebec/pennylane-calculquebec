@@ -114,13 +114,21 @@ def shortest_path(a : int, b : int, graph : nx.Graph, excluding : list[int] = []
     
     return nx.astar_path(g_copy, a, b, weight = lambda u, v, _: weight(u, v))
 
+def find_best_neighbour(wire, topology : nx.Graph, use_benchmark = True):
+    """
+    
+    """
+    neigh = list(topology.neighbors(wire))
+    return max(neigh, key = lambda n : calculate_score(n, topology, use_benchmark))
+        
+
 def find_best_wire(graph : nx.Graph, excluded : list[int] = [], use_benchmark = True):
     """
     find node with highest degree in graph
     """
     g = deepcopy(graph)
     g.remove_nodes_from(excluded)
-    return max([n for n in g.nodes], key=lambda n: calculate_cost(n, g, use_benchmark))
+    return max([n for n in g.nodes], key=lambda n: calculate_score(n, g, use_benchmark))
 
 def find_closest_wire(a : int, machine_graph : nx.Graph, excluding : list[int] = [], prioritized : list[int] = [], use_benchmark = True):
     """
@@ -146,11 +154,12 @@ def node_with_shortest_path_from_selection(source : int, selection : list[int], 
     # mapping_minus_source = [n for n in mapping if n != source]
 
     nodes_minus_source = [node for node in selection if node != source]
-    return min(nodes_minus_source, key=lambda n: len(shortest_path(source, n, graph, use_benchmark)))
+    return min(nodes_minus_source, key=lambda n: len(shortest_path(source, n, graph, use_benchmark=use_benchmark)))
     # return min(all_unmapped_nodes, key = lambda n : len(_shortest_path(source, n, graph, mapping_minus_source)))
 
-def calculate_cost(source : int, graph : nx.Graph, use_benchmark = True) -> float:
-    """Defines a cost for a node by using cz fidelities on neighbouring couplers and state 1 readout fidelity
+def calculate_score(source : int, graph : nx.Graph, use_benchmark = True) -> float:
+    """Defines a score for a node by using cz fidelities on neighbouring couplers and state 1 readout fidelity\n
+    the bigger the better
 
     Args:
         source (int): the node you want to define a cost for

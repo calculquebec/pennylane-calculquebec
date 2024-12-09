@@ -107,9 +107,9 @@ def get_broken_qubits_and_couplers(q1Acceptance, q2Acceptance):
 def get_readout1_and_cz_fidelities():
     """get state 1 fidelities and cz fidelities
     """
-    if cache._readout1_cz_fidelities is None:
+    if cache._readout1_cz_fidelities is None or ApiAdapter.is_last_update_expired():
         cache._readout1_cz_fidelities = {keys.readoutState1Fidelity:{}, keys.czGateFidelity:{}}
-        benchmark = ApiAdapter.get_benchmark()[keys.resultsPerDevice]
+        benchmark = ApiAdapter.get_qubits_and_couplers()
     
         # build state 1 fidelity
         for key in benchmark[keys.qubits]:

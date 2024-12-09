@@ -49,7 +49,7 @@ class ISMAGS(Placement):
             
         for node in missing:
             # 3. Trouver le noeud le plus connecté à A dans le circuit
-            most_connected_node = graph_util.find_best_wire(node, circuit_topology, self.use_benchmark)
+            most_connected_node = graph_util.find_best_neighbour(node, circuit_topology, self.use_benchmark)
 
             # 4. trouver un noeud dans la machine (a') qui minimise le chemin entre a' et b'  
             possibles = [n for n in machine_topology.nodes if n not in mapping.values()]
@@ -84,7 +84,7 @@ class VF2(Placement):
             
         for node in missing:
             # 3. Trouver le noeud le plus connecté à A dans le circuit
-            most_connected_node = graph_util.find_best_wire(node, circuit_topology, self.use_benchmark)
+            most_connected_node = graph_util.find_best_neighbour(node, circuit_topology, self.use_benchmark)
 
             # 4. trouver un noeud dans la machine (a') qui minimise le chemin entre a' et b'  
             possibles = [n for n in machine_topology.nodes if n not in mapping.values()]
