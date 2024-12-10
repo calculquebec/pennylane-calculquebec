@@ -52,6 +52,8 @@ EmptyConfig = lambda : ProcessingConfig()
 NoPlaceNoRouteConfig  = lambda : ProcessingConfig(DecomposeReadout(),
                                         CliffordTDecomposition(),
                                         IterativeCommuteAndMerge(),
+                                        MonarqDecomposition(), 
+                                        IterativeCommuteAndMerge(),
                                         MonarqDecomposition())
 """A configuration preset that omits placement and routing. be sure to use existing qubits and couplers """
 
