@@ -11,7 +11,7 @@ class PostProcessor:
     """
     a container for post-processing functionalities that should be applied to the results of a circuit
     """
-
+    @staticmethod
     def get_processor(behaviour_config : ProcessingConfig, circuit_wires):
         """
         returns a function that applies the steps contained in the supplied ProcessingConfig
@@ -42,6 +42,7 @@ class PostProcessor:
 
         return process
 
+    @staticmethod
     def expand_full_measurements(tape, wires):
         """turns empty measurements to all-wire measurements
 

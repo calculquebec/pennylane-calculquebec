@@ -4,6 +4,7 @@ Contains the Device implementation of monarq.default
 
 from typing import Tuple
 from pennylane.devices import Device
+from pennylane.transforms import transform
 from pennylane.transforms.core import TransformProgram
 from pennylane.tape import QuantumScript, QuantumTape
 from pennylane_snowflurry.execution_config import DefaultExecutionConfig, ExecutionConfig
@@ -97,7 +98,8 @@ class MonarqDevice(Device):
         config = execution_config
 
         transform_program = TransformProgram()
-        transform_program.add_transform(PreProcessor.get_processor(self._processing_config, self.wires))
+        processor = PreProcessor.get_processor(self._processing_config, self.wires)
+        transform_program.add_transform(transform=transform(processor))
         return transform_program, config
 
 

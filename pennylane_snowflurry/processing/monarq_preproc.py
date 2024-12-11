@@ -39,9 +39,9 @@ class PreProcessor:
                 for step in prerpoc_steps:
                     optimized_tape = step.execute(optimized_tape)
             new_tape = type(tape)(optimized_tape.operations, optimized_tape.measurements, shots=optimized_tape.shots)
-            return [new_tape], lambda results : results[0]
+            return new_tape
 
-        return transform(transpile)
+        return transpile
 
     def expand_full_measurements(tape, wires):
         """turns empty measurements to all-wire measurements

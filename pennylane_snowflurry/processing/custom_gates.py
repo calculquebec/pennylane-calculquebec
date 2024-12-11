@@ -41,7 +41,7 @@ class TDagger(Operation):
         Returns:
             ndarray: matrix
         """
-        return np.array([[1, 0], [0, 0.70710678-0.70710678j]])
+        return qml.PhaseShift.compute_matrix(-np.pi/4)
 
     @staticmethod
     def compute_eigvals():  # pylint: disable=arguments-differ
@@ -59,7 +59,7 @@ class TDagger(Operation):
         Returns:
             array: eigenvalues
         """
-        return np.array([1, 0.70710678-0.70710678j])
+        return np.linalg.eigvals(TDagger.compute_matrix())
 
     @staticmethod
     def compute_decomposition(wires):
@@ -74,27 +74,27 @@ class TDagger(Operation):
             list[Operator]: decomposition into lower level operations
 
         """
-        return [qml.adjoint(qml.T(qml.T)(wires))]
+        return [qml.adjoint(qml.T(wires))]
 
     def pow(self, z):
         z = z % 8
         pow_map = {
-            0: lambda op: [],
-            1: lambda op: [copy(op)],
-            2: lambda op: [qml.adjoint(qml.S)(wires=op.wires)],
-            4: lambda op: [qml.Z(wires=op.wires)],
-            6: lambda op: [qml.S(wires=op.wires)],
-            7: lambda op: [qml.T(wires=op.wires)]
+            0: [],
+            1: [copy(self)],
+            2: [qml.adjoint(qml.S)(wires=self.wires)],
+            3: [qml.Z(wires=self.wires), qml.T(wires=self.wires)],
+            4: [qml.Z(wires=self.wires)],
+            5: [qml.S(wires=self.wires), qml.T(wires=self.wires)],
+            6: [qml.S(wires=self.wires)],
+            7: [qml.T(wires=self.wires)]
         }
-        return pow_map.get(z, lambda op: [qml.PhaseShift(np.pi * z / 4, wires=op.wires)])(
-            self
-        )
+        return pow_map[z]
 
     def adjoint(self):
         return qml.T(self.wires)
 
     def single_qubit_rot_angles(self):
-        return [np.pi / 4, 0, 0]
+        return [-np.pi / 4, 0, 0]
 
 
 class X90(Operation):

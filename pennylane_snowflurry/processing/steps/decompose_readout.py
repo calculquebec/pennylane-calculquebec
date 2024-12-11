@@ -31,10 +31,6 @@ class DecomposeReadout(PreProcStep):
                     ops.append(self.obs_dict[op.name](w))
                 continue
             
-            if op.name == "Prod":
-                ops.extend(self.get_ops_for_product(op))
-                continue
-            
             raise ValueError("this readout observable is not supported")
         return ops
         
@@ -94,4 +90,3 @@ class DecomposeReadout(PreProcStep):
             raise ValueError("this readout observable is not supported")
         
         return type(tape)(ops, mps, shots=tape.shots)
-            

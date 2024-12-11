@@ -43,7 +43,8 @@ def to_qasm(tape : QuantumTape) -> str:
     total_string = ""
     for op in tape.operations:
         string = eq[op.name]
-        string += str(op.parameters[0]) if len(op.parameters) > 0 else ""
+        if len(op.parameters) > 0:            
+            string += "(" + str(op.parameters[0]) + ")" 
         string += " "
         string += ", ".join([f"q[{w}]" for w in op.wires])
         string += ";"

@@ -65,7 +65,8 @@ def _custom_rz(angle : float, wires, epsilon = 1E-8):
     """
     a MonarQ native implementation of the RZ operation
     """
-    while angle < 0: angle += np.pi * 2
+    while angle < 0: 
+        angle += np.pi * 2
     angle %= np.pi * 2
     if is_close_enough_to(angle, 0): 
         return []
@@ -116,9 +117,9 @@ def _custom_ry(angle : float, wires, epsilon = 1E-8):
     elif is_close_enough_to(angle, np.pi): 
         return [qml.PauliY(wires = wires)]
     else: 
-        return _custom_s(wires) + _custom_h(wires) \
+        return _custom_sx(wires) \
                 + [qml.RZ(angle, wires = wires)] \
-                + _custom_h(wires) + _custom_s(wires)
+                + _custom_sxdag(wires)
 
 def _custom_swap(wires):
     """
