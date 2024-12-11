@@ -73,4 +73,4 @@ class Job:
         this raises an error by parsing the json body of the response, and using the response text as message
         """
         error = json.loads(response.text)
-        raise JobException(f"API ERROR : {error["code"]}, {error["error"]}")
+        raise JobException("API ERROR : " + str(error["code"]) + ", " + error["error"])
