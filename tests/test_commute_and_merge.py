@@ -2,11 +2,11 @@ from pennylane.tape import QuantumTape
 import pennylane as qml
 import pytest
 from unittest.mock import patch
-import pennylane_snowflurry.processing.optimization_methods.commute_and_merge as commute_and_merge
+import pennylane_snowflurry.processing.optimization_methods.iterative_commute_and_merge as iterative_commute_and_merge
 import pennylane.transforms as transforms
 import numpy as np
 
-file_path = "pennylane_snowflurry.processing.optimization_methods.commute_and_merge"
+file_path = "pennylane_snowflurry.processing.optimization_methods.iterative_commute_and_merge"
 
 @pytest.fixture
 def mock_commute_controlled():
@@ -40,24 +40,24 @@ def mock_remove_trivials():
 
 def test_remove_root_zs():
     tape = QuantumTape([qml.Z(0), qml.X(0), qml.X(1), qml.Z(1)], [], 1000)
-    tape = commute_and_merge.remove_root_zs(tape)
+    tape = iterative_commute_and_merge.remove_root_zs(tape)
     assert tape.operations == [qml.X(0), qml.X(1), qml.Z(1)]
     
-    tape = commute_and_merge.remove_root_zs(tape)
+    tape = iterative_commute_and_merge.remove_root_zs(tape)
     assert tape.operations == [qml.X(0), qml.X(1), qml.Z(1)]
 
 def test_remove_leaf_zs():
     tape = QuantumTape([qml.Z(0), qml.X(0), qml.X(1), qml.Z(1)], [], 1000)
-    tape = commute_and_merge.remove_leaf_zs(tape)
+    tape = iterative_commute_and_merge.remove_leaf_zs(tape)
     assert tape.operations == [qml.Z(0), qml.X(0), qml.X(1)]
     
     tape.operations.append(qml.RZ(3.14, 0))
-    tape = commute_and_merge.remove_leaf_zs(tape)
+    tape = iterative_commute_and_merge.remove_leaf_zs(tape)
     assert tape.operations == [qml.Z(0), qml.X(0), qml.X(1)]
 
 def test_remove_trivials():
     tape = QuantumTape([qml.RZ(0, 0), qml.Z(0), qml.RX(0, 0), qml.RY(3.14, 0), qml.RY(0, 0), qml.X(0)])
-    tape = commute_and_merge._remove_trivials(tape)
+    tape = iterative_commute_and_merge._remove_trivials(tape)
     assert tape.operations == [qml.Z(0), qml.RY(3.14, 0), qml.X(0)]
     
 def test_commute_and_merge():
@@ -77,14 +77,14 @@ def test_commute_and_merge():
                 qml.RX(np.pi/2, 3), qml.RZ(np.pi, 3), qml.RX(np.pi/2, 3), qml.RZ(np.pi, 0),
                 qml.RZ(np.pi, 3), qml.CZ([0, 3]), qml.RX(np.pi/2, 3), qml.RX(np.pi/2, 0), 
                 qml.RX(np.pi/2, 1), qml.RX(np.pi/2, 2)]
-    tape = commute_and_merge.commute_and_merge(tape)
+    tape = iterative_commute_and_merge.commute_and_merge(tape)
     assert tape.operations == solution
 
 def test_commute_and_merge_mock(mock_commute_controlled, mock_remove_root_zs, mock_remove_leaf_zs, 
                            mock_cancel_inverses, mock_merge_rotations, mock_remove_trivials):
     
     tape = QuantumTape([], [], 1000)
-    tape = commute_and_merge.commute_and_merge(tape)
+    tape = iterative_commute_and_merge.commute_and_merge(tape)
     mock_commute_controlled.assert_called()
     mock_remove_root_zs.assert_called()
     mock_remove_leaf_zs.assert_called()

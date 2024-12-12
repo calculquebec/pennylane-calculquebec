@@ -13,6 +13,35 @@ from pennylane_snowflurry.pennylane_converter import PennylaneConverter, Snowflu
 import random
 
 
+
+def are_matrices_equivalent(matrix1, matrix2, tolerance=1e-9):
+    """
+    Checks if two matrices are equal up to a complex multiplicative factor.
+
+    Args:
+        matrix1 (ndarray): First matrix.
+        matrix2 (ndarray): Second matrix.
+        tolerance (float): Numerical tolerance for comparison.
+
+    Returns:
+        bool: True if the matrices are equal up to a complex factor, False otherwise.
+    """
+    
+    tolerance = tolerance + 1j*tolerance
+    
+    if matrix1.shape != matrix2.shape:
+        return False
+
+    matrix2_dag = np.transpose(np.conjugate(matrix2))
+    id = np.round(matrix1 @ matrix2_dag, 4)
+    value = id[0][0]
+    
+    for i in range(id.shape[0]):
+        if abs(id[i][i] - value) > tolerance:
+            return False
+    return True
+
+
 def add_noise(tape : QuantumTape, t = 0.005):
     """
     adds noise for each gate present in a quantum tape
