@@ -6,6 +6,16 @@ import json
 from pennylane_snowflurry.API.client import ApiClient
 from datetime import datetime, timedelta
 
+class ApiException(Exception):
+    def __init__(self, code, message):
+        self.message = f"API ERROR : {code}, {message}"
+    
+    def __str__(self):
+        return self.message
+
+    def __repr__(self):
+        return self.message
+
 class ApiAdapter(object):
     _qubits_and_couplers = None
     _machine = None
@@ -55,7 +65,7 @@ class ApiAdapter(object):
             route = ApiAdapter.instance().client.host + routes.machines + routes.machineName + "=" + ApiAdapter.instance().client.machine_name
             res = requests.get(route, headers=ApiAdapter.instance().headers)
             if res.status_code != 200:
-                raise Exception(f"API ERROR : {res.status_code}")
+                ApiAdapter.raise_exception(res)
             ApiAdapter._machine = json.loads(res.text)
             
         return ApiAdapter._machine
@@ -83,7 +93,7 @@ class ApiAdapter(object):
             route = ApiAdapter.instance().client.host + routes.machines + "/" + machine_id + routes.benchmarking
             res = requests.get(route, headers=ApiAdapter.instance().headers)
             if res.status_code != 200:
-                raise Exception(f"API ERROR : {res.status_code}")
+                ApiAdapter.raise_exception(res)
             ApiAdapter._benchmark = json.loads(res.text)
             ApiAdapter._last_update = datetime.now()
             
@@ -97,18 +107,31 @@ class ApiAdapter(object):
         post a new job for running a specific circuit a certain amount of times on given machine (machine name stored in client)
         """
         body = ApiUtility.job_body(circuit, circuit_name, ApiAdapter.instance().client.project_name, ApiAdapter.instance().client.machine_name, shot_count)
-        return requests.post(ApiAdapter.instance().client.host + routes.jobs, data=json.dumps(body), headers=ApiAdapter.instance().headers)
+        res = requests.post(ApiAdapter.instance().client.host + routes.jobs, data=json.dumps(body), headers=ApiAdapter.instance().headers)
+        if res.status_code != 200:
+            ApiAdapter.raise_exception(res)
+        return res
 
     @staticmethod
     def list_jobs() -> requests.Response:
         """
         get all jobs for a given user (user stored in client)
         """
-        return requests.get(ApiAdapter.instance().client.host + routes.jobs, headers=ApiAdapter.instance().headers)
+        res = requests.get(ApiAdapter.instance().client.host + routes.jobs, headers=ApiAdapter.instance().headers)
+        if res.status_code != 200:
+            ApiAdapter.raise_exception(res)
+        return res
 
     @staticmethod
     def job_by_id(id : str) -> requests.Response:
         """
         get a job for a given user by providing its id (user stored in client)
         """
-        return requests.get(ApiAdapter.instance().client.host + routes.jobs + f"/{id}", headers=ApiAdapter.instance().headers)
+        res = requests.get(ApiAdapter.instance().client.host + routes.jobs + f"/{id}", headers=ApiAdapter.instance().headers)
+        if res.status_code != 200:
+            ApiAdapter.raise_exception(res)
+        return res
+
+    @staticmethod
+    def raise_exception(res):
+        raise ApiException(res.status_code, res.text)

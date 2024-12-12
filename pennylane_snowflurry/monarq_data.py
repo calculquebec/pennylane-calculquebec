@@ -122,7 +122,7 @@ def get_readout1_and_cz_fidelities():
         
     return cache._readout1_cz_fidelities
 
-def get_coupler_noise():
+def get_coupler_noise() -> dict:
     """
     build cz gate error array
     

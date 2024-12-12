@@ -19,7 +19,7 @@ def phase_damping(t, t2):
     """Compute phase damping parameter lambda."""
     return 1 - np.exp(-t / t2) if t2 > 0 else None
 
-class TypicalErrors:
+class TypicalBenchmark:
     """
     typical errors represented as constants
     """

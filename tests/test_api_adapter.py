@@ -1,4 +1,4 @@
-from pennylane_snowflurry.API.adapter import ApiAdapter
+from pennylane_snowflurry.API.adapter import ApiAdapter, ApiException
 from pennylane_snowflurry.API.client import MonarqClient
 import pytest
 from unittest.mock import patch
@@ -80,7 +80,7 @@ def test_get_machine_by_name(mock_requests_get):
     
     ApiAdapter._machine = None  
     
-    with pytest.raises(Exception):
+    with pytest.raises(ApiException):
         machine = ApiAdapter.get_machine_by_name()
 
 def test_get_qubits_and_couplers(mock_get_benchmark):
@@ -107,36 +107,44 @@ def test_get_benchmark(mock_is_last_update_expired, mock_get_machine_by_name, mo
     benchmark = ApiAdapter.get_benchmark()
     assert all(test_benchmark[k] == benchmark[k] for k in benchmark)
 
-    # test 200 and last_update < 24 h
-    mock_requests_get.return_value.text = test_benchmark_str2
-    benchmark = ApiAdapter.get_benchmark()
-    assert all(test_benchmark[k] == benchmark[k] for k in benchmark)    
-
-    # test 400 and cache
-    mock_requests_get.side_effect = lambda route, header: \
+    # test last_update < 24 h
+    mock_requests_get.side_effect = lambda route, headers: \
         Res(400, test_machine_str) if "benchmark" not in route \
-            else Res(400, test_benchmark_str)
-            
-    mock_requests_get.return_value.status_code = 400
+            else Res(400, test_benchmark_str2)
     benchmark = ApiAdapter.get_benchmark()
     assert all(test_benchmark[k] == benchmark[k] for k in benchmark)    
 
     # test 400 and last_update > 24 h
     mock_is_last_update_expired.return_value = True
-    with pytest.raises(Exception):
+    with pytest.raises(ApiException):
         benchmark = ApiAdapter.get_benchmark()
 
 def test_create_job(mock_job_body, mock_requests_post):
-    mock_requests_post.return_value = 42
     ApiAdapter.initialize(client)
-    assert ApiAdapter.create_job(None) == 42
+    
+    mock_requests_post.return_value = Res(200, 42)
+    assert ApiAdapter.create_job(None).text == 42
+    
+    mock_requests_post.return_value = Res(400, 42)
+    with pytest.raises(ApiException):
+        ApiAdapter.create_job(None)
+    
 
 def test_list_jobs(mock_requests_get):
-    mock_requests_get.return_value = 42
     ApiAdapter.initialize(client)
-    assert ApiAdapter.list_jobs() == 42
+    
+    mock_requests_get.return_value = Res(200, 42)
+    assert ApiAdapter.list_jobs().text == 42
+    mock_requests_get.return_value = Res(400, 42)
+    with pytest.raises(ApiException):
+        ApiAdapter.list_jobs()
 
 def test_job_by_id(mock_requests_get):
-    mock_requests_get.return_value = 42
     ApiAdapter.initialize(client)
-    assert ApiAdapter.job_by_id(None) == 42
+    
+    mock_requests_get.return_value = Res(200, 42)
+    assert ApiAdapter.job_by_id(None).text == 42
+    
+    mock_requests_get.return_value = Res(400, 42)
+    with pytest.raises(ApiException):
+        ApiAdapter.job_by_id(None)

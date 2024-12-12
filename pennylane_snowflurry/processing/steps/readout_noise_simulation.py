@@ -7,7 +7,7 @@ from pennylane_snowflurry.monarq_data import get_readout_noise_matrices
 import pennylane as qml
 import numpy as np
 from pennylane_snowflurry.utility.debug import get_labels
-from pennylane_snowflurry.utility.noise import readout_error, TypicalErrors
+from pennylane_snowflurry.utility.noise import readout_error, TypicalBenchmark
 
 class ReadoutNoiseSimulation(PostProcStep):
     """
@@ -40,7 +40,7 @@ class ReadoutNoiseSimulation(PostProcStep):
         
         readout_error_matrices = get_readout_noise_matrices() \
             if self.use_benchmark \
-            else [readout_error(TypicalErrors.readout0, TypicalErrors.readout1) for _ in range(24)]
+            else [readout_error(TypicalBenchmark.readout0, TypicalBenchmark.readout1) for _ in range(24)]
 
         readout_matrix = np.identity(1)
         
