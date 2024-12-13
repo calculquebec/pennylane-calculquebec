@@ -39,7 +39,7 @@ class PreProcessor:
                 for step in prerpoc_steps:
                     optimized_tape = step.execute(optimized_tape)
             new_tape = type(tape)(optimized_tape.operations, optimized_tape.measurements, shots=optimized_tape.shots)
-            return new_tape
+            return [new_tape], lambda res : res[0]
 
         return transpile
 

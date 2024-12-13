@@ -7,7 +7,7 @@ from .placement import ASTAR, ISMAGS, VF2
 from .routing import Swaps
 from .optimization import IterativeCommuteAndMerge
 from .native_decomposition import MonarqDecomposition
-from .readout_error_mitigation import ReadoutErrorMitigation
+from .readout_error_mitigation import MatrixReadoutMitigation, IBUReadoutMitigation
 from .decompose_readout import DecomposeReadout
 from .gate_noise_simulation import GateNoiseSimulation
 from .readout_noise_simulation import ReadoutNoiseSimulation
