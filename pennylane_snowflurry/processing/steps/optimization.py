@@ -95,6 +95,8 @@ class IterativeCommuteAndMerge(Optimize):
         if len(op.wires) != 1:
             raise ValueError("Single qubit rotations must be given one wire")
         
+        if op.basis != "Y":
+            raise ValueError("Operation must be in the Y basis")
         rot_angles = op.single_qubit_rot_angles()
         return [qml.RZ(np.pi/2, op.wires), qml.RX(rot_angles[1], op.wires), qml.RZ(-np.pi/2, op.wires)]
 

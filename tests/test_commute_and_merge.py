@@ -59,7 +59,8 @@ def test_remove_trivials():
     tape = QuantumTape([qml.RZ(0, 0), qml.Z(0), qml.RX(0, 0), qml.RY(3.14, 0), qml.RY(0, 0), qml.X(0)])
     tape = iterative_commute_and_merge._remove_trivials(tape)
     assert tape.operations == [qml.Z(0), qml.RY(3.14, 0), qml.X(0)]
-    
+
+
 def test_commute_and_merge():
     # test bernstein vazirani
     tape = QuantumTape([qml.RZ(np.pi/2, 0), qml.RZ(np.pi/2, 1), qml.RZ(np.pi/2, 2), qml.RZ(np.pi/2, 3),

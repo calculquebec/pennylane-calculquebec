@@ -10,18 +10,17 @@ from pennylane_snowflurry.utility.debug import are_matrices_equivalent
 
 @pytest.fixture
 def mock_commute_and_merge():
-    with patch("pennylane_snowflurry.processing.optimization_methods.iterative_commute_and_merge.commute_and_merge") as mock:
+    with patch("pennylane_snowflurry.processing.steps.optimization.commute_and_merge") as mock:
         yield mock
 
 # ajouter des tests pour les autres fonctions que execute
 
-# def test_execute_calls_commute_and_merge(mock_commute_and_merge):
-#     le mock fonctionne pas ici
-#     mock_commute_and_merge.side_effect = lambda tape: tape
-    
-#     tape = QuantumTape([], [], 1000)
-#     IterativeCommuteAndMerge().execute(tape)
-#     assert mock_commute_and_merge.call_count == 6
+def test_execute_calls_commute_and_merge(mock_commute_and_merge):
+    mock_commute_and_merge.side_effect = lambda tape: tape
+
+    tape = QuantumTape([], [], 1000)
+    IterativeCommuteAndMerge().execute(tape)
+    assert mock_commute_and_merge.call_count == 6
     
 def test_optimize_qubit_unitary():
     ops = [qml.Hadamard(0), qml.QubitUnitary(np.array([[-1, 1], [1, 1]])/np.sqrt(2), 0)]
@@ -112,4 +111,47 @@ def test_ZXZ_Hadamard():
     with pytest.raises(ValueError):
         IterativeCommuteAndMerge.ZXZ_Hadamard([1, 2])
 
-# do y to zxz and get rid of y rotations
+
+def test_Y_to_ZXZ():
+    op = qml.CNOT([0, 1])
+    with pytest.raises(ValueError):
+        IterativeCommuteAndMerge.Y_to_ZXZ(op)
+    
+    op = qml.RX(-np.pi/5, 0)
+    with pytest.raises(ValueError):
+        IterativeCommuteAndMerge.Y_to_ZXZ(op)
+    
+    op = qml.RY(-np.pi/5, 0)
+    result = IterativeCommuteAndMerge.Y_to_ZXZ(op)
+    assert result[0] == qml.RZ(np.pi/2, 0)
+    assert result[1] == qml.RX(-np.pi/5, 0)
+    assert result[2] == qml.RZ(-np.pi/2, 0)
+    
+def test_get_rid_of_Y_rotations():
+    with patch("pennylane_snowflurry.processing.steps.optimization.IterativeCommuteAndMerge.Y_to_ZXZ") as Y_to_ZXZ_mock:
+        Y_to_ZXZ_mock.return_value = []
+        
+        # non-y gate dont call Y_to_ZXZ
+        tape = QuantumTape([qml.CNOT([0, 1])])
+        IterativeCommuteAndMerge.get_rid_of_y_rotations(tape)
+        Y_to_ZXZ_mock.assert_not_called()
+        
+        # Y gates call Y_to_ZXZ
+        tape = QuantumTape([qml.RY(0, 0)])
+        IterativeCommuteAndMerge.get_rid_of_y_rotations(tape)
+        Y_to_ZXZ_mock.assert_called_once()
+    
+    # 2 qubit gate
+    tape = QuantumTape([qml.CNOT([0, 1])])
+    result = IterativeCommuteAndMerge.get_rid_of_y_rotations(tape)
+    assert tape.operations == result.operations
+    
+    # x basis rotation
+    tape = QuantumTape([qml.RX(np.pi/5, 0)])
+    result = IterativeCommuteAndMerge.get_rid_of_y_rotations(tape)
+    assert tape.operations == result.operations
+    
+    # y basis rotation
+    tape = QuantumTape([qml.RY(np.pi/5, 0)])
+    result = IterativeCommuteAndMerge.get_rid_of_y_rotations(tape)
+    assert result.operations == [qml.RZ(np.pi/2, 0), qml.RX(np.pi/5, 0), qml.RZ(-np.pi/2, 0)]
