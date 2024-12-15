@@ -9,7 +9,6 @@ from pennylane.tape import QuantumTape
 import pennylane as qml
 import numpy as np
 import pennylane_snowflurry.processing.custom_gates as custom
-from pennylane_snowflurry.pennylane_converter import PennylaneConverter, Snowflurry
 import random
 
 
