@@ -96,8 +96,6 @@ class PennylaneConverter:
     def __init__(
         self,
         pennylane_circuit: QuantumTape,
-        debugger=None,
-        interface=None,
         host="",
         user="",
         access_token="",
@@ -108,8 +106,6 @@ class PennylaneConverter:
 
         # Instance attributes related to PennyLane
         self.pennylane_circuit = pennylane_circuit
-        self.debugger = debugger
-        self.interface = interface
         self.wires = wires
 
         # Instance attributes related to Snowflurry
