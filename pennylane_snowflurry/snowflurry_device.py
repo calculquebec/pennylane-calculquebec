@@ -217,8 +217,6 @@ class SnowflurryQubitDevice(qml.devices.Device):
         results = tuple(
             PennylaneConverter(
                 circuit,
-                debugger=self._debugger,
-                interface=interface,
                 host=self.host,
                 user=self.user,
                 access_token=self.access_token,
