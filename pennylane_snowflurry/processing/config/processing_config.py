@@ -33,6 +33,12 @@ class ProcessingConfig:
         
         return True
 
+    def __getitem__(self, idx):
+        return self._steps[idx]
+    
+    def __setitem__(self, idx, value):
+        self._steps[idx] = value
+        
 MonarqDefaultConfig : Callable[[bool, float, float, list[int], list[list[int]]], ProcessingConfig] = \
     lambda use_benchmark = True, q1_acceptance = 0.5, q2_acceptance = 0.5, excluded_qubits = [], excluded_couplers = [] : \
         ProcessingConfig(DecomposeReadout(), CliffordTDecomposition(), \

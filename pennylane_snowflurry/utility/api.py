@@ -20,6 +20,9 @@ class ApiUtility:
         Returns:
             dict[str, any]: a dictionary representation of the operation that can be read by the Thunderhead API
         """
+        if instruction.name not in instructions:
+            raise ValueError("This instruction is not supported")
+        
         operation = {
             keys.qubits : [w for w in instruction.wires],
             keys.type : instructions[instruction.name]
@@ -43,7 +46,7 @@ class ApiUtility:
 
         circuit_dict = {
             keys.bitCount : 24,
-            keys.operations : [ApiUtility.convert_instruction(op) for op in circuit.operations if not isinstance(op, MeasurementProcess)],
+            keys.operations : [ApiUtility.convert_instruction(op) for op in circuit.operations],
             keys.qubitCount : 24
         }
         wires = [w for w in circuit.wires]
@@ -158,8 +161,6 @@ instructions : dict[str, str] = {
     "TDagger" : "t_dag",
     "CZ" : "cz",
     "PhaseShift" : "p",
-    "Hadamard" : "h",
-    "CNOT" : "cnot",
     "RZ" : "rz"
 }
 

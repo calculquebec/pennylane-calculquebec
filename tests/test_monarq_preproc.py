@@ -48,7 +48,7 @@ def test_get_processor(mock_expand_full_measurements):
                   "not_step")
     tape = Tape()
     process = PreProcessor.get_processor(conf, [0, 1, 2])
-    tape2 = process(tape)
+    tape2 = process(tape)[0][0]
     
     solution = ["a", "b", "c"]
     

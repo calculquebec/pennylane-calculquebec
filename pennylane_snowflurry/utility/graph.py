@@ -174,6 +174,8 @@ def calculate_score(source : int, graph : nx.Graph, use_benchmark = True) -> flo
     
     fidelities = get_readout1_and_cz_fidelities()
     neighbours = [n for n in graph.neighbors(source)]
+    if len(neighbours) <= 0:
+        return 0
     
     r1 = fidelities[keys.readoutState1Fidelity][str(source)]
     

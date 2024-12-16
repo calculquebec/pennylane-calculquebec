@@ -27,18 +27,27 @@ def are_matrices_equivalent(matrix1, matrix2, tolerance=1e-9):
         bool: True if the matrices are equal up to a complex factor, False otherwise.
     """
     
-    tolerance = tolerance + 1j*tolerance
+    det = np.linalg.det(matrix2)
+    
+    if abs(det) < tolerance:
+        raise ValueError("cannot invert matrix. cannot check equivalence")
     
     if matrix1.shape != matrix2.shape:
         return False
 
-    matrix2_dag = np.transpose(np.conjugate(matrix2))
-    id = np.round(matrix1 @ matrix2_dag, 4)
+    matrix2_inv = np.linalg.inv(matrix2)
+    id = np.round(matrix1 @ matrix2_inv, 4)
     value = id[0][0]
     
+    # check if matrix is diagonal
     for i in range(id.shape[0]):
-        if abs(id[i][i] - value) > tolerance:
-            return False
+        for j in range(id.shape[1]):
+            # if non-diagonal position is > 0, not equivalent
+            if i != j and abs(id[i][j]) > tolerance:
+                return False
+            # if diagonal positions are not equal, not equivalent
+            if i == j and abs(id[i][j] - value) > tolerance:
+                return False
     return True
 
 
