@@ -1,40 +1,40 @@
 import pytest
 from unittest.mock import patch
-from pennylane_snowflurry.monarq_device import MonarqDevice, DeviceException
-from pennylane_snowflurry.API.client import MonarqClient
-from pennylane_snowflurry.processing.config import MonarqDefaultConfig, NoPlaceNoRouteConfig
-from pennylane_snowflurry.processing import PreProcessor
+from pennylane_calculquebec.monarq_device import MonarqDevice, DeviceException
+from pennylane_calculquebec.API.client import MonarqClient
+from pennylane_calculquebec.processing.config import MonarqDefaultConfig, NoPlaceNoRouteConfig
+from pennylane_calculquebec.processing import PreProcessor
 from pennylane.transforms import transform
 from pennylane.tape import QuantumTape
 import pennylane as qml
-import pennylane_snowflurry.API.job as api_job
+import pennylane_calculquebec.API.job as api_job
 
 
 client = MonarqClient("host", "user", "token")
 
 @pytest.fixture
 def mock_measure():
-    with patch("pennylane_snowflurry.monarq_device.MonarqDevice._measure") as meas:
+    with patch("pennylane_calculquebec.monarq_device.MonarqDevice._measure") as meas:
         yield meas
 
 @pytest.fixture
 def mock_default_config():
-    with patch("pennylane_snowflurry.processing.config.MonarqDefaultConfig") as default_config:
+    with patch("pennylane_calculquebec.processing.config.MonarqDefaultConfig") as default_config:
         yield default_config
 
 @pytest.fixture
 def mock_api_initialize():
-    with patch("pennylane_snowflurry.API.adapter.ApiAdapter.initialize") as initialize:
+    with patch("pennylane_calculquebec.API.adapter.ApiAdapter.initialize") as initialize:
         yield initialize
 
 @pytest.fixture
 def mock_PostProcessor_get_processor():
-    with patch("pennylane_snowflurry.processing.PostProcessor.get_processor") as proc:
+    with patch("pennylane_calculquebec.processing.PostProcessor.get_processor") as proc:
         yield proc
 
 @pytest.fixture
 def mock_PreProcessor_get_processor():
-    with patch("pennylane_snowflurry.processing.PreProcessor.get_processor") as proc:
+    with patch("pennylane_calculquebec.processing.PreProcessor.get_processor") as proc:
         yield proc
 
 def test_constructor(mock_api_initialize):
@@ -93,7 +93,7 @@ def test_measure():
     
     quantum_tape = QuantumTape([], [], 1000)
     
-    with patch("pennylane_snowflurry.API.job.Job.__new__") as job:
+    with patch("pennylane_calculquebec.API.job.Job.__new__") as job:
         job.return_value = Job()
         
         # measurement != 1, DeviceException

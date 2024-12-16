@@ -1,4 +1,4 @@
-from pennylane_snowflurry.processing.interfaces import PreProcStep, PostProcStep
+from pennylane_calculquebec.processing.interfaces import PreProcStep, PostProcStep
 
 def test_pre_proc_step():
     step = PreProcStep()

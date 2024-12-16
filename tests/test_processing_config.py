@@ -1,5 +1,5 @@
-from pennylane_snowflurry.processing.config import ProcessingConfig, MonarqDefaultConfig, MonarqDefaultConfigNoBenchmark, NoPlaceNoRouteConfig, EmptyConfig, FakeMonarqConfig
-from pennylane_snowflurry.processing.steps import DecomposeReadout, CliffordTDecomposition, ASTAR, Swaps, IterativeCommuteAndMerge, MonarqDecomposition, GateNoiseSimulation, ReadoutNoiseSimulation
+from pennylane_calculquebec.processing.config import ProcessingConfig, MonarqDefaultConfig, MonarqDefaultConfigNoBenchmark, NoPlaceNoRouteConfig, EmptyConfig, FakeMonarqConfig
+from pennylane_calculquebec.processing.steps import DecomposeReadout, CliffordTDecomposition, ASTAR, Swaps, IterativeCommuteAndMerge, MonarqDecomposition, GateNoiseSimulation, ReadoutNoiseSimulation
 
 def test_processing_config():
     config = ProcessingConfig(1, 2, 3)

@@ -1,5 +1,5 @@
 import pytest
-from pennylane_snowflurry.snowflurry_device import SnowflurryQubitDevice
+from pennylane_calculquebec.snowflurry_device import SnowflurryQubitDevice
 from juliacall import newmodule
 
 

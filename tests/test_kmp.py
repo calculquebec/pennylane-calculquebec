@@ -1,5 +1,5 @@
 import copy
-import pennylane_snowflurry.utility.kmp as kmp
+import pennylane_calculquebec.utility.kmp as kmp
 import random as rand
 
 class TestKmp:

@@ -1,5 +1,5 @@
 import numpy as np
-import pennylane_snowflurry.utility.debug as debug
+import pennylane_calculquebec.utility.debug as debug
 import pennylane as qml
 
 def test_are_matrices_equivalent():
