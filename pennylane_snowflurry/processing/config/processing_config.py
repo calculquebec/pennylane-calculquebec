@@ -34,9 +34,20 @@ class ProcessingConfig:
         return True
 
     def __getitem__(self, idx):
+        """returns step at index idx
+
+        Args:
+            idx (int): the index to return
+        """
         return self._steps[idx]
     
     def __setitem__(self, idx, value):
+        """Sets the item at index idx to given value
+
+        Args:
+            idx (int): index to modify
+            value : value to assign at index
+        """
         self._steps[idx] = value
         
 MonarqDefaultConfig : Callable[[bool, float, float, list[int], list[list[int]]], ProcessingConfig] = \
