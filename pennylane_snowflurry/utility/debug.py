@@ -11,8 +11,28 @@ import numpy as np
 import pennylane_snowflurry.processing.custom_gates as custom
 import random
 
+def remove_global_phase(matrix):
+    """
+    Removes the global phase from a matrix by normalizing its determinant to 1.
 
+    Parameters:
+        matrix (ndarray): The input matrix (square and complex).
 
+    Returns:
+        ndarray: The matrix with the global phase removed.
+    """
+    # Compute the determinant of the matrix
+    determinant = np.linalg.det(matrix)
+
+    # Compute the global phase factor
+    global_phase = np.exp(1j * np.angle(determinant))
+
+    # Normalize the matrix to remove the global phase
+    normalized_matrix = matrix / global_phase
+
+    return normalized_matrix
+
+# TOFIX : this method doesnt work for some matrices
 def are_matrices_equivalent(matrix1, matrix2, tolerance=1e-9):
     """
     Checks if two matrices are equal up to a complex multiplicative factor.
@@ -25,7 +45,6 @@ def are_matrices_equivalent(matrix1, matrix2, tolerance=1e-9):
     Returns:
         bool: True if the matrices are equal up to a complex factor, False otherwise.
     """
-    
     det = np.linalg.det(matrix2)
     
     if abs(det) < tolerance:
@@ -34,8 +53,11 @@ def are_matrices_equivalent(matrix1, matrix2, tolerance=1e-9):
     if matrix1.shape != matrix2.shape:
         return False
 
-    matrix2_inv = np.linalg.inv(matrix2)
-    id = np.round(matrix1 @ matrix2_inv, 4)
+    matrix1_normalized = remove_global_phase(matrix1)
+    matrix2_normalized = remove_global_phase(matrix2)
+
+    matrix2_inv = np.linalg.inv(matrix2_normalized)
+    id = np.round(matrix1_normalized @ matrix2_inv, 4)
     value = id[0][0]
     
     # check if matrix is diagonal

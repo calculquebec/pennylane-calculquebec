@@ -1,5 +1,6 @@
 """
-Contains an experiment function for generating documentation using pydoc
+Contains an experiment function for generating documentation using pydoc\n
+this is a WIP and should probably not be used   
 """
 
 import os
@@ -9,7 +10,7 @@ def generate_pydoc(directory, output_dir):
     """
     Generates pydoc documentation for all Python modules in the specified directory and its subdirectories.
     
-    Args:
+    Args:   
         directory (str): The root directory to search for Python files.
         output_dir (str): The directory to save the generated HTML documentation.
     """
