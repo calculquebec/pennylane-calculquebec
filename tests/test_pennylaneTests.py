@@ -2,6 +2,7 @@
 # The tests are run using the pytest framework and can be run using the following command:
 # python-jl -m tests.test_pennylaneTests
 
+# TOFIX : This test doesn't work.
 from pennylane.devices.tests import test_device
 
 test_device("snowflurry.qubit", skip_ops=True)
