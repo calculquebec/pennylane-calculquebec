@@ -3,7 +3,7 @@ contains the base configuration class and presets that can be used to specify mo
 """
 
 from pennylane_snowflurry.processing.interfaces.base_step import BaseStep
-from pennylane_snowflurry.processing.steps import DecomposeReadout, CliffordTDecomposition, ASTAR, Swaps, IterativeCommuteAndMerge, MonarqDecomposition, GateNoiseSimulation, ReadoutNoiseSimulation
+from pennylane_snowflurry.processing.steps import DecomposeReadout, CliffordTDecomposition, ISMAGS, Swaps, IterativeCommuteAndMerge, MonarqDecomposition, GateNoiseSimulation, ReadoutNoiseSimulation
 from typing import Callable
 
 class ProcessingConfig:
@@ -42,7 +42,7 @@ class ProcessingConfig:
 MonarqDefaultConfig : Callable[[bool, float, float, list[int], list[list[int]]], ProcessingConfig] = \
     lambda use_benchmark = True, q1_acceptance = 0.5, q2_acceptance = 0.5, excluded_qubits = [], excluded_couplers = [] : \
         ProcessingConfig(DecomposeReadout(), CliffordTDecomposition(), \
-            ASTAR(use_benchmark, q1_acceptance, q2_acceptance, excluded_qubits, excluded_couplers),
+            ISMAGS(use_benchmark, q1_acceptance, q2_acceptance, excluded_qubits, excluded_couplers),
             Swaps(use_benchmark, q1_acceptance, q2_acceptance, excluded_qubits, excluded_couplers), 
             IterativeCommuteAndMerge(), MonarqDecomposition(), IterativeCommuteAndMerge(), MonarqDecomposition())
 """The default configuration preset for MonarQ"""
@@ -65,7 +65,7 @@ NoPlaceNoRouteConfig  = lambda : ProcessingConfig(DecomposeReadout(),
 
 FakeMonarqConfig = lambda use_benchmark = False: ProcessingConfig(DecomposeReadout(),
                                              CliffordTDecomposition(),
-                                             ASTAR(use_benchmark),
+                                             ISMAGS(use_benchmark),
                                              Swaps(use_benchmark),
                                              IterativeCommuteAndMerge(),
                                              MonarqDecomposition(),
