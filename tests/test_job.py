@@ -1,8 +1,8 @@
-from pennylane_snowflurry.API.adapter import ApiAdapter
-from pennylane_snowflurry.API.client import MonarqClient
+from pennylane_calculquebec.API.adapter import ApiAdapter
+from pennylane_calculquebec.API.client import MonarqClient
 import pytest
 from unittest.mock import patch
-from pennylane_snowflurry.API.job import Job, JobException
+from pennylane_calculquebec.API.job import Job, JobException
 import json
 
 client = MonarqClient("test", "test", "test")
@@ -37,17 +37,17 @@ class Circuit:
 
 @pytest.fixture(name="mock_convert_circuit")
 def mock_convert_circut():
-    with patch("pennylane_snowflurry.utility.api.ApiUtility.convert_circuit") as convert_circuit:
+    with patch("pennylane_calculquebec.utility.api.ApiUtility.convert_circuit") as convert_circuit:
         yield convert_circuit
 
 @pytest.fixture(name="mock_create_job")
 def mock_create_job():
-    with patch("pennylane_snowflurry.API.adapter.ApiAdapter.create_job") as create_job:
+    with patch("pennylane_calculquebec.API.adapter.ApiAdapter.create_job") as create_job:
         yield create_job
 
 @pytest.fixture(name="mock_job_by_id")
 def mock_job_by_id():
-    with patch("pennylane_snowflurry.API.adapter.ApiAdapter.job_by_id") as job_by_id:
+    with patch("pennylane_calculquebec.API.adapter.ApiAdapter.job_by_id") as job_by_id:
         yield job_by_id
 
 

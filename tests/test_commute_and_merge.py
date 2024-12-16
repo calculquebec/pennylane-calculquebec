@@ -2,11 +2,11 @@ from pennylane.tape import QuantumTape
 import pennylane as qml
 import pytest
 from unittest.mock import patch
-import pennylane_snowflurry.processing.optimization_methods.iterative_commute_and_merge as iterative_commute_and_merge
+import pennylane_calculquebec.processing.optimization_methods.iterative_commute_and_merge as iterative_commute_and_merge
 import pennylane.transforms as transforms
 import numpy as np
 
-file_path = "pennylane_snowflurry.processing.optimization_methods.iterative_commute_and_merge"
+file_path = "pennylane_calculquebec.processing.optimization_methods.iterative_commute_and_merge"
 
 @pytest.fixture
 def mock_commute_controlled():

@@ -2,17 +2,17 @@ import numpy as np
 import pennylane as qml
 import pytest
 from unittest.mock import patch
-from pennylane_snowflurry.utility.api import ApiUtility, keys
+from pennylane_calculquebec.utility.api import ApiUtility, keys
 from pennylane.tape import QuantumTape
 
 @pytest.fixture
 def mock_convert_instruction():
-    with patch("pennylane_snowflurry.utility.api.ApiUtility.convert_instruction") as mock:
+    with patch("pennylane_calculquebec.utility.api.ApiUtility.convert_instruction") as mock:
         yield mock
 
 @pytest.fixture
 def mock_basic_auth():
-    with patch("pennylane_snowflurry.utility.api.ApiUtility.basic_auth") as mock:
+    with patch("pennylane_calculquebec.utility.api.ApiUtility.basic_auth") as mock:
         yield mock
 
 

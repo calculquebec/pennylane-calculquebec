@@ -1,5 +1,5 @@
 import pytest
-import pennylane_snowflurry.processing.decompositions.native_decomp_functions as decomp
+import pennylane_calculquebec.processing.decompositions.native_decomp_functions as decomp
 import pennylane as qml
 from functools import reduce
 import numpy as np

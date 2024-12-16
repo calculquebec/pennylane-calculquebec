@@ -1,7 +1,7 @@
 import numpy as np
 import pennylane as qml
 from functools import reduce
-from pennylane_snowflurry.processing.custom_gates import \
+from pennylane_calculquebec.processing.custom_gates import \
     TDagger, X90, XM90, Y90, YM90, Z90, ZM90
 def rz(angle): 
     return np.array([[np.exp(-1j*angle/2), 0], 

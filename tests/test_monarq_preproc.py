@@ -1,11 +1,11 @@
 import pytest
 from unittest.mock import patch
-from pennylane_snowflurry.processing import PreProcessor
-from pennylane_snowflurry.processing.interfaces import PreProcStep, PostProcStep
+from pennylane_calculquebec.processing import PreProcessor
+from pennylane_calculquebec.processing.interfaces import PreProcStep, PostProcStep
 
 @pytest.fixture
 def mock_expand_full_measurements():
-    with patch("pennylane_snowflurry.processing.PreProcessor.expand_full_measurements") as mock:
+    with patch("pennylane_calculquebec.processing.PreProcessor.expand_full_measurements") as mock:
         yield mock
 
 class step_call_counter:

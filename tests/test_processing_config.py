@@ -1,5 +1,5 @@
-from pennylane_snowflurry.processing.config import ProcessingConfig, MonarqDefaultConfig, MonarqDefaultConfigNoBenchmark, NoPlaceNoRouteConfig, EmptyConfig, FakeMonarqConfig
-from pennylane_snowflurry.processing.steps import DecomposeReadout, CliffordTDecomposition, ASTAR, ISMAGS, Swaps, IterativeCommuteAndMerge, MonarqDecomposition, GateNoiseSimulation, ReadoutNoiseSimulation
+from pennylane_calculquebec.processing.config import ProcessingConfig, MonarqDefaultConfig, MonarqDefaultConfigNoBenchmark, NoPlaceNoRouteConfig, EmptyConfig, FakeMonarqConfig
+from pennylane_calculquebec.processing.steps import DecomposeReadout, CliffordTDecomposition, ASTAR, Swaps, IterativeCommuteAndMerge, MonarqDecomposition, GateNoiseSimulation, ReadoutNoiseSimulation
 
 def test_processing_config():
     config = ProcessingConfig(1, 2, 3)
@@ -9,7 +9,7 @@ def test_processing_config():
 def test_presets():
     # default config should contain only default steps
     config = MonarqDefaultConfig()
-    test_arr = [DecomposeReadout, CliffordTDecomposition, ISMAGS, Swaps, IterativeCommuteAndMerge, MonarqDecomposition]
+    test_arr = [DecomposeReadout, CliffordTDecomposition, ASTAR, Swaps, IterativeCommuteAndMerge, MonarqDecomposition]
     for step in config.steps:
         assert any(type(step) == test for test in test_arr)
     
@@ -22,7 +22,7 @@ def test_presets():
     # no place no route config should not contain placement or routing
     config = NoPlaceNoRouteConfig()
     
-    place_route = list(filter(lambda step : isinstance(step, ISMAGS) or isinstance(step, Swaps), config.steps))
+    place_route = list(filter(lambda step : isinstance(step, ASTAR) or isinstance(step, Swaps), config.steps))
     assert len(place_route) == 0
     
     # empty config should be empty
