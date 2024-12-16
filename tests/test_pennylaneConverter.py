@@ -84,9 +84,3 @@ class TestPennylaneConverterClass:
         strategy = pennylane_converter_without_client.get_strategy(mp)
         assert isinstance(strategy, measurements.State)
 
-
-
-
-
-
-
