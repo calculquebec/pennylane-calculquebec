@@ -123,12 +123,10 @@ class IBUReadoutMitigation(PostProcStep):
             
             # Check for convergence
             if np.linalg.norm(theta_next - theta_current) < tol:
-                print(f"Converged after {iteration + 1} iterations.")
                 return theta_next, iteration + 1
             
             theta_current = theta_next
         
-        print(f"Did not converge after {max_iterations} iterations.")
         return theta_current, max_iterations
     
     
