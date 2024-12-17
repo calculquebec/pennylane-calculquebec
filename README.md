@@ -60,6 +60,25 @@ For PennyLane, please refer to the [PennyLane documentation](https://pennylane.a
 
 For Snowflurry, please refer to the [Snowflurry documentation](https://snowflurry.org).
 
+## dotenv
+
+CalculQCDevice currently uses dotenv to save credentials and other software information. 
+
+In order to use dotenv, create a file called ".env" at the project's root folder and add those informations in it : 
+
+```
+HOST=
+USER=
+ACCESS_TOKEN=
+REALM=
+PROJECT_ID=
+MACHINE_NAME=
+
+# benchmarking acceptable levels
+Q1_ACCEPTANCE=
+Q2_ACCEPTANCE=
+```
+
 ## Usage
 
 ### Running files

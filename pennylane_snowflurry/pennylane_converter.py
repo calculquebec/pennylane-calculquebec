@@ -1,4 +1,3 @@
-from juliacall import newmodule
 import pennylane as qml
 from pennylane.tape import QuantumTape
 from pennylane.typing import Result
@@ -65,11 +64,14 @@ if host, user, access_token are left blank, the code will be ran on the simulato
 if host, user, access_token are filled, the code will be sent to Anyon's API
 """
 
-##########################################
-# Defining namespace for Snowflurry      #
-##########################################
-Snowflurry = newmodule("Snowflurry")
-Snowflurry.seval("using Snowflurry")
+def define_snowflurry_namespace():
+    """
+    Define the Snowflurry namespace in Julia.
+    """
+    from juliacall import newmodule
+    sf = newmodule("Snowflurry")
+    sf.seval("using Snowflurry")
+    return sf
 
 
 class PennylaneConverter:
@@ -113,6 +115,7 @@ class PennylaneConverter:
         self.wires = wires
 
         # Instance attributes related to Snowflurry
+        self.snowflurry_namespace = define_snowflurry_namespace()
         self.snowflurry_py_circuit = None
         if (
             len(host) != 0
@@ -120,12 +123,12 @@ class PennylaneConverter:
             and len(access_token) != 0
             and len(realm) != 0
         ):
-            Snowflurry.currentClient = Snowflurry.Client(
+            self.snowflurry_namespace.currentClient = self.snowflurry_namespace.Client(
                 host=host, user=user, access_token=access_token, realm=realm
             )
-            Snowflurry.seval('project_id="' + project_id + '"')
+            self.snowflurry_namespace.seval('project_id="' + project_id + '"')
         else:
-            Snowflurry.currentClient = None
+            self.snowflurry_namespace.currentClient = None
 
         self.measurementStrategy = None
 
@@ -140,7 +143,7 @@ class PennylaneConverter:
     ):
         """
         Convert the received pennylane circuit into a snowflurry device in julia.
-        It is then store into Snowflurry.sf_circuit
+        It is then store into self.snowflurry_namespace.sf_circuit
 
         Args:
             pennylane_circuit (QuantumTape): The circuit to simulate.
@@ -151,7 +154,7 @@ class PennylaneConverter:
         """
 
         wires_nb = self.wires  # default number of wires in the circuit
-        Snowflurry.sf_circuit = Snowflurry.QuantumCircuit(qubit_count=wires_nb)
+        self.snowflurry_namespace.sf_circuit = self.snowflurry_namespace.QuantumCircuit(qubit_count=wires_nb)
 
         prep = None
         if len(pennylane_circuit) > 0 and isinstance(
@@ -167,11 +170,11 @@ class PennylaneConverter:
                     continue
                 parameters = op.parameters + [i + 1 for i in op.wires.tolist()]
                 gate = SNOWFLURRY_OPERATION_MAP[op.name].format(*parameters)
-                Snowflurry.seval(f"push!(sf_circuit,{gate})")
+                self.snowflurry_namespace.seval(f"push!(sf_circuit,{gate})")
             else:
                 print(f"{op.name} is not supported by this device. skipping...")
 
-        return Snowflurry.sf_circuit
+        return self.snowflurry_namespace.sf_circuit
 
     def apply_readouts(self, obs):
         """
@@ -184,13 +187,13 @@ class PennylaneConverter:
 
         if obs is None:  # if no observable is given, we apply readouts to all wires
             for wire in range(self.wires):
-                Snowflurry.seval(f"push!(sf_circuit, readout({wire + 1}, {wire + 1}))")
+                self.snowflurry_namespace.seval(f"push!(sf_circuit, readout({wire + 1}, {wire + 1}))")
 
         else:
             # if an observable is given, we apply readouts to the wires mentioned in the observable,
             # TODO : could add Pauli rotations to get the correct observable
             self.apply_single_readout(obs.wires[0])
-
+    
     def get_circuit_as_dictionary(self):
         """
         Take the snowflurry QuantumCircuit.instructions and convert it to an array of operations.
@@ -202,7 +205,7 @@ class PennylaneConverter:
                 applied to.
 
         Example:
-            >>> Snowflurry.sf_circuit.instructions
+            >>> self.snowflurry_namespace.sf_circuit.instructions
             [<PyCall.jlwrap Gate Object: Snowflurry.Hadamard
             Connected_qubits        : [1]
             Operator:
@@ -233,7 +236,7 @@ class PennylaneConverter:
         """
         ops = []
         instructions = (
-            Snowflurry.sf_circuit.instructions
+            self.snowflurry_namespace.namespace.sf_circuit.instructions
         )  # instructions is a jlwrap object
         gate_str = ""
         gate_name = ""
@@ -292,7 +295,7 @@ class PennylaneConverter:
         # of the instructions vector and removing the readouts from it before
         # contructing a new QuantumCircuit with that vector.
         while self.has_readout():
-            Snowflurry.seval("pop!(sf_circuit)")
+            self.snowflurry_namespace.namespace.seval("pop!(sf_circuit)")
 
     def apply_single_readout(self, wire):
         """
@@ -311,7 +314,7 @@ class PennylaneConverter:
 
         # if no readout is applied to the wire, we apply one while taking into account that
         # the wire number is 1-indexed in Julia
-        Snowflurry.seval(f"push!(sf_circuit, readout({wire+1}, {wire+1}))")
+        self.snowflurry_namespace.namespace.seval(f"push!(sf_circuit, readout({wire+1}, {wire+1}))")
 
     def measure_final_state(self):
         """
@@ -340,8 +343,6 @@ class PennylaneConverter:
                 self.measure(mp, shots)
                 for mp in circuit.measurements
             )
-
-        # Snowflurry.print(Snowflurry.sf_circuit) # uncomment to print the circuit while debugging
 
         return results
 

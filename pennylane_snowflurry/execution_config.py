@@ -20,7 +20,7 @@ This module has not been modified from the original Pennylane source.
 from dataclasses import dataclass
 from typing import Optional
 
-from pennylane.workflow import SUPPORTED_INTERFACES
+from pennylane.workflow import SUPPORTED_INTERFACE_NAMES
 from pennylane.gradients import SUPPORTED_GRADIENT_KWARGS
 
 SUPPORTED_GRADIENT_METHODS = [
@@ -78,9 +78,9 @@ class ExecutionConfig:
 
         Note that this hook is automatically called after init via the dataclass integration.
         """
-        if self.interface not in SUPPORTED_INTERFACES:
+        if self.interface not in SUPPORTED_INTERFACE_NAMES:
             raise ValueError(
-                f"Unknown interface. interface must be in {SUPPORTED_INTERFACES}, got {self.interface} instead."
+                f"Unknown interface. interface must be in {SUPPORTED_INTERFACE_NAMES}, got {self.interface} instead."
             )
 
         if self.grad_on_execution not in {True, False, None}:
