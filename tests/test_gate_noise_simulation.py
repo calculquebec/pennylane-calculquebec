@@ -7,7 +7,7 @@ from pennylane.tape import QuantumTape
 import pennylane as qml
 import pennylane_snowflurry.utility.noise as noise
 
-class TestStep:
+class FakeStep:
     def __init__(self, use_benchmark):
         self.use_benchmark = use_benchmark
     
@@ -57,7 +57,7 @@ def test_execute(mock_get_qubit_noise,
     mock_get_phase_damping.return_value = [0.4 for _ in range(4)]
     
     tape = QuantumTape([qml.X(0), qml.Z(1), qml.CZ([2 ,3])], [], 1000)
-    tape = GateNoiseSimulation.execute(TestStep(True), tape)
+    tape = GateNoiseSimulation.execute(FakeStep(True), tape)
     
     assert qml.DepolarizingChannel(0.2, 2) in tape.operations
     assert qml.DepolarizingChannel(0.2, 3) in tape.operations
@@ -68,11 +68,11 @@ def test_execute(mock_get_qubit_noise,
     # invalid placement raises error
     tape = QuantumTape([qml.CZ([0, 10])])
     with pytest.raises(ValueError):
-        tape = GateNoiseSimulation.execute(TestStep(True), tape)
+        tape = GateNoiseSimulation.execute(FakeStep(True), tape)
     
     # dont use benchmark, noise should be reciprocal to benchmark
     tape = QuantumTape([qml.X(0), qml.Z(4), qml.CZ([8, 12])], [], 1000)
-    tape = GateNoiseSimulation.execute(TestStep(False), tape)
+    tape = GateNoiseSimulation.execute(FakeStep(False), tape)
     
     assert qml.DepolarizingChannel(noise.depolarizing_noise(TypicalBenchmark.cz), 8) in tape.operations
     assert qml.DepolarizingChannel(noise.depolarizing_noise(TypicalBenchmark.cz), 12) in tape.operations
@@ -83,5 +83,5 @@ def test_execute(mock_get_qubit_noise,
     # invalid gate raises error
     tape = QuantumTape([qml.CNOT([0, 1])])
     with pytest.raises(ValueError):
-        tape = GateNoiseSimulation.execute(TestStep(False), tape)
+        tape = GateNoiseSimulation.execute(FakeStep(False), tape)
     
