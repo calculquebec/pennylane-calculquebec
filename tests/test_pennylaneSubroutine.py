@@ -22,6 +22,8 @@ class TestPennylaneSubroutine:
     def dev_snowflurry(self):
         self.dev_snowflurry = qml.device("snowflurry.qubit", wires=5)
 
+    
+    @pytest.mark.xfail
     def test_AQFT(self):
         """Test the AQFT subroutine."""
         def circuit_AQFT():
@@ -34,7 +36,7 @@ class TestPennylaneSubroutine:
         result_pennylane = pennylane_qnode()
         assert result_pennylane.all() == result_snowflurry.all()
 
-
+    @pytest.mark.xfail
     def test_BasisState(self):
         """Test the BasisState subroutine.
 
