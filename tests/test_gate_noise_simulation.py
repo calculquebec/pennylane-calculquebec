@@ -1,11 +1,11 @@
 import pytest
 from unittest.mock import patch
-from pennylane_snowflurry.processing.steps import GateNoiseSimulation
-from pennylane_snowflurry.utility.noise import TypicalBenchmark
-from pennylane_snowflurry.monarq_data import connectivity
+from pennylane_calculquebec.processing.steps import GateNoiseSimulation
+from pennylane_calculquebec.utility.noise import TypicalBenchmark
+from pennylane_calculquebec.monarq_data import connectivity
 from pennylane.tape import QuantumTape
 import pennylane as qml
-import pennylane_snowflurry.utility.noise as noise
+import pennylane_calculquebec.utility.noise as noise
 
 class FakeStep:
     def __init__(self, use_benchmark):
@@ -25,22 +25,22 @@ class FakeStep:
         
 @pytest.fixture
 def mock_get_qubit_noise():
-    with patch("pennylane_snowflurry.monarq_data.get_qubit_noise") as mock:
+    with patch("pennylane_calculquebec.monarq_data.get_qubit_noise") as mock:
         yield mock
 
 @pytest.fixture
 def mock_get_coupler_noise():
-    with patch("pennylane_snowflurry.monarq_data.get_coupler_noise") as mock2:
+    with patch("pennylane_calculquebec.monarq_data.get_coupler_noise") as mock2:
         yield mock2
 
 @pytest.fixture
 def mock_get_amplitude_damping():
-    with patch("pennylane_snowflurry.monarq_data.get_amplitude_damping") as mock3:
+    with patch("pennylane_calculquebec.monarq_data.get_amplitude_damping") as mock3:
         yield mock3
 
 @pytest.fixture
 def mock_get_phase_damping():
-    with patch("pennylane_snowflurry.monarq_data.get_phase_damping") as mock4:
+    with patch("pennylane_calculquebec.monarq_data.get_phase_damping") as mock4:
         yield mock4
 
 def test_execute(mock_get_qubit_noise, 

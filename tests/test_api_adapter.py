@@ -1,8 +1,8 @@
-from pennylane_snowflurry.API.adapter import ApiAdapter, ApiException
-from pennylane_snowflurry.API.client import MonarqClient
+from pennylane_calculquebec.API.adapter import ApiAdapter, ApiException
+from pennylane_calculquebec.API.client import MonarqClient
 import pytest
 from unittest.mock import patch
-from pennylane_snowflurry.utility.api import ApiUtility, keys
+from pennylane_calculquebec.utility.api import ApiUtility, keys
 from datetime import datetime, timedelta
 client = MonarqClient("test", "test", "test")
 
@@ -20,22 +20,22 @@ def mock_requests_post():
 
 @pytest.fixture
 def mock_get_benchmark():
-    with patch("pennylane_snowflurry.API.adapter.ApiAdapter.get_benchmark") as get_benchmark:
+    with patch("pennylane_calculquebec.API.adapter.ApiAdapter.get_benchmark") as get_benchmark:
         yield get_benchmark
     
 @pytest.fixture
 def mock_is_last_update_expired():
-    with patch("pennylane_snowflurry.API.adapter.ApiAdapter.is_last_update_expired") as is_last_update_expired:
+    with patch("pennylane_calculquebec.API.adapter.ApiAdapter.is_last_update_expired") as is_last_update_expired:
         yield is_last_update_expired
 
 @pytest.fixture
 def mock_get_machine_by_name():
-    with patch("pennylane_snowflurry.API.adapter.ApiAdapter.get_machine_by_name") as get_machine_by_name:
+    with patch("pennylane_calculquebec.API.adapter.ApiAdapter.get_machine_by_name") as get_machine_by_name:
         return get_machine_by_name
 
 @pytest.fixture
 def mock_job_body():
-    with patch("pennylane_snowflurry.utility.api.ApiUtility.job_body") as job_body:
+    with patch("pennylane_calculquebec.utility.api.ApiUtility.job_body") as job_body:
         return job_body
 
 

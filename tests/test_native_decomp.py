@@ -1,7 +1,7 @@
 import numpy as np
-from pennylane_snowflurry.processing.steps.base_decomposition import CliffordTDecomposition
-from pennylane_snowflurry.processing.steps.native_decomposition import MonarqDecomposition
-from pennylane_snowflurry.utility.api import instructions
+from pennylane_calculquebec.processing.steps.base_decomposition import CliffordTDecomposition
+from pennylane_calculquebec.processing.steps.native_decomposition import MonarqDecomposition
+from pennylane_calculquebec.utility.api import instructions
 import pennylane as qml
 from pennylane.tape import QuantumTape
 import pytest

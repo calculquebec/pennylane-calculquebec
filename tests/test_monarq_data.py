@@ -1,32 +1,32 @@
 import pytest
 from unittest.mock import patch
-from pennylane_snowflurry.utility.api import keys
-import pennylane_snowflurry.monarq_data as data
-from pennylane_snowflurry.API.adapter import ApiAdapter
+from pennylane_calculquebec.utility.api import keys
+import pennylane_calculquebec.monarq_data as data
+from pennylane_calculquebec.API.adapter import ApiAdapter
 
 epsilon = 1e-8
 
 @pytest.fixture
 def mock_depolarizing_noise():
-    with patch("pennylane_snowflurry.utility.noise.depolarizing_noise") as depolarizing_noise:
+    with patch("pennylane_calculquebec.utility.noise.depolarizing_noise") as depolarizing_noise:
         yield depolarizing_noise
 
 
 @pytest.fixture
 def mock_phase_damping():
-    with patch("pennylane_snowflurry.utility.noise.phase_damping") as phase_damping:
+    with patch("pennylane_calculquebec.utility.noise.phase_damping") as phase_damping:
         yield phase_damping
 
         
 @pytest.fixture
 def mock_amplitude_damping():
-    with patch("pennylane_snowflurry.utility.noise.amplitude_damping") as amplitude_damping:
+    with patch("pennylane_calculquebec.utility.noise.amplitude_damping") as amplitude_damping:
         yield amplitude_damping
 
         
 @pytest.fixture
 def mock_get_qubits_and_couplers():
-    with patch("pennylane_snowflurry.API.adapter.ApiAdapter.get_qubits_and_couplers") as get_qubits_and_couplers:
+    with patch("pennylane_calculquebec.API.adapter.ApiAdapter.get_qubits_and_couplers") as get_qubits_and_couplers:
         connectivity = data.connectivity
         get_qubits_and_couplers.return_value = {keys.qubits : {}, keys.couplers : {}}
         for qubit in connectivity[keys.qubits]:
@@ -39,7 +39,7 @@ def mock_get_qubits_and_couplers():
 
 @pytest.fixture
 def mock_is_last_update_expired():
-    with patch("pennylane_snowflurry.API.adapter.ApiAdapter.is_last_update_expired") as is_last_update_expired:
+    with patch("pennylane_calculquebec.API.adapter.ApiAdapter.is_last_update_expired") as is_last_update_expired:
         yield is_last_update_expired
 
 

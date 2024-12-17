@@ -1,14 +1,14 @@
 import pennylane as qml
 from pennylane.tape import QuantumTape
 import numpy as np
-from pennylane_snowflurry.processing.steps import DecomposeReadout
+from pennylane_calculquebec.processing.steps import DecomposeReadout
 import pytest
 from unittest.mock import patch
 
 
 @pytest.fixture
 def mock_get_ops_for_product():
-    with patch("pennylane_snowflurry.processing.steps.DecomposeReadout.get_ops_for_product") as mock:
+    with patch("pennylane_calculquebec.processing.steps.DecomposeReadout.get_ops_for_product") as mock:
         yield mock
 
 @pytest.mark.parametrize("obs, expected", [

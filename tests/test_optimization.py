@@ -1,16 +1,16 @@
 import numpy as np
-from pennylane_snowflurry.processing.steps.base_decomposition import CliffordTDecomposition
-from pennylane_snowflurry.processing.steps.optimization import IterativeCommuteAndMerge
+from pennylane_calculquebec.processing.steps.base_decomposition import CliffordTDecomposition
+from pennylane_calculquebec.processing.steps.optimization import IterativeCommuteAndMerge
 import pennylane as qml
 from pennylane.tape import QuantumTape
 import pytest
 from unittest.mock import patch
 from functools import reduce
-from pennylane_snowflurry.utility.debug import are_matrices_equivalent
+from pennylane_calculquebec.utility.debug import are_matrices_equivalent
 
 @pytest.fixture
 def mock_commute_and_merge():
-    with patch("pennylane_snowflurry.processing.steps.optimization.commute_and_merge") as mock:
+    with patch("pennylane_calculquebec.processing.steps.optimization.commute_and_merge") as mock:
         yield mock
 
 # ajouter des tests pour les autres fonctions que execute
@@ -128,7 +128,7 @@ def test_Y_to_ZXZ():
     assert result[2] == qml.RZ(-np.pi/2, 0)
     
 def test_get_rid_of_Y_rotations():
-    with patch("pennylane_snowflurry.processing.steps.optimization.IterativeCommuteAndMerge.Y_to_ZXZ") as Y_to_ZXZ_mock:
+    with patch("pennylane_calculquebec.processing.steps.optimization.IterativeCommuteAndMerge.Y_to_ZXZ") as Y_to_ZXZ_mock:
         Y_to_ZXZ_mock.return_value = []
         
         # non-y gate dont call Y_to_ZXZ
