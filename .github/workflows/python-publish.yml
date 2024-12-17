@@ -8,7 +8,7 @@
 
 # This workflow has yet to be tested
 
-name: Upload Python Package
+name: Upload Python Package to PyPI
 
 on:
   release:
@@ -19,11 +19,9 @@ permissions:
   contents: read
 
 jobs:
-  release:
+  build:
+    name: Build the disctribution package
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-    environment: release
 
     steps:
       - name: Checkout the repository
@@ -40,6 +38,23 @@ jobs:
         run: python3 -m build
       - name: Store the distribution packages
         uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+
+  release-on-pypi:
+    name: Release distribution packages on PyPI
+    needs:
+    - build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    environment: release
+
+    steps:
+      - name: Download the distribution packages
+        uses: actions/download-artifact@v4
         with:
           name: python-package-distributions
           path: dist/
