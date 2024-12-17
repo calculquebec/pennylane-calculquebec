@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pennylane-snowflurry"
+name = "pennylane-calculquebec"
 dynamic = ["version"]
 requires-python = ">=3.9"
 dependencies = ["numpy", "juliacall >= 0.9.0", "pennylane >= 0.30.0", "networkx >= 3.3"]
@@ -33,19 +33,19 @@ classifiers = [
 ]
 
 [project.urls]
-Source = "https://github.com/calculquebec/pennylane-snowflurry"
+Source = "https://github.com/calculquebec/pennylane-calculquebec"
 
 [project.optional-dependencies]
 test = ["matplotlib", "pytest", "pytest-mock", "flaky"]
 
 [project.entry-points."pennylane.plugins"]
-"snowflurry.qubit" = "pennylane_snowflurry:SnowflurryQubitDevice"
-"monarq.default" = "pennylane_snowflurry:MonarqDevice"
+"snowflurry.qubit" = "pennylane_calculquebec:SnowflurryQubitDevice"
+"monarq.default" = "pennylane_calculquebec:MonarqDevice"
 
 [project.entry-points."pennylane.io"]
 
 [tool.setuptools]
-packages = ["pennylane_snowflurry", "pennylane_snowflurry.measurements", "pennylane_snowflurry.utility", "pennylane_snowflurry.API", "pennylane_snowflurry.processing", "pennylane_snowflurry.processing.steps", "pennylane_snowflurry.processing.config", "pennylane_snowflurry.processing.interfaces"]
+packages = ["pennylane_calculquebec", "pennylane_calculquebec.measurements", "pennylane_calculquebec.utility", "pennylane_calculquebec.API", "pennylane_calculquebec.processing", "pennylane_calculquebec.processing.steps", "pennylane_calculquebec.processing.config", "pennylane_calculquebec.processing.interfaces"]
 
 [tool.setuptools.dynamic]
-version = { attr = "pennylane_snowflurry._version.__version__" }
+version = { attr = "pennylane_calculquebec._version.__version__" }
