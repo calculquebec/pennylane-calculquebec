@@ -6,9 +6,11 @@ import os
 # Required packages for the Julia environment
 REQUIRED_PACKAGES = [
     PkgSpec(
-        name="Snowflurry", uuid="7bd9edc1-4fdc-40a1-a0f6-da58fb4f45ec", version="0.5"
+        name="Snowflurry", uuid="7bd9edc1-4fdc-40a1-a0f6-da58fb4f45ec", version="0.5.1"
     ),
 ]
+
+JULIA_TARGET_VERSION = "1.9 - 1.10"
 
 IS_USER_CONFIGURED = False
 
@@ -36,9 +38,9 @@ class JuliaEnv:
     """
 
     def __init__(self):
-        self.julia_env_path = juliapkg.project()
-        self.json_path = self.julia_env_path + "/pyjuliapkg/juliapkg.json"
-        self.json_pkg_list = self.get_json_pkg_list()
+        self.julia_env_path = None
+        self.json_path = None
+        self.json_pkg_list = None
         self.required_packages = REQUIRED_PACKAGES
 
     def update(self):
@@ -49,6 +51,10 @@ class JuliaEnv:
         """
         if IS_USER_CONFIGURED:
             return
+
+        self.julia_env_path = juliapkg.project()
+        self.json_path = self.julia_env_path + "/pyjuliapkg/juliapkg.json"
+        self.json_pkg_list = self.get_json_pkg_list()
 
         for required_pkg in self.required_packages:
             if required_pkg.name in self.json_pkg_list:
@@ -90,16 +96,6 @@ class JuliaEnv:
         except:
             LookupError("Package not found")
 
-    def write_json(self):
-        """
-        This function writes the updated list of packages to the JSON file
-        It also creates the JSON file if it does not exist.
-        """
-        if "packages" not in self.json_pkg_list:
-            self.json_pkg_list = {"packages": self.json_pkg_list}
-        with open(self.json_path, "w") as f:
-            json.dump(self.json_pkg_list, f)
-
     def new_json_pkg_list(self):
         """
         This function updates the list of packages with the required packages
@@ -110,3 +106,13 @@ class JuliaEnv:
                 "uuid": required_pkg.uuid,
                 "version": required_pkg.version,
             }
+
+    def write_json(self):
+        """
+        This function writes the updated list of packages to the JSON file
+        It also creates the JSON file if it does not exist.
+        """
+        if "packages" not in self.json_pkg_list:
+            self.json_pkg_list = {"packages": self.json_pkg_list}
+        with open(self.json_path, "w") as f:
+            json.dump(self.json_pkg_list, f)
