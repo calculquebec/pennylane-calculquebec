@@ -1,4 +1,5 @@
 {
+  "comment (not included in circuit dict)" : "this file's purpose is to provide a sample of what QuantumTapes are converted to when we want to send them to MonarQ.",
   "operations": [
     {
       "type": "x_90",
