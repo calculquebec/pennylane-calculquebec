@@ -1,5 +1,6 @@
 """
-Contains a couple of quantum circuit implementations
+Contains a couple of quantum circuit implementations\n
+Those circuits are not used in any features of the plugin.
 """
 
 import pennylane as qml

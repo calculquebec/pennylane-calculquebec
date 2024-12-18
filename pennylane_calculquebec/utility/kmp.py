@@ -1,5 +1,6 @@
 """
-Contains a generic implementation of KMP search algorithm (could be useful for optimization)
+Contains a generic implementation of KMP search algorithm
+This is not used for now, but could be used to search for equivalences in a circuit
 """
 
 from typing import Callable
