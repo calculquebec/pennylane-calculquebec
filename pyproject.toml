@@ -5,29 +5,29 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pennylane-calculquebec"
 dynamic = ["version"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = ["numpy", "juliacall >= 0.9.0", "pennylane >= 0.30.0", "networkx >= 3.3"]
-description = "PennyLane plugin for interfacing with Anyon's quantum computers"
+description = "Pennylane plugin enabling seamless job execution on MonarQ, Calcul Québec’s nonprofit-hosted quantum computer"
 readme = "README.md"
 maintainers = [
     { name = "Calcul Québec", email = "support@tech.alliancecan.ca" },
 ]
-license = { text = "Apache Software License (Apache License 2.0)" }
+license = { text = "Creative Commons" }
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Environment :: Console",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: Apache Software License",
+    "License :: OSI Approved :: Creative Commons",
     "Natural Language :: English",
     "Operating System :: POSIX",
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: POSIX :: Linux",
     "Operating System :: Microsoft :: Windows",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3",,
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+	"Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Scientific/Engineering :: Physics",
 ]
