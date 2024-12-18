@@ -190,7 +190,7 @@ def find_best_wire(graph : nx.Graph, excluded : list[int] = [], use_benchmark = 
     graph_copy.remove_nodes_from(excluded)
     return max([node for node in graph_copy.nodes], key=lambda other: calculate_score(other, graph_copy, use_benchmark))
 
-def find_closest_wire(start : int, machine_graph : nx.Graph, excluding : list[int] = [], prioritized : list[int] = [], use_benchmark = True):
+def find_closest_wire(source : int, machine_graph : nx.Graph, excluding : list[int] = [], prioritized : list[int] = [], use_benchmark = True):
     """
     find node in graph that is closest to given node, while skipping nodes from the excluding list
 
@@ -201,13 +201,12 @@ def find_closest_wire(start : int, machine_graph : nx.Graph, excluding : list[in
         prioritized (list[int]) : nodes that should be in the path if possible
         use_benchmark (bool) : should we use qubit fidelities?
     """
-    nodes = [n for n in machine_graph if n not in excluding]
-    return min(nodes, key=lambda end: len(shortest_path(start, end, 
-                                                      machine_graph, 
-                                                      excluding=excluding, 
-                                                      prioritized_nodes=prioritized, 
-                                                      use_benchmark=use_benchmark)))
-
+    nodes = [node for node in machine_graph.nodes if node not in excluding]
+    return min(nodes, key=lambda dest: shortest_path(source, 
+                                                     dest, 
+                                                     machine_graph, 
+                                                     excluding=excluding, 
+                                                     use_benchmark=use_benchmark))
 
 def node_with_shortest_path_from_selection(source : int, selection : list[int], graph : nx.Graph, use_benchmark = True):
     """
