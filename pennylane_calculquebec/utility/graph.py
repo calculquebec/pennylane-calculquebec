@@ -142,6 +142,8 @@ def shortest_path(a : int, b : int, graph : nx.Graph, excluding : list[int] = []
         this function is used to determine the cost of a link
         it is determined by the error of the source + the error of the coupler + the error of the destination
         """
+        infinite = 10000000
+
         if not use_benchmark: 
             return 1 # return default value of one if we should not use benchmarks
     
@@ -151,8 +153,9 @@ def shortest_path(a : int, b : int, graph : nx.Graph, excluding : list[int] = []
         source_readout1 = r1_cz_fidelities[keys.READOUT_STATE_1_FIDELITY][str(source_node)]
         dest_readout1 = r1_cz_fidelities[keys.READOUT_STATE_1_FIDELITY][str(dest_node)]
         
+        # this node has no coupler. we should never chose it!
         if len(source_dest_cz) < 1:
-            return 10
+            return infinite
         
         # weight corresponds to the cz error (ie 1 - fidelity)
         # we add one at the end so that if the node is prioritized, 
