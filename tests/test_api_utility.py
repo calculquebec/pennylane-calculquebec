@@ -24,15 +24,15 @@ def test_convert_instructions():
     
     op = qml.CZ([0, 1])
     op_dict = ApiUtility.convert_instruction(op)
-    assert op_dict[keys.type] == "cz"
-    assert op_dict[keys.qubits] == [0, 1]
-    assert keys.parameters not in op_dict
+    assert op_dict[keys.TYPE] == "cz"
+    assert op_dict[keys.QUBITS] == [0, 1]
+    assert keys.PARAMETERS not in op_dict
     
     op = qml.RZ(np.pi, 0)
     op_dict = ApiUtility.convert_instruction(op)
-    assert op_dict[keys.type] == "rz"
-    assert op_dict[keys.qubits] == [0]
-    assert abs(op_dict[keys.parameters]["lambda"] - np.pi) < 1E-8
+    assert op_dict[keys.TYPE] == "rz"
+    assert op_dict[keys.QUBITS] == [0]
+    assert abs(op_dict[keys.PARAMETERS]["lambda"] - np.pi) < 1E-8
 
 def test_convert_circuit(mock_convert_instruction):
     mock_convert_instruction.side_effect = lambda op : op.name
@@ -43,15 +43,15 @@ def test_convert_circuit(mock_convert_instruction):
     result = ApiUtility.convert_circuit(tape)
     assert mock_convert_instruction.call_count == 3
     
-    for i, op in enumerate(result[keys.operations]):
+    for i, op in enumerate(result[keys.OPERATIONS]):
         assert op == tape.operations[i].name
     
     tape = QuantumTape([], [qml.counts(wires=wires)], 1000)
     result = ApiUtility.convert_circuit(tape)
     
-    for i, op in enumerate(result[keys.operations]):
-        assert op[keys.qubits] == [wires[i]]
-        assert op[keys.bits] == [i]
+    for i, op in enumerate(result[keys.OPERATIONS]):
+        assert op[keys.QUBITS] == [wires[i]]
+        assert op[keys.BITS] == [i]
 
 def test_basic_auth():
     test = ApiUtility.basic_auth("user", "password")
@@ -78,8 +78,8 @@ def test_body():
                                  machine_name="d", 
                                  shots="e")
     
-    assert result[keys.circuit] == "a"
-    assert result[keys.name] == "b"
-    assert result[keys.projectID] == "c"
-    assert result[keys.machineName] == "d"
-    assert result[keys.shotCount] == "e"
+    assert result[keys.CIRCUIT] == "a"
+    assert result[keys.NAME] == "b"
+    assert result[keys.PROJECT_ID] == "c"
+    assert result[keys.MACHINE_NAME] == "d"
+    assert result[keys.SHOT_COUNT] == "e"

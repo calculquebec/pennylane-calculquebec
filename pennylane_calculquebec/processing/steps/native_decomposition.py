@@ -54,19 +54,19 @@ class MonarqDecomposition(NativeDecomposition):
         new_operations = []
 
         with qml.QueuingManager.stop_recording():
-            for op in tape.operations:
-                if op.name in MonarqDecomposition._decomp_map:
-                    if op.num_params > 0:
-                        new_operations.extend(MonarqDecomposition._decomp_map[op.name](angle=op.data[0], wires=op.wires))
+            for operation in tape.operations:
+                if operation.name in MonarqDecomposition._decomp_map:
+                    if operation.num_params > 0:
+                        new_operations.extend(MonarqDecomposition._decomp_map[operation.name](angle=operation.data[0], wires=operation.wires))
                     else:
-                        new_operations.extend(MonarqDecomposition._decomp_map[op.name](wires=op.wires))
+                        new_operations.extend(MonarqDecomposition._decomp_map[operation.name](wires=operation.wires))
                 else:
-                    if op.name in self.native_gates():
-                        new_operations.append(op)
+                    if operation.name in self.native_gates():
+                        new_operations.append(operation)
                     else:
-                        raise ValueError(f"gate {op.name} is not handled by the native decomposition step. Did you bypass the base decomposition step?")
+                        raise ValueError(f"gate {operation.name} is not handled by the native decomposition step. Did you bypass the base decomposition step?")
 
-        new_operations = [n.data[0][0] if isinstance(n, SProd) else n for n in new_operations]
+        new_operations = [operation.data[0][0] if isinstance(operation, SProd) else operation for operation in new_operations]
         new_tape = type(tape)(new_operations, tape.measurements, shots=tape.shots)
 
         return new_tape

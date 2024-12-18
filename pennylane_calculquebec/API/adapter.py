@@ -62,7 +62,7 @@ class ApiAdapter(object):
         """
         # put machine in cache
         if ApiAdapter._machine is None:
-            route = ApiAdapter.instance().client.host + routes.machines + routes.machineName + "=" + ApiAdapter.instance().client.machine_name
+            route = ApiAdapter.instance().client.host + routes.MACHINES + routes.MACHINE_NAME + "=" + ApiAdapter.instance().client.machine_name
             res = requests.get(route, headers=ApiAdapter.instance().headers)
             if res.status_code != 200:
                 ApiAdapter.raise_exception(res)
@@ -77,7 +77,7 @@ class ApiAdapter(object):
         """
         
         benchmark = ApiAdapter.get_benchmark()
-        return benchmark[keys.resultsPerDevice]
+        return benchmark[keys.RESULTS_PER_DEVICE]
 
     @staticmethod
     def get_benchmark():
@@ -88,9 +88,9 @@ class ApiAdapter(object):
         # put benchmark in cache
         if ApiAdapter._benchmark is None or ApiAdapter.is_last_update_expired():
             machine = ApiAdapter.get_machine_by_name()
-            machine_id = machine[keys.items][0][keys.id]
+            machine_id = machine[keys.ITEMS][0][keys.ID]
 
-            route = ApiAdapter.instance().client.host + routes.machines + "/" + machine_id + routes.benchmarking
+            route = ApiAdapter.instance().client.host + routes.MACHINES + "/" + machine_id + routes.BENCHMARKING
             res = requests.get(route, headers=ApiAdapter.instance().headers)
             if res.status_code != 200:
                 ApiAdapter.raise_exception(res)
@@ -107,7 +107,7 @@ class ApiAdapter(object):
         post a new job for running a specific circuit a certain amount of times on given machine (machine name stored in client)
         """
         body = ApiUtility.job_body(circuit, circuit_name, ApiAdapter.instance().client.project_name, ApiAdapter.instance().client.machine_name, shot_count)
-        res = requests.post(ApiAdapter.instance().client.host + routes.jobs, data=json.dumps(body), headers=ApiAdapter.instance().headers)
+        res = requests.post(ApiAdapter.instance().client.host + routes.JOBS, data=json.dumps(body), headers=ApiAdapter.instance().headers)
         if res.status_code != 200:
             ApiAdapter.raise_exception(res)
         return res
@@ -117,7 +117,7 @@ class ApiAdapter(object):
         """
         get all jobs for a given user (user stored in client)
         """
-        res = requests.get(ApiAdapter.instance().client.host + routes.jobs, headers=ApiAdapter.instance().headers)
+        res = requests.get(ApiAdapter.instance().client.host + routes.JOBS, headers=ApiAdapter.instance().headers)
         if res.status_code != 200:
             ApiAdapter.raise_exception(res)
         return res
@@ -127,7 +127,7 @@ class ApiAdapter(object):
         """
         get a job for a given user by providing its id (user stored in client)
         """
-        res = requests.get(ApiAdapter.instance().client.host + routes.jobs + f"/{id}", headers=ApiAdapter.instance().headers)
+        res = requests.get(ApiAdapter.instance().client.host + routes.JOBS + f"/{id}", headers=ApiAdapter.instance().headers)
         if res.status_code != 200:
             ApiAdapter.raise_exception(res)
         return res

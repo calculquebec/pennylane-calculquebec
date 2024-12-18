@@ -2,7 +2,7 @@ import numpy as np
 from pennylane_calculquebec.processing.steps.base_decomposition import CliffordTDecomposition, BaseDecomposition
 from pennylane_calculquebec.processing.steps.native_decomposition import MonarqDecomposition
 from pennylane_calculquebec.utility.api import instructions
-from pennylane_calculquebec.utility.debug import are_matrices_equivalent
+from pennylane_calculquebec.utility.debug import is_equal_matrices
 import pennylane as qml
 from pennylane.tape import QuantumTape
 import pytest
@@ -22,7 +22,7 @@ def test_base_decomp_toffoli():
     mat1 = reduce(lambda i, s: i @ s.matrix(wire_order=tape.wires), tape.operations, np.identity(1 << len(tape.wires)))
     mat2 = reduce(lambda i, s: i @ s.matrix(wire_order=new_tape.wires), new_tape.operations, np.identity(1 << len(new_tape.wires)))
     
-    assert are_matrices_equivalent(mat1, mat2)
+    assert is_equal_matrices(mat1, mat2)
 
 @pytest.mark.xfail
 def test_base_decomp_unitary():
@@ -36,7 +36,7 @@ def test_base_decomp_unitary():
     mat1 = reduce(lambda i, s: i @ s.matrix(wire_order=tape.wires), tape.operations, np.identity(1 << len(tape.wires)))
     mat2 = reduce(lambda i, s: i @ s.matrix(wire_order=new_tape.wires), new_tape.operations, np.identity(1 << len(new_tape.wires)))
     
-    assert are_matrices_equivalent(mat1, mat2)
+    assert is_equal_matrices(mat1, mat2)
 
 @pytest.mark.xfail
 def test_base_decomp_cu():
@@ -51,4 +51,4 @@ def test_base_decomp_cu():
     mat1 = reduce(lambda i, s: i @ s.matrix(wire_order=tape.wires), tape.operations, np.identity(1 << len(tape.wires)))
     mat2 = reduce(lambda i, s: i @ s.matrix(wire_order=new_tape.wires), new_tape.operations, np.identity(1 << len(new_tape.wires)))
     
-    assert are_matrices_equivalent(mat1, mat2)
+    assert is_equal_matrices(mat1, mat2)

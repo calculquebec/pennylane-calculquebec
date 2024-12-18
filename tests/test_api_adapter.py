@@ -84,7 +84,7 @@ def test_get_machine_by_name(mock_requests_get):
         machine = ApiAdapter.get_machine_by_name()
 
 def test_get_qubits_and_couplers(mock_get_benchmark):
-    mock_get_benchmark.return_value = {keys.resultsPerDevice : True}
+    mock_get_benchmark.return_value = {keys.RESULTS_PER_DEVICE : True}
     result = ApiAdapter.get_qubits_and_couplers()
     assert result
 
@@ -93,7 +93,7 @@ def test_get_benchmark(mock_is_last_update_expired, mock_get_machine_by_name, mo
     test_benchmark_str2 = '{"test" : "im a benchmark2"}'
 
     test_machine_str = '{"items" : [{"id" : "3"}]}'
-    mock_get_machine_by_name.return_value = {keys.items : [{keys.id : "3"}]}
+    mock_get_machine_by_name.return_value = {keys.ITEMS : [{keys.ID : "3"}]}
     mock_is_last_update_expired.return_value = False
     
     test_benchmark = {"test" : "im a benchmark"}

@@ -42,7 +42,7 @@ class IterativeCommuteAndMerge(Optimize):
         tape = expand(tape, { "Hadamard" : IterativeCommuteAndMerge.ZXZ_Hadamard })
         tape = commute_and_merge(tape)
         
-        tape = transforms.create_expand_fn(depth=3, stop_at=lambda op: op.name in ["RZ", "RX", "RY", "CZ"])(tape)
+        tape = transforms.create_expand_fn(depth=3, stop_at=lambda operation: operation.name in ["RZ", "RX", "RY", "CZ"])(tape)
         tape = commute_and_merge(tape)
         
         tape = IterativeCommuteAndMerge.get_rid_of_y_rotations(tape)
@@ -90,24 +90,24 @@ class IterativeCommuteAndMerge(Optimize):
         ]
 
     @staticmethod
-    def Y_to_ZXZ(op):
+    def Y_to_ZXZ(operation):
         """turns RY into RZ - RX - RZ"""
-        if len(op.wires) != 1:
+        if len(operation.wires) != 1:
             raise ValueError("Single qubit rotations must be given one wire")
         
-        if op.basis != "Y":
+        if operation.basis != "Y":
             raise ValueError("Operation must be in the Y basis")
-        rot_angles = op.single_qubit_rot_angles()
-        return [qml.RZ(np.pi/2, op.wires), qml.RX(rot_angles[1], op.wires), qml.RZ(-np.pi/2, op.wires)]
+        rot_angles = operation.single_qubit_rot_angles()
+        return [qml.RZ(np.pi/2, operation.wires), qml.RX(rot_angles[1], operation.wires), qml.RZ(-np.pi/2, operation.wires)]
 
     @staticmethod
     def get_rid_of_y_rotations(tape : QuantumTape):
         """removes all Y rotations"""
         list_copy = tape.operations.copy()
         new_operations = []
-        for op in list_copy:
-            if not is_single_axis_gate(op, "Y"): 
-                new_operations += [op]
+        for operation in list_copy:
+            if not is_single_axis_gate(operation, "Y"): 
+                new_operations += [operation]
             else:
-                new_operations += IterativeCommuteAndMerge.Y_to_ZXZ(op)
+                new_operations += IterativeCommuteAndMerge.Y_to_ZXZ(operation)
         return type(tape)(new_operations, tape.measurements, tape.shots)

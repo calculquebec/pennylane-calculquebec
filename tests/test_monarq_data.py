@@ -28,11 +28,11 @@ def mock_amplitude_damping():
 def mock_get_qubits_and_couplers():
     with patch("pennylane_calculquebec.API.adapter.ApiAdapter.get_qubits_and_couplers") as get_qubits_and_couplers:
         connectivity = data.connectivity
-        get_qubits_and_couplers.return_value = {keys.qubits : {}, keys.couplers : {}}
-        for qubit in connectivity[keys.qubits]:
-            get_qubits_and_couplers.return_value[keys.qubits][str(qubit)] = {keys.readoutState1Fidelity : 0.8, keys.readoutState0Fidelity : 0.8, keys.singleQubitGateFidelity : 0.8, keys.t1 : 1e-5, keys.t2Ramsey : 1e-5}
-        for coupler in connectivity[keys.couplers]:
-            get_qubits_and_couplers.return_value[keys.couplers][coupler] = {keys.czGateFidelity : 0.8}
+        get_qubits_and_couplers.return_value = {keys.QUBITS : {}, keys.COUPLERS : {}}
+        for qubit in connectivity[keys.QUBITS]:
+            get_qubits_and_couplers.return_value[keys.QUBITS][str(qubit)] = {keys.READOUT_STATE_1_FIDELITY : 0.8, keys.READOUT_STATE_0_FIDELITY : 0.8, keys.SINGLE_QUBIT_GATE_FIDELITY : 0.8, keys.T1 : 1e-5, keys.T2_RAMSEY : 1e-5}
+        for coupler in connectivity[keys.COUPLERS]:
+            get_qubits_and_couplers.return_value[keys.COUPLERS][coupler] = {keys.CZ_GATE_FIDELITY : 0.8}
             
         yield get_qubits_and_couplers
 
@@ -48,48 +48,48 @@ def set_benchmark(qubits_and_couplers, **kwargs):
         k = key[0]
         v = key[1:]
         if k == "q":
-            qubits_and_couplers.return_value[keys.qubits][v][keys.readoutState1Fidelity] = kwargs[key]
+            qubits_and_couplers.return_value[keys.QUBITS][v][keys.READOUT_STATE_1_FIDELITY] = kwargs[key]
         else:
-            qubits_and_couplers.return_value[keys.couplers][v][keys.czGateFidelity] = kwargs[key]    
+            qubits_and_couplers.return_value[keys.COUPLERS][v][keys.CZ_GATE_FIDELITY] = kwargs[key]    
             
 
 def test_get_broken_qubits_and_couplers(mock_get_qubits_and_couplers):
     # nothing is broken
     results = data.get_broken_qubits_and_couplers(0.5, 0.5)
-    assert len(results[keys.qubits]) == 0
-    assert len(results[keys.couplers]) == 0
+    assert len(results[keys.QUBITS]) == 0
+    assert len(results[keys.COUPLERS]) == 0
     
     # qubit 4 is broken
     set_benchmark(mock_get_qubits_and_couplers, q4 = 0)
     results = data.get_broken_qubits_and_couplers(0.5, 0.5)
-    assert results[keys.qubits][0] == 4
-    assert len(results[keys.couplers]) == 0
+    assert results[keys.QUBITS][0] == 4
+    assert len(results[keys.COUPLERS]) == 0
     
     # coupler 3 is broken
     set_benchmark(mock_get_qubits_and_couplers, q4 = 1, c3 = 0)
     results = data.get_broken_qubits_and_couplers(0.5, 0.5)
     # coupler 3 ==> link from node 5 to node 2
-    assert results[keys.couplers][0] == [5, 2] 
-    assert len(results[keys.qubits]) == 0
+    assert results[keys.COUPLERS][0] == [5, 2] 
+    assert len(results[keys.QUBITS]) == 0
 
 
 def test_get_readout1_and_cz_fidelities(mock_get_qubits_and_couplers, mock_is_last_update_expired):
     # before caching
     results = data.get_readout1_and_cz_fidelities()
-    assert all([key in results for key in [keys.readoutState1Fidelity, keys.czGateFidelity]])
-    assert len(results[keys.readoutState1Fidelity]) == 24
-    assert len(results[keys.czGateFidelity]) == 35
+    assert all([key in results for key in [keys.READOUT_STATE_1_FIDELITY, keys.CZ_GATE_FIDELITY]])
+    assert len(results[keys.READOUT_STATE_1_FIDELITY]) == 24
+    assert len(results[keys.CZ_GATE_FIDELITY]) == 35
     
     # after caching
     mock_is_last_update_expired.return_value = False
     set_benchmark(mock_get_qubits_and_couplers, q4 = 0)
     results = data.get_readout1_and_cz_fidelities()
-    assert abs(results[keys.readoutState1Fidelity]["4"] - 0.8) < epsilon
+    assert abs(results[keys.READOUT_STATE_1_FIDELITY]["4"] - 0.8) < epsilon
     
     # cache is expired
     mock_is_last_update_expired.return_value = True
     results = data.get_readout1_and_cz_fidelities()
-    assert results[keys.readoutState1Fidelity]["4"] == 0
+    assert results[keys.READOUT_STATE_1_FIDELITY]["4"] == 0
 
 
 def test_get_coupler_noise(mock_is_last_update_expired, mock_get_qubits_and_couplers):
