@@ -12,51 +12,54 @@ def _compute_lps_array(pattern : list[T], compare : Callable[[T, T], bool]) ->li
     :param pattern: The pattern for which to compute the LPS array.
     :return: The LPS array.
     """
-    m = len(pattern)
-    lps = [0] * m
+    pattern_length = len(pattern)
+    longest_prefix_suffix = [0] * pattern_length
     length = 0  # length of the previous longest prefix suffix
-    i = 1
+    index = 1
     
-    while i < m:
-        if compare(pattern[i], pattern[length]):
+    while index < pattern_length:
+        if compare(pattern[index], pattern[length]):
             length += 1
-            lps[i] = length
-            i += 1
+            longest_prefix_suffix[index] = length
+            index += 1
         else:
             if length != 0:
-                length = lps[length - 1]
+                length = longest_prefix_suffix[length - 1]
             else:
-                lps[i] = 0
-                i += 1
+                longest_prefix_suffix[index] = 0
+                index += 1
                 
-    return lps
+    return longest_prefix_suffix
 
-def kmp_search(array : list[T], pattern : list[T], compare : Callable[[T, T], bool]) -> list[int]:
+def kmp_search(array : list[T], pattern : list[T], compare : Callable[[T, T], bool]) -> int:
     """
     Perform KMP search of `pattern` in `array`.
-    :param array: The array to search within.
-    :param pattern: The pattern to search for.
-    :return: the first starting index where the pattern is found in the array.
+    Args:
+        array (list[T]) The array to search within.
+        pattern (list[T]) The pattern to search for.
+        compare (T, T -> bool) comparison operation. returns True if lhs is more than rhs
+    
+    Returns
+        (int) the first starting index where the pattern is found in the array.
     """
-    n = len(array)
-    m = len(pattern)
-    lps = _compute_lps_array(pattern, compare)
+    array_length = len(array)
+    pattern_length = len(pattern)
+    longest_prefix_suffix = _compute_lps_array(pattern, compare)
     
-    i = 0  # index for array
-    j = 0  # index for pattern
+    array_index = 0  # index for array
+    pattern_index = 0  # index for pattern
     
-    while i < n:
-        if compare(pattern[j], array[i]):
-            i += 1
-            j += 1
+    while array_index < array_length:
+        if compare(pattern[pattern_index], array[array_index]):
+            array_index += 1
+            pattern_index += 1
         
-        if j == m:
-            return i - j
-            j = lps[j - 1]
-        elif i < n and not compare(pattern[j], array[i]):
-            if j != 0:
-                j = lps[j - 1]
+        if pattern_index == pattern_length:
+            return array_index - pattern_index
+        elif array_index < array_length and not compare(pattern[pattern_index], array[array_index]):
+            if pattern_index != 0:
+                pattern_index = longest_prefix_suffix[pattern_index - 1]
             else:
-                i += 1
+                array_index += 1
                 
     return None
