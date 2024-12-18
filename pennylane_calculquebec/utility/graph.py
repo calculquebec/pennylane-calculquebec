@@ -146,12 +146,8 @@ def node_with_shortest_path_from_selection(source : int, selection : list[int], 
     """
     find the unmapped node node in graph minus mapped nodes that has shortest path to given source node
     """
-    # all_unmapped_nodes = [n for n in graph.nodes if n not in mapping and n != source]
-    # mapping_minus_source = [n for n in mapping if n != source]
-
     nodes_minus_source = [node for node in selection if node != source]
     return min(nodes_minus_source, key=lambda n: len(shortest_path(source, n, graph, use_benchmark=use_benchmark)))
-    # return min(all_unmapped_nodes, key = lambda n : len(_shortest_path(source, n, graph, mapping_minus_source)))
 
 def calculate_score(source : int, graph : nx.Graph, use_benchmark = True) -> float:
     """Defines a score for a node by using cz fidelities on neighbouring couplers and state 1 readout fidelity\n
