@@ -33,7 +33,7 @@ As shown in the diagram below, this plugin contains a Pennylane [device](https:/
 
 An other device named `snowflurry.qubit` also lives in the package. It works by converting a PennyLane circuit into a Snowflurry circuit, thanks to packages like JuliaCall that allow the communication between Python and Julia environments. The The Snowflurry circuit can then be used with the available backends, either a simulator or real quantum hardware. The results are then converted back into PennyLane's format and returned to the user.
 
-![prject_structure]([./doc/assets/project_structure.png](https://github.com/calculquebec/pennylane-calculquebec/blob/feature/update_readme/doc/assets/project_structure.png))
+![project_structure](https://raw.githubusercontent.com/calculquebec/pennylane-calculquebec/9276a260959c886eed87373b74090a9d652b130c/doc/assets/project_structure.png)
 
 ## Local installation
 
