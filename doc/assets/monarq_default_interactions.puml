@@ -1,0 +1,34 @@
+@startuml monarq.default interaction
+object MonarqDevice
+
+package "confinguration classes" {
+    object TranspilerConfig
+    object ApiClient
+}
+package "device work classes" {
+    object Transpiler
+    object PostProcessor
+    object ApiJob
+}
+package "steps" {
+    object BaseStep
+    object PreprocStep
+    object PostprocStep
+}
+object ApiAdapter
+
+MonarqDevice --> "1" TranspilerConfig : contains
+MonarqDevice --> "1" ApiClient : contains
+TranspilerConfig --* BaseStep : contains
+PreprocStep --|> BaseStep
+PostprocStep --|> BaseStep
+Transpiler --> PreprocStep : uses
+PreprocStep --> ApiAdapter : might use
+PostProcessor --> PostprocStep : uses
+PostprocStep --> ApiAdapter : might use
+
+    MonarqDevice --> Transpiler : uses
+    MonarqDevice --> PostProcessor : uses
+    MonarqDevice --> ApiJob : uses
+ApiJob --> ApiAdapter : uses
+@enduml
