@@ -1,6 +1,6 @@
 from typing import Union, Callable, Tuple, Optional, Sequence
 import numpy as np
-from pennylane import Device
+from pennylane.devices import Device
 import abc
 import pennylane as qml
 from pennylane.tape import QuantumTape, QuantumScript
@@ -60,7 +60,7 @@ def stopping_condition(op: qml.operation.Operator) -> bool:
     return op.has_matrix
 
 
-class SnowflurryQubitDevice(qml.devices.Device):
+class SnowflurryQubitDevice(Device):
     """Snowflurry Qubit PennyLane device for interfacing with Anyon's quantum simulators or quantum Hardware.
 
     * Extends the PennyLane :class:`~.pennylane.Device` class.
