@@ -102,4 +102,4 @@ The plugin is currently in its beta phase and provides access to MonarQ directly
 
 ## References 
 
-Calcul Québec's Wiki provides a lot of information on the plugin, its components and how to use them. You can access it [here](https://docs.alliancecan.ca/wiki/Les_services_quantiques).
+Calcul Québec's Wiki provides a lot of information on the plugin, its components and how to use them. You can access it [here](https://docs.alliancecan.ca/wiki/Services_d%27informatique_quantique).
