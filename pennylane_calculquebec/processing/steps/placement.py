@@ -29,12 +29,19 @@ class Placement(PreProcStep):
 
 class ISMAGS(Placement):
     """
-    finds a mapping between the circuit's wires and the machine's qubits using the ISMAGS subgraph isomorphism algorithm
+    finds a mapping between the circuit's wires and the machine's qubits using the ISMAGS subgraph isomorphism algorithm\n
+    ISMAGS is similar to VF2 except it also considers symmetries which can make it faster in some cases\n
+    Plus, the networkx implementation has capabilities for searching for largest common subgraphs
     """
     def execute(self, tape):   
         """
         places the circuit on the machine's connectivity using ISMAGS subgraph isomorphism algorithm\n
-        If there is no perfect match, the missing nodes are mapped with qubits that minimize the subsequent routing path
+        If there is no perfect match, the missing nodes are mapped with qubits that minimize the subsequent routing path\n
+        1. find largest common subgraph\n
+        2. for each unmapped node\n
+            3. find the best neighbour (using cost function)\n
+            4. find machine node with shortest path from already mapped machine node\n
+        5. map wires in all operations and measurements\n
         """
         circuit_topology = graph_util.circuit_graph(tape)
         machine_topology = graph_util.machine_graph(self.use_benchmark, self.q1_acceptance, self.q2_acceptance, self.excluded_qubits, self.excluded_couplers)
@@ -65,12 +72,19 @@ class ISMAGS(Placement):
 
 class VF2(Placement):
     """
-    finds a mapping between the circuit's wires and the machine's qubits using the VF2 subgraph isomorphism algorithm
+    finds a mapping between the circuit's wires and the machine's qubits using the VF2 subgraph isomorphism algorithm\n
+    the networkx implementation of VF2 doesn't allow for largest common subgraph research, so we're using a combinatorics approach and testing all possibilities from largest to smallest\n
+    this "brute force" approach makes the algorithm quite slower than other solutions in the plugin
     """
     def execute(self, tape):
         """
         places the circuit on the machine's connectivity using VF2 algorithm\n
-        If there is no perfect match, the missing nodes are mapped with qubits that minimize the subsequent routing path
+        If there is no perfect match, the missing nodes are mapped with qubits that minimize the subsequent routing path\n
+        1. find largest common subgraph\n
+        2. for each unmapped node\n
+            3. find the best neighbour (using cost function)\n
+            4. find machine node with shortest path from already mapped machine node\n
+        5. map wires in all operations and measurements\n
         """
         circuit_topology = graph_util.circuit_graph(tape)
         machine_topology = graph_util.machine_graph(self.use_benchmark, self.q1_acceptance, self.q2_acceptance, self.excluded_qubits, self.excluded_couplers)
