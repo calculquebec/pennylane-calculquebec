@@ -33,7 +33,7 @@ def remove_global_phase(matrix):
     return normalized_matrix
 
 # TOFIX : this method doesnt work for some matrices
-def are_matrices_equivalent(matrix1, matrix2, tolerance=1e-9):
+def is_equal_matrices(matrix1, matrix2, tolerance=1e-9):
     """
     Checks if two matrices are equal up to a complex multiplicative factor.
 

@@ -131,9 +131,9 @@ class MonarqDevice(Device):
 
 
     def _measure(self, tape : QuantumTape):
-        meas = set([type(mp).__name__ for mp in tape.measurements])
+        meas = set([type(measure).__name__ for measure in tape.measurements])
         if len(meas) != 1:
-            raise DeviceException("multiple measurements not supported")
+            raise DeviceException("Multiple measurements not supported")
         meas = tape.measurements[0]
         if isinstance(meas, measurements.CountsMP):
             return Job(tape).run()

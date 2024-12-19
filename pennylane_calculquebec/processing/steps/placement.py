@@ -33,7 +33,8 @@ class ISMAGS(Placement):
     """
     def execute(self, tape):   
         """
-        places the circuit on the machine's connectivity using ISMAGS subgraph isomorphism algorithm
+        places the circuit on the machine's connectivity using ISMAGS subgraph isomorphism algorithm\n
+        If there is no perfect match, the missing nodes are mapped with qubits that minimize the subsequent routing path
         """
         circuit_topology = graph_util.circuit_graph(tape)
         machine_topology = graph_util.machine_graph(self.use_benchmark, self.q1_acceptance, self.q2_acceptance, self.excluded_qubits, self.excluded_couplers)
@@ -41,24 +42,24 @@ class ISMAGS(Placement):
         if len(graph_util.find_biggest_group(circuit_topology)) > len(graph_util.find_biggest_group(machine_topology)):
             raise Exception(f"There are {machine_topology.number_of_nodes} qubits on the machine but your circuit has {circuit_topology.number_of_nodes}.")
         
-        # 1. trouver un isomorphisme de sous-graph entre le circuit et la machine, maximisant le nombre de noeuds pris en compte
-        mapping = graph_util.find_largest_subgraph_isomorphism_imags(circuit_topology, machine_topology)
+        # 1. find largest common subgraph
+        mapping = graph_util.find_largest_common_subgraph_ismags(circuit_topology, machine_topology)
 
-        # 2. identifier les noeuds du circuit manquant dans le mapping (a)
+        # 2. find all unmapped nodes
         missing = [node for node in circuit_topology.nodes if node not in mapping.keys()]
             
         for node in missing:
-            # 3. Trouver le noeud le plus connecté à A dans le circuit
+            # 3. find the best neighbour (using cost function)
             most_connected_node = graph_util.find_best_neighbour(node, circuit_topology, self.use_benchmark)
 
-            # 4. trouver un noeud dans la machine (a') qui minimise le chemin entre a' et b'  
-            possibles = [n for n in machine_topology.nodes if n not in mapping.values()]
+            # 4. find machine node with shortest path from already mapped machine node
+            possibles = [possible for possible in machine_topology.nodes if possible not in mapping.values()]
             shortest_path_mapping = graph_util.node_with_shortest_path_from_selection(mapping[most_connected_node], possibles, machine_topology, self.use_benchmark)
                 
             mapping[node] = shortest_path_mapping
         
-        # 5. corriger les connexions dans le circuit en fonction du mappage choisi
-        new_tape = type(tape)([op.map_wires(mapping) for op in tape.operations], [m.map_wires(mapping) for m in tape.measurements], shots=tape.shots)
+        # 5. map wires in all operations and measurements
+        new_tape = type(tape)([operation.map_wires(mapping) for operation in tape.operations], [measurement.map_wires(mapping) for measurement in tape.measurements], shots=tape.shots)
 
         return new_tape
 
@@ -68,7 +69,8 @@ class VF2(Placement):
     """
     def execute(self, tape):
         """
-        places the circuit on the machine's connectivity using VF2 algorithm
+        places the circuit on the machine's connectivity using VF2 algorithm\n
+        If there is no perfect match, the missing nodes are mapped with qubits that minimize the subsequent routing path
         """
         circuit_topology = graph_util.circuit_graph(tape)
         machine_topology = graph_util.machine_graph(self.use_benchmark, self.q1_acceptance, self.q2_acceptance, self.excluded_qubits, self.excluded_couplers)
@@ -76,24 +78,24 @@ class VF2(Placement):
         if len(graph_util.find_biggest_group(circuit_topology)) > len(graph_util.find_biggest_group(machine_topology)):
             raise Exception(f"There are {machine_topology.number_of_nodes} qubits on the machine but your circuit has {circuit_topology.number_of_nodes}.")
         
-        # 1. trouver un isomorphisme de sous-graph entre le circuit et la machine, maximisant le nombre de noeuds pris en compte
-        mapping = graph_util.find_largest_subgraph_isomorphism_vf2(circuit_topology, machine_topology)
+        # 1. find the largest common subgraph using VF2 algorithm and combinatorics
+        mapping = graph_util.find_largest_common_subgraph_vf2(circuit_topology, machine_topology)
 
-        # 2. identifier les noeuds du circuit manquant dans le mapping (a)
+        # 2. find all unmapped nodes
         missing = [node for node in circuit_topology.nodes if node not in mapping.keys()]
             
         for node in missing:
-            # 3. Trouver le noeud le plus connecté à A dans le circuit
+            # 3. find the best neighbour (using cost function)
             most_connected_node = graph_util.find_best_neighbour(node, circuit_topology, self.use_benchmark)
 
-            # 4. trouver un noeud dans la machine (a') qui minimise le chemin entre a' et b'  
-            possibles = [n for n in machine_topology.nodes if n not in mapping.values()]
+            # 4. find machine node with shortest path from already mapped machine node
+            possibles = [possible for possible in machine_topology.nodes if possible not in mapping.values()]
             shortest_path_mapping = graph_util.node_with_shortest_path_from_selection(mapping[most_connected_node], possibles, machine_topology, self.use_benchmark)
                 
             mapping[node] = shortest_path_mapping
         
-        # 5. corriger les connexions dans le circuit en fonction du mappage choisi
-        new_tape = type(tape)([op.map_wires(mapping) for op in tape.operations], [m.map_wires(mapping) for m in tape.measurements], shots=tape.shots)
+        # 5. map wires in all operations and measurements
+        new_tape = type(tape)([operation.map_wires(mapping) for operation in tape.operations], [measurement.map_wires(mapping) for measurement in tape.measurements], shots=tape.shots)
 
         return new_tape
 
@@ -101,28 +103,28 @@ class ASTAR(Placement):
     """
     finds a mapping between the circuit's wires and the machine's qubits using an ASTAR based traversal heuristic
     """
-    def _recurse(self, a_key, b_key, mapping, to_explore, machine_topology, circuit_topology):
+    def _recurse(self, source, destination, mapping, to_explore, machine_topology, circuit_topology):
         """traverses the circuit graph, finding mappings for nodes recursively
 
         Args:
-            a_key (int): a source node
-            b_key (int): a destination node
+            source (int): a source node
+            destination (int): a destination node
             mapping (dict[int, int]): the current mapping
             to_explore (list[int]): which nodes have not yet been explored
             machine_topology (nx.Graph): the machine's graph
             circuit_topology (nx.Graph): the circuit's graph
         """
-        if b_key in mapping:
+        if destination in mapping:
             return
         
-        mapping[b_key] = graph_util.find_closest_wire(mapping[a_key], machine_topology, [v for (_, v) in mapping.items()], [v for _, v in mapping.items()], self.use_benchmark)
+        mapping[destination] = graph_util.find_closest_wire(mapping[source], machine_topology, excluding=[machine_node for machine_node in mapping.values()], use_benchmark=self.use_benchmark)
 
-        a_key2 = b_key
-        for b_key2 in to_explore:
-            if (a_key2, b_key2) not in circuit_topology.edges:
+        source2 = destination
+        for destination2 in to_explore:
+            if (source2, destination2) not in circuit_topology.edges:
                 continue
 
-            self._recurse(a_key2, b_key2, mapping, to_explore, machine_topology, circuit_topology)
+            self._recurse(source2, destination2, mapping, to_explore, machine_topology, circuit_topology)
 
     def execute(self, tape : QuantumTape) -> QuantumTape:
         """
@@ -136,18 +138,18 @@ class ASTAR(Placement):
         
         mapping = {}
         # sort nodes by degree descending, so that we map the most connected node first
-        to_explore = list(reversed(sorted([w for w in tape.wires], key=lambda w: circuit_topology.degree(w))))
+        to_explore = list(reversed(sorted([wires for wires in tape.wires], key=lambda node: circuit_topology.degree(node))))
 
-        for a_key in to_explore:
-            if a_key in mapping:
+        for source in to_explore:
+            if source in mapping:
                 continue
-            mapping[a_key] = graph_util.find_best_wire(machine_topology, [v for _, v in mapping.items()], self.use_benchmark)
+            mapping[source] = graph_util.find_best_wire(machine_topology, [machine_node for machine_node in mapping.value()], self.use_benchmark)
 
-            for b_key in to_explore:
-                if (a_key, b_key) not in circuit_topology.edges: 
+            for destination in to_explore:
+                if (source, destination) not in circuit_topology.edges: 
                     continue
                 
-                self._recurse(a_key, b_key, mapping, to_explore, machine_topology, circuit_topology)
+                self._recurse(source, destination, mapping, to_explore, machine_topology, circuit_topology)
 
-        new_tape = type(tape)([op.map_wires(mapping) for op in tape.operations], [m.map_wires(mapping) for m in tape.measurements], shots=tape.shots)
+        new_tape = type(tape)([operation.map_wires(mapping) for operation in tape.operations], [measurement.map_wires(mapping) for measurement in tape.measurements], shots=tape.shots)
         return new_tape

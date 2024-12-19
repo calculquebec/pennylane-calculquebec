@@ -23,12 +23,12 @@ import numpy as np
 #          23
 """
 connectivity = {
-  keys.qubits : [ 0, 1, 2, 3, 4, 5, 
+  keys.QUBITS : [ 0, 1, 2, 3, 4, 5, 
                 6, 7, 8, 9, 10, 11, 
                 12, 13, 14, 15, 16, 17, 
                 18, 19, 20, 21, 22, 23 ],
   
-  keys.couplers : {
+  keys.COUPLERS : {
       "0": [0, 4],
       "1": [4, 1],
       "2": [1, 5],
@@ -78,47 +78,52 @@ class cache:
 def get_broken_qubits_and_couplers(q1Acceptance, q2Acceptance):
     """
     creates a dictionary that contains unreliable qubits and couplers
+
+    Args:
+        q1Acceptance (float) : what fidelity should be considered broken for a qubit?
+        q2Acceptance (float) : what fidelity should be considered broken for a coupler?
     """
     val = (q1Acceptance, q2Acceptance)
 
     # call to api to get qubit and couplers benchmark
     qubits_and_couplers = ApiAdapter.get_qubits_and_couplers()
 
-    broken_qubits_and_couplers = { keys.qubits : [], keys.couplers : [] }
+    broken_qubits_and_couplers = { keys.QUBITS : [], keys.COUPLERS : [] }
 
-    for coupler_id in qubits_and_couplers[keys.couplers]:
-        benchmark_coupler = qubits_and_couplers[keys.couplers][coupler_id]
-        conn_coupler = connectivity[keys.couplers][coupler_id]
+    for coupler_id in qubits_and_couplers[keys.COUPLERS]:
+        benchmark_coupler = qubits_and_couplers[keys.COUPLERS][coupler_id]
+        conn_coupler = connectivity[keys.COUPLERS][coupler_id]
 
-        if benchmark_coupler[keys.czGateFidelity] >= val[1]:
+        if benchmark_coupler[keys.CZ_GATE_FIDELITY] >= val[1]:
             continue
 
-        broken_qubits_and_couplers[keys.couplers].append(conn_coupler)
+        broken_qubits_and_couplers[keys.COUPLERS].append(conn_coupler)
 
-    for qubit_id in qubits_and_couplers[keys.qubits]:
-        benchmark_qubit = qubits_and_couplers[keys.qubits][qubit_id]
+    for qubit_id in qubits_and_couplers[keys.QUBITS]:
+        benchmark_qubit = qubits_and_couplers[keys.QUBITS][qubit_id]
 
-        if benchmark_qubit[keys.readoutState1Fidelity] >= val[0]:
+        if benchmark_qubit[keys.READOUT_STATE_1_FIDELITY] >= val[0]:
             continue
 
-        broken_qubits_and_couplers[keys.qubits].append(int(qubit_id))
+        broken_qubits_and_couplers[keys.QUBITS].append(int(qubit_id))
     return broken_qubits_and_couplers
 
 def get_readout1_and_cz_fidelities():
-    """get state 1 fidelities and cz fidelities
+    """
+    get state 1 fidelities and cz fidelities
     """
     if cache._readout1_cz_fidelities is None or ApiAdapter.is_last_update_expired():
-        cache._readout1_cz_fidelities = {keys.readoutState1Fidelity:{}, keys.czGateFidelity:{}}
+        cache._readout1_cz_fidelities = {keys.READOUT_STATE_1_FIDELITY:{}, keys.CZ_GATE_FIDELITY:{}}
         benchmark = ApiAdapter.get_qubits_and_couplers()
     
         # build state 1 fidelity
-        for key in benchmark[keys.qubits]:
-            cache._readout1_cz_fidelities[keys.readoutState1Fidelity][key] = benchmark[keys.qubits][key][keys.readoutState1Fidelity]
+        for key in benchmark[keys.QUBITS]:
+            cache._readout1_cz_fidelities[keys.READOUT_STATE_1_FIDELITY][key] = benchmark[keys.QUBITS][key][keys.READOUT_STATE_1_FIDELITY]
         
         # build cz fidelity
-        for key in benchmark[keys.couplers]:
-            link = connectivity[keys.couplers][key]
-            cache._readout1_cz_fidelities[keys.czGateFidelity][(link[0], link[1])] = benchmark[keys.couplers][key][keys.czGateFidelity]
+        for key in benchmark[keys.COUPLERS]:
+            link = connectivity[keys.COUPLERS][key]
+            cache._readout1_cz_fidelities[keys.CZ_GATE_FIDELITY][(link[0], link[1])] = benchmark[keys.COUPLERS][key][keys.CZ_GATE_FIDELITY]
         
     return cache._readout1_cz_fidelities
 
@@ -133,10 +138,10 @@ def get_coupler_noise() -> dict:
         benchmark = ApiAdapter.get_qubits_and_couplers()
     
         cz_gate_fidelity = {}
-        num_couplers = len(benchmark[keys.couplers])
+        num_couplers = len(benchmark[keys.COUPLERS])
 
         for i in range(num_couplers):
-            cz_gate_fidelity[i] = benchmark[keys.couplers][str(i)][keys.czGateFidelity]
+            cz_gate_fidelity[i] = benchmark[keys.COUPLERS][str(i)][keys.CZ_GATE_FIDELITY]
         cz_gate_fidelity = list(cz_gate_fidelity.values())   
 
         coupler_noise_array = [
@@ -145,7 +150,7 @@ def get_coupler_noise() -> dict:
         ]
         cache._coupler_noise = { }
         for i, noise in enumerate(coupler_noise_array):
-            link = connectivity[keys.couplers][str(i)]
+            link = connectivity[keys.COUPLERS][str(i)]
             cache._coupler_noise[(link[0], link[1])] = noise
             
             
@@ -163,10 +168,10 @@ def get_qubit_noise():
     
         single_qubit_gate_fidelity = {} 
 
-        num_qubits = len(benchmark[keys.qubits])
+        num_qubits = len(benchmark[keys.QUBITS])
 
         for i in range(num_qubits):
-            single_qubit_gate_fidelity[i] = benchmark[keys.qubits][str(i)][keys.singleQubitGateFidelity]
+            single_qubit_gate_fidelity[i] = benchmark[keys.QUBITS][str(i)][keys.SINGLE_QUBIT_GATE_FIDELITY]
         single_qubit_gate_fidelity = list(single_qubit_gate_fidelity.values())   
 
         cache._qubit_noise = [
@@ -177,16 +182,17 @@ def get_qubit_noise():
     return cache._qubit_noise
 
 def get_phase_damping():
-    """builds decoherence error arrays using t2 time
+    """
+    builds decoherence error arrays using t2 time
     """
     if cache._decoherence is None or ApiAdapter.is_last_update_expired():
         benchmark = ApiAdapter.get_qubits_and_couplers()
         time_step = 1e-6 # microsecond
-        num_qubits = len(benchmark[keys.qubits])
+        num_qubits = len(benchmark[keys.QUBITS])
 
         t2_values = {}
         for i in range(num_qubits):
-            t2_values[i] = benchmark[keys.qubits][str(i)][keys.t2Ramsey]
+            t2_values[i] = benchmark[keys.QUBITS][str(i)][keys.T2_RAMSEY]
         t2_values = list(t2_values.values())  
 
         cache._decoherence = [
@@ -195,16 +201,17 @@ def get_phase_damping():
     return cache._decoherence
 
 def get_amplitude_damping():
-    """builds relaxation error arrays using t1 time
+    """
+    builds relaxation error arrays using t1 time
     """
     if cache._relaxation is None or ApiAdapter.is_last_update_expired():
         benchmark = ApiAdapter.get_qubits_and_couplers()
         time_step = 1e-6 # microsecond
-        num_qubits = len(benchmark[keys.qubits])
+        num_qubits = len(benchmark[keys.QUBITS])
 
         t1_values = {}
         for i in range(num_qubits):
-            t1_values[i] = benchmark[keys.qubits][str(i)][keys.t1]
+            t1_values[i] = benchmark[keys.QUBITS][str(i)][keys.T1]
         t1_values = list(t1_values.values())  
 
         cache._relaxation = [
@@ -214,21 +221,22 @@ def get_amplitude_damping():
     return cache._relaxation
 
 def get_readout_noise_matrices():
-    """constructs an arry of readout noise matrices
+    """
+    constructs an array of readout noise matrices
 
     Returns:
         np.ndarray : an array of 2x2 matrices built from state 0 / 1 fidelities
     """
     if cache._readout_noise is None or ApiAdapter.is_last_update_expired():
         benchmark = ApiAdapter.get_qubits_and_couplers()
-        num_qubits = len(benchmark[keys.qubits])
+        num_qubits = len(benchmark[keys.QUBITS])
 
         readout_state_0_fidelity = []
         readout_state_1_fidelity = []
         
         for i in range(num_qubits):
-            readout_state_0_fidelity.append(benchmark[keys.qubits][str(i)][keys.readoutState0Fidelity])
-            readout_state_1_fidelity.append(benchmark[keys.qubits][str(i)][keys.readoutState1Fidelity])
+            readout_state_0_fidelity.append(benchmark[keys.QUBITS][str(i)][keys.READOUT_STATE_0_FIDELITY])
+            readout_state_1_fidelity.append(benchmark[keys.QUBITS][str(i)][keys.READOUT_STATE_1_FIDELITY])
 
         cache._readout_noise = []
 

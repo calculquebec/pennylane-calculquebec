@@ -24,12 +24,12 @@ class ApiUtility:
             raise ValueError("This instruction is not supported")
         
         operation = {
-            keys.qubits : [w for w in instruction.wires],
-            keys.type : instructions[instruction.name]
+            keys.QUBITS : [wire for wire in instruction.wires],
+            keys.TYPE : instructions[instruction.name]
         }
         if instruction.name in parametered_ops: 
             value = instruction.parameters[0][0] if isinstance(instruction.parameters[0], np.ndarray) else instruction.parameters[0]
-            operation[keys.parameters] = {"lambda" : value}
+            operation[keys.PARAMETERS] = {"lambda" : value}
             
         return operation
     
@@ -45,18 +45,18 @@ class ApiUtility:
         """
 
         circuit_dict = {
-            keys.bitCount : 24,
-            keys.operations : [ApiUtility.convert_instruction(op) for op in circuit.operations],
-            keys.qubitCount : 24
+            keys.BIT_COUNT : 24,
+            keys.OPERATIONS : [ApiUtility.convert_instruction(operation) for operation in circuit.operations],
+            keys.QUBIT_COUNT : 24
         }
-        wires = [w for w in circuit.wires]
-        for m in circuit.measurements:
-            for w in m.wires:
-                i = wires.index(w)
-                circuit_dict[keys.operations].append({
-                    keys.qubits : [w],
-                    keys.bits : [i],
-                    keys.type : "readout"
+        wires = [wire for wire in circuit.wires]
+        for measurement in circuit.measurements:
+            for wire in measurement.wires:
+                bit = wires.index(wire)
+                circuit_dict[keys.OPERATIONS].append({
+                    keys.QUBITS : [wire],
+                    keys.BITS : [bit],
+                    keys.TYPE : "readout"
                 })
         return circuit_dict
     
@@ -107,44 +107,44 @@ class ApiUtility:
             dict[str, any]: the body for the job creation request
         """
         body = {
-            keys.name : circuit_name,
-            keys.projectID : project_id,
-            keys.machineName : machine_name,
-            keys.shotCount : shots,
-            keys.circuit : circuit,
+            keys.NAME : circuit_name,
+            keys.PROJECT_ID : project_id,
+            keys.MACHINE_NAME : machine_name,
+            keys.SHOT_COUNT : shots,
+            keys.CIRCUIT : circuit,
         }
         return body
 
 class routes:
-    jobs = "/jobs"
-    projects = "/projects"
-    machines = "/machines"
-    benchmarking = "/benchmarking"
-    machineName = "?machineName"
+    JOBS = "/jobs"
+    PROJECTS = "/projects"
+    MACHINES = "/machines"
+    BENCHMARKING = "/benchmarking"
+    MACHINE_NAME = "?machineName"
     
 class keys:
-    bitCount = "bitCount"
-    qubitCount = "qubitCount"
-    operations = "operations"
-    circuit = "circuit"
-    name = "name"
-    machineName = "machineName"
-    projectID = "projectID"
-    shotCount = "shotCount"
-    type = "type"
-    bits = "bits"
-    qubits = "qubits"
-    parameters = "parameters"
-    couplers = "couplers"
-    singleQubitGateFidelity = "singleQubitGateFidelity"
-    readoutState0Fidelity = "readoutState0Fidelity"
-    readoutState1Fidelity = "readoutState1Fidelity"
-    t1 = "t1"
-    t2Ramsey = "t2Ramsey"
-    czGateFidelity = "czGateFidelity"
-    resultsPerDevice = "resultsPerDevice"
-    items = "items"
-    id = "id"
+    BIT_COUNT = "bitCount"
+    QUBIT_COUNT = "qubitCount"
+    OPERATIONS = "operations"
+    CIRCUIT = "circuit"
+    NAME = "name"
+    MACHINE_NAME = "machineName"
+    PROJECT_ID = "projectID"
+    SHOT_COUNT = "shotCount"
+    TYPE = "type"
+    BITS = "bits"
+    QUBITS = "qubits"
+    PARAMETERS = "parameters"
+    COUPLERS = "couplers"
+    SINGLE_QUBIT_GATE_FIDELITY = "singleQubitGateFidelity"
+    READOUT_STATE_0_FIDELITY = "readoutState0Fidelity"
+    READOUT_STATE_1_FIDELITY = "readoutState1Fidelity"
+    T1 = "t1"
+    T2_RAMSEY = "t2Ramsey"
+    CZ_GATE_FIDELITY = "czGateFidelity"
+    RESULTS_PER_DEVICE = "resultsPerDevice"
+    ITEMS = "items"
+    ID = "id"
 
 instructions : dict[str, str] = {
     "Identity" : "i",

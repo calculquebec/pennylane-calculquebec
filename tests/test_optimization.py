@@ -6,7 +6,7 @@ from pennylane.tape import QuantumTape
 import pytest
 from unittest.mock import patch
 from functools import reduce
-from pennylane_calculquebec.utility.debug import are_matrices_equivalent
+from pennylane_calculquebec.utility.debug import is_equal_matrices
 
 @pytest.fixture
 def mock_commute_and_merge():
