@@ -91,7 +91,7 @@ def _find_isomorphisms(circuit : nx.Graph, machine : nx.Graph) -> dict[int, int]
        return {v : k for k, v in mono.items()}
     return None
 
-def find_largest_subgraph_isomorphism_vf2(circuit : nx.Graph, machine : nx.Graph):
+def find_largest_common_subgraph_vf2(circuit : nx.Graph, machine : nx.Graph):
     """
     Uses vf2 and combinations to find the largest common graph between two graphs
 
@@ -107,7 +107,7 @@ def find_largest_subgraph_isomorphism_vf2(circuit : nx.Graph, machine : nx.Graph
             result = _find_isomorphisms(nx.Graph(comb), machine)
             if result: return result
 
-def find_largest_subgraph_isomorphism_imags(circuit : nx.Graph, machine : nx.Graph):
+def find_largest_common_subgraph_ismags(circuit : nx.Graph, machine : nx.Graph):
     """
     Uses IMAGS to find the largest common graph between two graphs
 

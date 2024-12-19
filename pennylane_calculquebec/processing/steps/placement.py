@@ -33,7 +33,8 @@ class ISMAGS(Placement):
     """
     def execute(self, tape):   
         """
-        places the circuit on the machine's connectivity using ISMAGS subgraph isomorphism algorithm
+        places the circuit on the machine's connectivity using ISMAGS subgraph isomorphism algorithm\n
+        If there is no perfect match, the missing nodes are mapped with qubits that minimize the subsequent routing path
         """
         circuit_topology = graph_util.circuit_graph(tape)
         machine_topology = graph_util.machine_graph(self.use_benchmark, self.q1_acceptance, self.q2_acceptance, self.excluded_qubits, self.excluded_couplers)
@@ -42,7 +43,7 @@ class ISMAGS(Placement):
             raise Exception(f"There are {machine_topology.number_of_nodes} qubits on the machine but your circuit has {circuit_topology.number_of_nodes}.")
         
         # 1. find largest common subgraph
-        mapping = graph_util.find_largest_subgraph_isomorphism_imags(circuit_topology, machine_topology)
+        mapping = graph_util.find_largest_common_subgraph_ismags(circuit_topology, machine_topology)
 
         # 2. find all unmapped nodes
         missing = [node for node in circuit_topology.nodes if node not in mapping.keys()]
@@ -68,7 +69,8 @@ class VF2(Placement):
     """
     def execute(self, tape):
         """
-        places the circuit on the machine's connectivity using VF2 algorithm
+        places the circuit on the machine's connectivity using VF2 algorithm\n
+        If there is no perfect match, the missing nodes are mapped with qubits that minimize the subsequent routing path
         """
         circuit_topology = graph_util.circuit_graph(tape)
         machine_topology = graph_util.machine_graph(self.use_benchmark, self.q1_acceptance, self.q2_acceptance, self.excluded_qubits, self.excluded_couplers)
@@ -77,7 +79,7 @@ class VF2(Placement):
             raise Exception(f"There are {machine_topology.number_of_nodes} qubits on the machine but your circuit has {circuit_topology.number_of_nodes}.")
         
         # 1. find the largest common subgraph using VF2 algorithm and combinatorics
-        mapping = graph_util.find_largest_subgraph_isomorphism_vf2(circuit_topology, machine_topology)
+        mapping = graph_util.find_largest_common_subgraph_vf2(circuit_topology, machine_topology)
 
         # 2. find all unmapped nodes
         missing = [node for node in circuit_topology.nodes if node not in mapping.keys()]
