@@ -34,12 +34,12 @@ class IBUReadoutMitigation(PostProcStep):
         all_combs = self.all_combinations(num_qubits)
         return {bitstring:(results[bitstring] if bitstring in results else 0) for bitstring in all_combs}
         
-    def get_readout_fidelities(self, myqubits):
+    def get_readout_fidelities(self, chosen_qubits):
         """
         what are the readout 0 and 1 fidelities for given qubits?
 
         Args
-            myqubits (list[int]) : qubits from the circuit
+            chosen_qubits (list[int]) : qubits from the circuit
         
         Returns
             a tuple appending readouts on 0 and 1 for given qubits
@@ -48,7 +48,7 @@ class IBUReadoutMitigation(PostProcStep):
         
         readout0 = {}
         readout1 = {}
-        for qubit in myqubits:
+        for qubit in chosen_qubits:
             readout0[qubit] = benchmark["qubits"][str(qubit)]["readoutState0Fidelity"]
             readout1[qubit] = benchmark["qubits"][str(qubit)]["readoutState1Fidelity"]    
 
@@ -56,17 +56,17 @@ class IBUReadoutMitigation(PostProcStep):
         readout1 = list(readout1.values())
         return readout0, readout1
     
-    def get_calibration_data(self, myqubits):
+    def get_calibration_data(self, chosen_qubits):
         """gets fidelities for the observed qubits
 
         Args:
-            myqubits (list[int]) : which qubits are observed
+            chosen_qubits (list[int]) : which qubits are observed
 
         Returns:
             dict[int, float], dict[int, float] : readout fidelities for state 0 and 1
         """
-        num_qubits = len(myqubits)
-        readout0, readout1 = self.get_readout_fidelities(myqubits)
+        num_qubits = len(chosen_qubits)
+        readout0, readout1 = self.get_readout_fidelities(chosen_qubits)
         calibration_data = {
             qubit: np.array([
                 [readout0[qubit], 1 - readout1[qubit]],
@@ -87,8 +87,8 @@ class IBUReadoutMitigation(PostProcStep):
             
         return readout_matrix
     
-    def get_full_readout_matrix(self, myqubits):
-        calibration_data = self.get_calibration_data(myqubits)
+    def get_full_readout_matrix(self, chosen_qubits):
+        calibration_data = self.get_calibration_data(chosen_qubits)
         full_readout_matrix = self.tensor_product_calibration(calibration_data)
 
         # normalize it
@@ -150,11 +150,11 @@ class IBUReadoutMitigation(PostProcStep):
     
     
     def execute(self, tape, results):
-        myqubits = [wire for wire in tape.wires]
-        num_qubits = len(myqubits)
+        chosen_qubits = [wire for wire in tape.wires]
+        num_qubits = len(chosen_qubits)
         shots = tape.shots.total_shots
         
-        readout_matrix = self.get_full_readout_matrix(myqubits)
+        readout_matrix = self.get_full_readout_matrix(chosen_qubits)
         all_results = self.all_results(results, num_qubits)
         probs = [v/shots for _,v in all_results.items()]
         
@@ -188,11 +188,11 @@ class MatrixReadoutMitigation(PostProcStep):
         all_combs = self.all_combinations(num_qubits)
         return {bitstring:(results[bitstring] if bitstring in results else 0) for bitstring in all_combs}
         
-    def _get_readout_fidelities(self, myqubits):
+    def _get_readout_fidelities(self, chosen_qubits):
         """gets fidelities for the observed qubits
 
         Args:
-            myqubits (list[int]) : which qubits are observed
+            chosen_qubits (list[int]) : which qubits are observed
 
         Returns:
             dict[int, float], dict[int, float] : readout fidelities for state 0 and 1
@@ -202,7 +202,7 @@ class MatrixReadoutMitigation(PostProcStep):
         
         readout0 = {}
         readout1 = {}
-        for qubit in myqubits:
+        for qubit in chosen_qubits:
             readout0[qubit] = benchmark["qubits"][str(qubit)]["readoutState0Fidelity"]
             readout1[qubit] = benchmark["qubits"][str(qubit)]["readoutState1Fidelity"]    
 
@@ -224,18 +224,18 @@ class MatrixReadoutMitigation(PostProcStep):
             
         return readout_matrix
 
-    def _get_calibration_data(self, myqubits):
+    def _get_calibration_data(self, chosen_qubits):
         """create calibration matrices for each observed qubits
 
         Args:
-            myqubits (list[int]): observed qubits
+            chosen_qubits (list[int]): observed qubits
         """
-        state_0_readout_fidelity, state_1_readout_fidelity = self._get_readout_fidelities(myqubits)
+        state_0_readout_fidelity, state_1_readout_fidelity = self._get_readout_fidelities(chosen_qubits)
         calibration_data = {
             qubit: np.array([
                 [state_0_readout_fidelity[qubit], 1 - state_1_readout_fidelity[qubit]],
                 [1 - state_0_readout_fidelity[qubit], state_1_readout_fidelity[qubit]]
-            ]) for qubit in range(len(myqubits))
+            ]) for qubit in range(len(chosen_qubits))
         }
         return calibration_data
 
@@ -251,17 +251,17 @@ class MatrixReadoutMitigation(PostProcStep):
         
         return reduced_readout_matrix
 
-    def _get_inverted_reduced_a_matrix(self, myqubits, results):
+    def _get_inverted_reduced_a_matrix(self, chosen_qubits, results):
         """
         create iverted reduced A matrix and cache it
         """
-        num_qubits = len(myqubits)
+        num_qubits = len(chosen_qubits)
         # Generate the full A-matrix
         if MatrixReadoutMitigation._readout_matrix_normalized is None or ApiAdapter.is_last_update_expired():
             MatrixReadoutMitigation._readout_matrix_reduced = None
             MatrixReadoutMitigation._readout_matrix_reduced_inverted = None
 
-            calibration_data = self._get_calibration_data(myqubits)
+            calibration_data = self._get_calibration_data(chosen_qubits)
             MatrixReadoutMitigation._readout_matrix_normalized = self._tensor_product_calibration(calibration_data)
             
             # normalize it
