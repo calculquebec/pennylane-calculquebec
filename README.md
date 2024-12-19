@@ -91,7 +91,7 @@ Those packages are installed automatically during the plugin installation proces
 
 ## State of the project and known issues
 
-The plugin is currently in its beta phase and provides access to MonarQ directly through API calls. It also contains capabilities for obtaining benchmarks and machine informations. There are alsu features that let experimented users change the pre-processing / post-processing behaviour of the device, and create custom pre-processing / post processing steps. There is a simulator device which is currently being developed, but the noise model still needs to be tweaked. The placement and routing phases of the transpiler currently chose wires and couplers by prioritizing best fidelities first, but this does not yield optimal results in terms of errors. The unit-test coverage is still not complete.
+The plugin is currently in its beta phase and provides access to MonarQ directly through API calls. It also contains capabilities for obtaining benchmarks and machine informations. There are also features that let experimented users change the pre-processing / post-processing behaviour of the device, and create custom pre-processing / post processing steps. There is a simulator device which is currently being developed, but the noise model still needs to be tweaked. The placement and routing phases of the transpiler currently chose wires and couplers by prioritizing best fidelities first, but this does not yield optimal results in terms of errors. The unit-test coverage is still not complete.
 
 ### Future plans
 
