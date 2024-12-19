@@ -1,6 +1,6 @@
 from typing import Union, Callable, Tuple, Optional, Sequence
 import numpy as np
-from pennylane import Device
+from pennylane.devices import Device
 import abc
 import pennylane as qml
 from pennylane.tape import QuantumTape, QuantumScript
@@ -9,9 +9,9 @@ from pennylane.transforms import convert_to_numpy_parameters
 from pennylane.transforms.core import TransformProgram
 from pennylane.operation import Operator
 from pennylane.devices.preprocess import decompose
-from pennylane_snowflurry.pennylane_converter import PennylaneConverter
-from pennylane_snowflurry.pennylane_converter import SNOWFLURRY_OPERATION_MAP
-from pennylane_snowflurry.execution_config import (
+from pennylane_calculquebec.pennylane_converter import PennylaneConverter
+from pennylane_calculquebec.pennylane_converter import SNOWFLURRY_OPERATION_MAP
+from pennylane_calculquebec.execution_config import (
     ExecutionConfig,
     DefaultExecutionConfig,
 )
@@ -60,7 +60,7 @@ def stopping_condition(op: qml.operation.Operator) -> bool:
     return op.has_matrix
 
 
-class SnowflurryQubitDevice(qml.devices.Device):
+class SnowflurryQubitDevice(Device):
     """Snowflurry Qubit PennyLane device for interfacing with Anyon's quantum simulators or quantum Hardware.
 
     * Extends the PennyLane :class:`~.pennylane.Device` class.

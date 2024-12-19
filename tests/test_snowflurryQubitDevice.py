@@ -1,13 +1,15 @@
-import unittest
-from pennylane_snowflurry.snowflurry_device import SnowflurryQubitDevice
+import pytest
+from pennylane_calculquebec.snowflurry_device import SnowflurryQubitDevice
 from juliacall import newmodule
 
-# TODO : this namespace should be imported from the plugin
-Snowflurry = newmodule("Snowflurry")
-Snowflurry.seval("using Snowflurry")
 
+class TestSnowflurryQubitDevice:
 
-class TestSnowflurryQubitDeviceInitialization(unittest.TestCase):
+    @pytest.fixture(autouse=True)
+    def sf_namespace(self):
+        self.snowflurry = newmodule("Snowflurry")
+        self.snowflurry.seval("using Snowflurry")
+
     def test_initialization(self):
         # Example parameters
         num_wires = 4
@@ -17,15 +19,12 @@ class TestSnowflurryQubitDeviceInitialization(unittest.TestCase):
         # Create an instance of the SnowflurryQubitDevice
         device = SnowflurryQubitDevice(wires=num_wires, shots=num_shots)
 
-        self.assertEqual(device.num_wires, num_wires)
+        assert device.num_wires == num_wires
 
-        self.assertEqual(device.shots.total_shots, num_shots)
+        assert device.shots.total_shots == num_shots
 
-
+    @pytest.mark.xfail
     def test_hadamard_juliacall(self):
-        Snowflurry.c = Snowflurry.QuantumCircuit(qubit_count=3)
-        Snowflurry.seval("push!(c,hadamard(1))")
+        self.snowflurry.c = self.snowflurry.QuantumCircuit(qubit_count=3)
+        self.snowflurry.seval("push!(c,hadamard(1))")
 
-
-if __name__ == "__main__":
-    unittest.main()

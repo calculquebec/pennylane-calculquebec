@@ -1,0 +1,95 @@
+{
+  "comment (not included in circuit dict)" : "this file's purpose is to provide a sample of what QuantumTapes are converted to when we want to send them to MonarQ.",
+  "operations": [
+    {
+      "type": "x_90",
+      "qubits": [
+        0
+      ]
+    },
+    {
+      "type": "x_90",
+      "qubits": [
+        4
+      ]
+    },
+    {
+      "type": "z_minus_90",
+      "qubits": [
+        4
+      ]
+    },
+    {
+      "type": "z_90",
+      "qubits": [
+        0
+      ]
+    },
+    {
+      "type": "cz",
+      "qubits": [
+        0,
+        4
+      ]
+    },
+    {
+      "type": "x_90",
+      "qubits": [
+        4
+      ]
+    },
+    {
+      "type": "t_dag",
+      "qubits": [
+        4
+      ]
+    },
+    {
+      "type": "x_90",
+      "qubits": [
+        0
+      ]
+    },
+    {
+      "type": "x_90",
+      "qubits": [
+        4
+      ]
+    },
+    {
+      "type": "p",
+      "parameters": {
+        "lambda": 3.9269907
+      },
+      "qubits": [
+        0
+      ]
+    },
+    {
+      "type": "x_90",
+      "qubits": [
+        0
+      ]
+    },
+    {
+      "type": "readout",
+      "qubits": [
+        0
+      ],
+      "bits": [
+        0
+      ]
+    },
+    {
+      "type": "readout",
+      "qubits": [
+        4
+      ],
+      "bits": [
+        1
+      ]
+    }
+  ],
+  "qubitCount": 6,
+  "bitCount": 2
+}

@@ -3,21 +3,21 @@ requires = ["setuptools>=61.0", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pennylane-snowflurry"
+name = "pennylane-calculquebec"
 dynamic = ["version"]
-requires-python = ">=3.9"
-dependencies = ["numpy", "juliacall >= 0.9.0", "pennylane >= 0.30.0"]
-description = "PennyLane plugin for interfacing with Anyon's quantum computers"
+requires-python = ">=3.10"
+dependencies = ["numpy", "juliacall >= 0.9.0", "pennylane >= 0.30.0", "networkx >= 3.3"]
+description = "Pennylane plugin enabling seamless job execution on MonarQ, Calcul Québec’s nonprofit-hosted quantum computer"
 readme = "README.md"
 maintainers = [
     { name = "Calcul Québec", email = "support@tech.alliancecan.ca" },
 ]
-license = { text = "Apache Software License (Apache License 2.0)" }
+license = { text = "Creative Commons" }
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Environment :: Console",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: Apache Software License",
+    "License :: OSI Approved :: Creative Commons",
     "Natural Language :: English",
     "Operating System :: POSIX",
     "Operating System :: MacOS :: MacOS X",
@@ -25,26 +25,27 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+	"Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Scientific/Engineering :: Physics",
 ]
 
 [project.urls]
-Source = "https://github.com/calculquebec/pennylane-snowflurry"
+Source = "https://github.com/calculquebec/pennylane-calculquebec"
 
 [project.optional-dependencies]
 test = ["matplotlib", "pytest", "pytest-mock", "flaky"]
 
 [project.entry-points."pennylane.plugins"]
-"snowflurry.qubit" = "pennylane_snowflurry:SnowflurryQubitDevice"
+"snowflurry.qubit" = "pennylane_calculquebec:SnowflurryQubitDevice"
+"monarq.default" = "pennylane_calculquebec:MonarqDevice"
 
 [project.entry-points."pennylane.io"]
 
 [tool.setuptools]
-packages = ["pennylane_snowflurry", "pennylane_snowflurry.measurements"]
+packages = ["pennylane_calculquebec", "pennylane_calculquebec.measurements", "pennylane_calculquebec.utility", "pennylane_calculquebec.API", "pennylane_calculquebec.processing", "pennylane_calculquebec.processing.steps", "pennylane_calculquebec.processing.config", "pennylane_calculquebec.processing.interfaces"]
 
 [tool.setuptools.dynamic]
-version = { attr = "pennylane_snowflurry._version.__version__" }
+version = { attr = "pennylane_calculquebec._version.__version__" }
