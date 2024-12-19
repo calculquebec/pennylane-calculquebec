@@ -69,13 +69,13 @@ python base_circuit.py
 
 ### Julia
 
-As of version 0.3.0, --there is no need to install Julia manually--, since the plugin will download and install the required version automatically upon first use. This Julia environment is bound to the plugin.
+As of version 0.3.0, **there is no need to install Julia manually**, since the plugin will download and install the required version automatically upon first use. This Julia environment is bound to the plugin.
 
 However, if you wish to manage your Julia environment, you can download it from the [official website](https://julialang.org/downloads/). It is highly recommended to install using the installer file, as it will ask to add Julia to the system's environment variables.
 
---To ensure this correct configuration, during the installation process, the checkbox `Add Julia to PATH` must be checked.--
+**To ensure this correct configuration, during the installation process, the checkbox `Add Julia to PATH` must be checked.**
 
-As of version 0.5.0, --Julia will only be installed if you use Snowflurry.Qubit--. You can use Monarq.Default without depending on Julia. 
+As of version 0.5.0, **Julia will only be installed if you use Snowflurry.Qubit**. You can use Monarq.Default without depending on Julia. 
 
 ### Python modules
 
