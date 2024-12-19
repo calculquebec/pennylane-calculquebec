@@ -71,22 +71,6 @@ def are_matrices_equivalent(matrix1, matrix2, tolerance=1e-9):
                 return False
     return True
 
-
-def add_noise(tape : QuantumTape, t = 0.005):
-    """
-    adds noise for each gate present in a quantum tape
-
-    Args:
-        tape (QuantumTape): the tape you want to noisify
-        t (float, optional): the noise quantity from 0 to 1. Defaults to 0.005.
-    """
-    new_operations = []
-    for op in tape.operations:
-        new_operations += [op] + [qml.DepolarizingChannel(random.random() * t, w) for w in op.wires]
-    
-    new_tape = type(tape)(ops=new_operations, measurements=tape.measurements, shots=tape.shots)
-    return [new_tape], lambda results : results[0]
-
 def to_qasm(tape : QuantumTape) -> str:
     """
     turns a quantum tape into a qasm string
@@ -109,25 +93,6 @@ def to_qasm(tape : QuantumTape) -> str:
         string += ";"
         total_string += string + "\n"
     return total_string
-
-def arbitrary_circuit(tape : QuantumTape, measurement = qml.counts):
-    """
-    create a quantum function out of a tape and a default measurement to use (overrides the measurements in the qtape)
-    """
-    def _arbitrary_circuit(operations : list[Operation], measurements : list[MeasurementProcess]):
-        for op in operations:
-            if len(op.parameters) > 0:
-                qml.apply(op)
-            else:
-                qml.apply(op)
-        
-        def get_wires(mp : MeasurementProcess):
-            return [w for w in mp.wires] if mp is not None and mp.wires is not None and len(mp.wires) > 0 else tape.wires
-
-        # retourner une liste de mesures si on a plusieurs mesures, sinon retourner une seule mesure
-        return [measurement(wires=get_wires(meas)) for meas in measurements] if len(measurements) > 1 \
-            else measurement(wires=get_wires(measurements[0] if len(measurements) > 0 else None))
-    return _arbitrary_circuit(tape.operations, tape.measurements)
 
 def get_labels(up_to : int):
     """

@@ -1,5 +1,7 @@
 """
-Contains utility functions for plotting
+Contains utility functions for plotting\n
+this is not used in any feature.\n
+it is mostly used for developpers to simplify plotting
 """
 
 import matplotlib.pyplot as plt

@@ -130,32 +130,24 @@ def find_best_wire(graph : nx.Graph, excluded : list[int] = [], use_benchmark = 
     g.remove_nodes_from(excluded)
     return max([n for n in g.nodes], key=lambda n: calculate_score(n, g, use_benchmark))
 
-def find_closest_wire(a : int, machine_graph : nx.Graph, excluding : list[int] = [], prioritized : list[int] = [], use_benchmark = True):
+def find_closest_wire(start : int, machine_graph : nx.Graph, excluding : list[int] = [], prioritized : list[int] = [], use_benchmark = True):
     """
     find node in graph that is closest to given node, not considering arbitrary excluding list
     """
-    min_node = None
-    min_value = 100000
-    for b in machine_graph.nodes:
-        if b in excluding:
-            continue
-        value = len(shortest_path(a, b, machine_graph, prioritized_nodes=prioritized, use_benchmark=use_benchmark))
-        
-        if value < min_value:
-            min_value = value
-            min_node = b
-    return min_node
+    nodes = [n for n in machine_graph if n not in excluding]
+    return min(nodes, key=lambda end: len(shortest_path(start, end, 
+                                                      machine_graph, 
+                                                      excluding=excluding, 
+                                                      prioritized_nodes=prioritized, 
+                                                      use_benchmark=use_benchmark)))
+
 
 def node_with_shortest_path_from_selection(source : int, selection : list[int], graph : nx.Graph, use_benchmark = True):
     """
     find the unmapped node node in graph minus mapped nodes that has shortest path to given source node
     """
-    # all_unmapped_nodes = [n for n in graph.nodes if n not in mapping and n != source]
-    # mapping_minus_source = [n for n in mapping if n != source]
-
     nodes_minus_source = [node for node in selection if node != source]
     return min(nodes_minus_source, key=lambda n: len(shortest_path(source, n, graph, use_benchmark=use_benchmark)))
-    # return min(all_unmapped_nodes, key = lambda n : len(_shortest_path(source, n, graph, mapping_minus_source)))
 
 def calculate_score(source : int, graph : nx.Graph, use_benchmark = True) -> float:
     """Defines a score for a node by using cz fidelities on neighbouring couplers and state 1 readout fidelity\n
