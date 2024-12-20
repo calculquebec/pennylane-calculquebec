@@ -157,7 +157,7 @@ class ASTAR(Placement):
         for source in to_explore:
             if source in mapping:
                 continue
-            mapping[source] = graph_util.find_best_wire(machine_topology, [machine_node for machine_node in mapping.value()], self.use_benchmark)
+            mapping[source] = graph_util.find_best_wire(machine_topology, [machine_node for machine_node in mapping.values()], self.use_benchmark)
 
             for destination in to_explore:
                 if (source, destination) not in circuit_topology.edges: 

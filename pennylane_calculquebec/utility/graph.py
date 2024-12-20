@@ -87,7 +87,7 @@ def _find_isomorphisms(circuit : nx.Graph, machine : nx.Graph) -> dict[int, int]
     returns (dict[int, int]) : a mapping between the circuit's wires and the machines qubits
     """
     vf2 = nx.isomorphism.GraphMatcher(machine, circuit)
-    for mono in vf2.subgraph_isomorphisms_iter():
+    for mono in vf2.subgraph_monomorphisms_iter():
        return {v : k for k, v in mono.items()}
     return None
 
@@ -208,7 +208,6 @@ def find_closest_wire(source : int, machine_graph : nx.Graph, excluding : list[i
     return min(nodes, key=lambda dest: shortest_path(source, 
                                                      dest, 
                                                      machine_graph, 
-                                                     excluding=excluding, 
                                                      use_benchmark=use_benchmark))
 
 def node_with_shortest_path_from_selection(source : int, selection : list[int], graph : nx.Graph, use_benchmark = True):
