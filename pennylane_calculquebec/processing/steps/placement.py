@@ -55,15 +55,16 @@ class ISMAGS(Placement):
         # 2. find all unmapped nodes
         missing = [node for node in circuit_topology.nodes if node not in mapping.keys()]
             
-        for node in missing:
-            # 3. find the best neighbour (using cost function)
-            most_connected_node = graph_util.find_best_neighbour(node, circuit_topology, self.use_benchmark)
+        for source in missing:
+            if source in mapping:
+                continue
+            mapping[source] = graph_util.find_best_wire(machine_topology, [machine_node for machine_node in mapping.values()], self.use_benchmark)
 
-            # 4. find machine node with shortest path from already mapped machine node
-            possibles = [possible for possible in machine_topology.nodes if possible not in mapping.values()]
-            shortest_path_mapping = graph_util.node_with_shortest_path_from_selection(mapping[most_connected_node], possibles, machine_topology, self.use_benchmark)
+            for destination in missing:
+                if (source, destination) not in circuit_topology.edges: 
+                    continue
                 
-            mapping[node] = shortest_path_mapping
+                ASTAR(False)._recurse(source, destination, mapping, missing, machine_topology, circuit_topology)
         
         # 5. map wires in all operations and measurements
         new_tape = type(tape)([operation.map_wires(mapping) for operation in tape.operations], [measurement.map_wires(mapping) for measurement in tape.measurements], shots=tape.shots)
