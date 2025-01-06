@@ -91,7 +91,7 @@ class VF2(Placement):
         machine_topology = graph_util.machine_graph(self.use_benchmark, self.q1_acceptance, self.q2_acceptance, self.excluded_qubits, self.excluded_couplers)
 
         if len(graph_util.find_biggest_group(circuit_topology)) > len(graph_util.find_biggest_group(machine_topology)):
-            raise Exception(f"There are {machine_topology.number_of_nodes} qubits on the machine but your circuit has {circuit_topology.number_of_nodes}.")
+            raise Exception(f"There are {machine_topology.number_of_nodes()} qubits on the machine but your circuit has {circuit_topology.number_of_nodes()}.")
         
         # 1. find the largest common subgraph using VF2 algorithm and combinatorics
         mapping = graph_util.find_largest_common_subgraph_vf2(circuit_topology, machine_topology)
