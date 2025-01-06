@@ -32,7 +32,32 @@ def remove_global_phase(matrix):
 
     return normalized_matrix
 
-# TOFIX : this method doesnt work for some matrices
+def apply_to_ket0(matrix):
+    """
+    returns the result of applying a 2**n square matrix to a vector representing the |0>**n state 
+    """
+
+    # create |0>**n state
+    dim = matrix.shape[0]
+    zero = np.array([1 if i == 0 else 0 for i in range(dim)])
+
+    # return application of matrix on |0>**n state
+    return matrix @ zero
+
+def are_tape_same_probs(tape1, tape2):
+    """
+    returns true if both tapes yield the same probabilities
+    """
+    dev = qml.device("default.qubit")
+    results1 = qml.execute([tape1], dev)
+    results2 = qml.execute([tape2], dev)
+
+    results1 = np.round(results1, 5)
+    results2 = np.round(results2, 5)
+
+    return np.array_equal(results1, results2)
+
+
 def is_equal_matrices(matrix1, matrix2, tolerance=1e-9):
     """
     Checks if two matrices are equal up to a complex multiplicative factor.

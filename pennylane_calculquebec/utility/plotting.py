@@ -39,8 +39,10 @@ def fit(x_axis : list, array : list, label : str):
     """
     def fit_func(x, a, b): return a*(x**b)
     
-    params, _ = curve_fit(fit_func, x_axis, array)        
+    params, _ = curve_fit(fit_func, [int(x) for x in x_axis], array)        
     a, b = params
     
+    plt.ylabel("seconds")
+    plt.xlabel("num qubits")
     plt.scatter(x_axis, array, label=label)
-    plt.plot(x_axis, fit_func(x_axis, a, b), label=f"fitted {label}: $y={a:.3f} x^{{{b:.2f}}}$")
+    plt.plot(x_axis, fit_func(x_axis, a, b), label=f"fitted {label}: $y={a:.3f} x^{{{b:.2f}}}$", )
