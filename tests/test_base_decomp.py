@@ -22,7 +22,6 @@ def test_base_decomp_toffoli():
     assert are_tape_same_probs(tape, new_tape)
 
 
-# @pytest.mark.xfail
 def test_base_decomp_unitary():
     step = CliffordTDecomposition()
     
