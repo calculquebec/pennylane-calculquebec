@@ -32,18 +32,6 @@ def remove_global_phase(matrix):
 
     return normalized_matrix
 
-def apply_to_ket0(matrix):
-    """
-    returns the result of applying a 2**n square matrix to a vector representing the |0>**n state 
-    """
-
-    # create |0>**n state
-    dim = matrix.shape[0]
-    zero = np.array([1 if i == 0 else 0 for i in range(dim)])
-
-    # return application of matrix on |0>**n state
-    return matrix @ zero
-
 def are_tape_same_probs(tape1, tape2):
     """
     returns true if both tapes yield the same probabilities
