@@ -1,5 +1,5 @@
 from .measurement_strategy import MeasurementStrategy
-from juliacall import convert
+
 
 
 class Probabilities(MeasurementStrategy):
@@ -8,6 +8,7 @@ class Probabilities(MeasurementStrategy):
         super().__init__()
 
     def measure(self, converter, mp, shots):
+        from juliacall import convert
         converter.remove_readouts()
         wires_list = mp.wires.tolist()
         if len(wires_list) == 0:

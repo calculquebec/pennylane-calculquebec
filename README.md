@@ -55,7 +55,7 @@ The plugin will also take care of installing Julia and the required Julia packag
 
 ## Usage
 
-If you need more information about how to use the plugin, you may read the [getting-started](./doc/getting_started.ipynb) jupyter notebook.
+If you need more information about how to use the plugin, you may read the [getting-started](https://github.com/calculquebec/pennylane-calculquebec/blob/main/doc/getting_started.ipynb) jupyter notebook.
 
 ### Running files
 
@@ -102,4 +102,4 @@ The plugin is currently in its beta phase and provides access to MonarQ directly
 
 ## References 
 
-Calcul Québec's Wiki provides a lot of information on the plugin, its components and how to use them. You can access it [here](https://docs.alliancecan.ca/wiki/Les_services_quantiques).
+Calcul Québec's Wiki provides a lot of information on the plugin, its components and how to use them. You can access it [here](https://docs.alliancecan.ca/wiki/Services_d%27informatique_quantique).
