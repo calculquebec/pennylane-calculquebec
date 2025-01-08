@@ -1,6 +1,6 @@
 import pytest
 from pennylane_calculquebec import measurements
-from pennylane_calculquebec import PennylaneConverter
+from pennylane_calculquebec.pennylane_converter import PennylaneConverter
 import pennylane as qml
 import numpy as np
 from pennylane.tape import QuantumTape
