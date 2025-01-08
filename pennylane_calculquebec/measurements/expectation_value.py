@@ -1,6 +1,5 @@
 from .measurement_strategy import MeasurementStrategy
 import pennylane as qml
-from juliacall import convert
 import numpy as np
 
 
@@ -10,6 +9,7 @@ class ExpectationValue(MeasurementStrategy):
         super().__init__()
 
     def measure(self, converter, mp, shots):
+        from juliacall import convert
         # FIXME : this measurement does work when the number of qubits measured is not equal to the number of qubits
         #  in the circuit
         # Requires some processing to work with larger matrices
