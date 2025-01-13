@@ -44,12 +44,10 @@ class ReadoutNoiseSimulation(PostProcStep):
 
         readout_matrix = np.identity(1)
         
-        wires = []
+        wires = [w for w in tape.wires]
         
-        for measurement in tape.measurements:
-            for wire in measurement.wires:
-                wires.append(wire)
-                readout_matrix = np.kron(readout_matrix, readout_error_matrices[wire])
+        for wire in wires:
+            readout_matrix = np.kron(readout_matrix, readout_error_matrices[wire])
 
         # Apply the readout error matrix (dot product with the probability vector)
         probs = []
