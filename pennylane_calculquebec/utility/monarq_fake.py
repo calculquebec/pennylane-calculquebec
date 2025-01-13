@@ -13,6 +13,7 @@ from pennylane_calculquebec.processing.monarq_postproc import PostProcessor
 from pennylane_calculquebec.processing.monarq_preproc import PreProcessor
 from pennylane_calculquebec.processing.config import MonarqDefaultConfig, MonarqDefaultConfigNoBenchmark, FakeMonarqConfig
 from pennylane_calculquebec.API.adapter import ApiAdapter
+from pennylane.transforms import transform
 
 class MonarqFake(Device):
     """
@@ -73,7 +74,7 @@ class MonarqFake(Device):
         config = execution_config
 
         transform_program = TransformProgram()
-        transform_program.add_transform(PreProcessor.get_processor(self._processing_config, self.wires))
+        transform_program.add_transform(transform(PreProcessor.get_processor(self._processing_config, self.wires)))
         return transform_program, config
 
     def execute(self, circuits: QuantumTape | list[QuantumTape], execution_config : ExecutionConfig = DefaultExecutionConfig):
