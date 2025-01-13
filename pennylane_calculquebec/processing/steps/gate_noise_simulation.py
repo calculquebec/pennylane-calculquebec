@@ -61,16 +61,8 @@ class GateNoiseSimulation(PreProcStep):
                     operations.append(qml.DepolarizingChannel(noises[0], wires=wire))
                 continue
             
-            if operation.basis == "Z":
-                operations.append(operation)
-                for wire in operation.wires:
-                    operations.append(qml.DepolarizingChannel(qubit_noise[wire], wires=wire))
-                continue
-            
             operations.append(operation)
             for wire in operation.wires:
-                operations.append(qml.DepolarizingChannel(qubit_noise[wire], wires=wire))    
-                operations.append(qml.AmplitudeDamping(relaxation[wire], wires=wire))
-                operations.append(qml.PhaseDamping(decoherence[wire], wires=wire))
+                operations.append(qml.DepolarizingChannel(qubit_noise[wire], wires=wire))   
         
         return type(tape)(operations, tape.measurements, tape.shots)
