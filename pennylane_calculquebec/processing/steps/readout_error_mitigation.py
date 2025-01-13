@@ -9,20 +9,19 @@ import json
 import numpy as np
 from pennylane_calculquebec.processing.interfaces import PostProcStep
 
-class IBUReadoutMitigation(PostProcStep):
-    """a mitigation method that uses iterative bayesian unfolding to mitigate readout errors on a circuit's results
+def all_combinations(num_qubits):
+    """
+    all bitstrings for a number of qubits
     
     Args:
-        * initial_guess (list[float]) : a probability distribution representing a starting point for the results (defaults to None)
+        num_qubits (int): how many qubits are used
+    
+    Returns:
+        list[str]: all combinations of 0s and 1s as bitstrings
     """
-    def __init__(self, initial_guess = None):
-        self._initial_guess = initial_guess
-    
-    
-    def all_combinations(self, num_qubits):
-        return get_labels((2 ** num_qubits) - 1)
-  
-    def all_results(self, results, num_qubits):
+    return get_labels((2 ** num_qubits) - 1)
+
+def all_results(results, num_qubits):
         """counts for all bitstring combinations
 
         Args:
@@ -31,72 +30,83 @@ class IBUReadoutMitigation(PostProcStep):
         Returns:
             dict[str, int]: counts for all bitstring combinations
         """
-        all_combs = self.all_combinations(num_qubits)
+        all_combs = all_combinations(num_qubits)
         return {bitstring:(results[bitstring] if bitstring in results else 0) for bitstring in all_combs}
-        
-    def get_readout_fidelities(self, chosen_qubits):
-        """
-        what are the readout 0 and 1 fidelities for given qubits?
 
-        Args
-            chosen_qubits (list[int]) : qubits from the circuit
-        
-        Returns
-            a tuple appending readouts on 0 and 1 for given qubits
-        """
-        benchmark = ApiAdapter.get_qubits_and_couplers()
-        
-        readout0 = {}
-        readout1 = {}
-        for qubit in chosen_qubits:
-            readout0[qubit] = benchmark["qubits"][str(qubit)]["readoutState0Fidelity"]
-            readout1[qubit] = benchmark["qubits"][str(qubit)]["readoutState1Fidelity"]    
+def get_readout_fidelities(chosen_qubits):
+    """
+    what are the readout 0 and 1 fidelities for given qubits?
 
-        readout0 = list(readout0.values())
-        readout1 = list(readout1.values())
-        return readout0, readout1
+    Args
+        chosen_qubits (list[int]) : qubits from the circuit
     
-    def get_calibration_data(self, chosen_qubits):
-        """gets fidelities for the observed qubits
-
-        Args:
-            chosen_qubits (list[int]) : which qubits are observed
-
-        Returns:
-            dict[int, float], dict[int, float] : readout fidelities for state 0 and 1
-        """
-        num_qubits = len(chosen_qubits)
-        readout0, readout1 = self.get_readout_fidelities(chosen_qubits)
-        calibration_data = {
-            qubit: np.array([
-                [readout0[qubit], 1 - readout1[qubit]],
-                [1 - readout0[qubit], readout1[qubit]]
-            ]) for qubit in range(num_qubits)
-        }
-        return calibration_data
+    Returns
+        a tuple appending readouts on 0 and 1 for given qubits
+    """
+    benchmark = ApiAdapter.get_qubits_and_couplers()
     
-    def tensor_product_calibration(self, calibration_matrices):
-        """
-        Initialize with the first qubit's calibration matrix
-        """
-        readout_matrix = calibration_matrices[0]
+    readout0 = {}
+    readout1 = {}
+    for qubit in chosen_qubits:
+        readout0[qubit] = benchmark["qubits"][str(qubit)]["readoutState0Fidelity"]
+        readout1[qubit] = benchmark["qubits"][str(qubit)]["readoutState1Fidelity"]    
+
+    readout0 = list(readout0.values())
+    readout1 = list(readout1.values())
+    return readout0, readout1
+
+def get_calibration_data(chosen_qubits):
+    """gets readout matrices for the observed qubits
+
+    Args:
+        chosen_qubits (list[int]) : which qubits are observed
+
+    Returns:
+        readout matrices for given qubits
+    """
+    num_qubits = len(chosen_qubits)
+    readout0, readout1 = get_readout_fidelities(chosen_qubits)
+    calibration_data = [
+        np.array([
+            [readout0[qubit], 1 - readout1[qubit]],
+            [1 - readout0[qubit], readout1[qubit]]
+        ]) for qubit in range(num_qubits)
+    ]
+    return calibration_data
+
+def tensor_product_calibration(calibration_matrices):
+    """
+    returns all calibrations concatenated together using tensor product
+    """
+    readout_matrix = calibration_matrices[0]
+    
+    # Tensor product of calibration matrices for all qubits
+    for i in range(1, len(calibration_matrices)):
+        readout_matrix = np.kron(readout_matrix, calibration_matrices[i])
         
-        # Tensor product of calibration matrices for all qubits
-        for i in range(1, len(calibration_matrices)):
-            readout_matrix = np.kron(readout_matrix, calibration_matrices[i])
-            
-        return readout_matrix
+    return readout_matrix
     
-    def get_full_readout_matrix(self, chosen_qubits):
-        calibration_data = self.get_calibration_data(chosen_qubits)
-        full_readout_matrix = self.tensor_product_calibration(calibration_data)
+def get_full_readout_matrix(chosen_qubits):
+    calibration_data = get_calibration_data(chosen_qubits)
+    full_readout_matrix = tensor_product_calibration(calibration_data)
 
-        # normalize it
-        for column in range(full_readout_matrix.shape[1]):
-            column_sum= np.sum(full_readout_matrix[:, column])
-            if column_sum > 1e-9:  # Threshold to handle potential near-zero sums
-                full_readout_matrix[:, column] /= column_sum
-        return full_readout_matrix
+    # normalize it
+    for column in range(full_readout_matrix.shape[1]):
+        column_sum= np.sum(full_readout_matrix[:, column])
+        if column_sum > 1e-9:  # Threshold to handle potential near-zero sums
+            full_readout_matrix[:, column] /= column_sum
+    return full_readout_matrix
+
+
+
+class IBUReadoutMitigation(PostProcStep):
+    """a mitigation method that uses iterative bayesian unfolding to mitigate readout errors on a circuit's results
+    
+    Args:
+        * initial_guess (list[float]) : a probability distribution representing a starting point for the results (defaults to None)
+    """
+    def __init__(self, initial_guess = None):
+        self._initial_guess = initial_guess
 
     def initial_guess(self, num_qubits):
         """
@@ -146,22 +156,21 @@ class IBUReadoutMitigation(PostProcStep):
             
             current_probs = next_probs
         
-        return current_probs, max_iterations
-    
-    
+        return current_probs
+
     def execute(self, tape, results):
         chosen_qubits = [wire for wire in tape.wires]
         num_qubits = len(chosen_qubits)
         shots = tape.shots.total_shots
         
-        readout_matrix = self.get_full_readout_matrix(chosen_qubits)
-        all_results = self.all_results(results, num_qubits)
-        probs = [v/shots for _,v in all_results.items()]
+        readout_matrix = get_full_readout_matrix(chosen_qubits)
+        _all_results = all_results(results, num_qubits)
+        probs = [v/shots for _,v in _all_results.items()]
         
         result, _ = self.iterative_bayesian_unfolding(readout_matrix, 
                                                    probs, 
                                                    self.initial_guess(num_qubits))
-        result_dict = {key:round(shots * prob) for key, prob in zip(all_results.keys(), result)}
+        result_dict = {key:round(shots * prob) for key, prob in zip(_all_results.keys(), result)}
         return result_dict
     
 
@@ -172,72 +181,6 @@ class MatrixReadoutMitigation(PostProcStep):
     _readout_matrix_normalized = None
     _readout_matrix_reduced = None
     _readout_matrix_reduced_inverted = None
-    
-    def all_combinations(self, num_qubits):
-        return get_labels((2 ** num_qubits) - 1)
-  
-    def all_results(self, results, num_qubits):
-        """counts for all bitstring combinations
-
-        Args:
-            results (dict[str, int]): counts for possibilities that are not 0
-
-        Returns:
-            dict[str, int]: counts for all bitstring combinations
-        """
-        all_combs = self.all_combinations(num_qubits)
-        return {bitstring:(results[bitstring] if bitstring in results else 0) for bitstring in all_combs}
-        
-    def _get_readout_fidelities(self, chosen_qubits):
-        """gets fidelities for the observed qubits
-
-        Args:
-            chosen_qubits (list[int]) : which qubits are observed
-
-        Returns:
-            dict[int, float], dict[int, float] : readout fidelities for state 0 and 1
-        """
-        benchmark = ApiAdapter.get_qubits_and_couplers()
-        
-        
-        readout0 = {}
-        readout1 = {}
-        for qubit in chosen_qubits:
-            readout0[qubit] = benchmark["qubits"][str(qubit)]["readoutState0Fidelity"]
-            readout1[qubit] = benchmark["qubits"][str(qubit)]["readoutState1Fidelity"]    
-
-        readout0 = list(readout0.values())
-        readout1 = list(readout1.values())
-        
-        return readout0, readout1
-
-    def _tensor_product_calibration(self, calibration_matrices):
-        """
-        creates a matrix out of calibration matrices for each observed qubits using kronecker product
-        """
-        # Initialize with the first qubit's calibration matrix
-        readout_matrix = calibration_matrices[0]
-        
-        # Tensor product of calibration matrices for all qubits
-        for qubit in range(1, len(calibration_matrices)):
-            readout_matrix = np.kron(readout_matrix, calibration_matrices[qubit])
-            
-        return readout_matrix
-
-    def _get_calibration_data(self, chosen_qubits):
-        """create calibration matrices for each observed qubits
-
-        Args:
-            chosen_qubits (list[int]): observed qubits
-        """
-        state_0_readout_fidelity, state_1_readout_fidelity = self._get_readout_fidelities(chosen_qubits)
-        calibration_data = {
-            qubit: np.array([
-                [state_0_readout_fidelity[qubit], 1 - state_1_readout_fidelity[qubit]],
-                [1 - state_0_readout_fidelity[qubit], state_1_readout_fidelity[qubit]]
-            ]) for qubit in range(len(chosen_qubits))
-        }
-        return calibration_data
 
     def _get_reduced_a_matrix(self, readout_matrix, observed_bit_strings, all_bit_strings):
         """
@@ -260,22 +203,13 @@ class MatrixReadoutMitigation(PostProcStep):
         if MatrixReadoutMitigation._readout_matrix_normalized is None or ApiAdapter.is_last_update_expired():
             MatrixReadoutMitigation._readout_matrix_reduced = None
             MatrixReadoutMitigation._readout_matrix_reduced_inverted = None
+            MatrixReadoutMitigation._readout_matrix_normalized = get_full_readout_matrix(chosen_qubits)
 
-            calibration_data = self._get_calibration_data(chosen_qubits)
-            MatrixReadoutMitigation._readout_matrix_normalized = self._tensor_product_calibration(calibration_data)
-            
-            # normalize it
-            for column in range(MatrixReadoutMitigation._readout_matrix_normalized.shape[1]):
-                column_sum= np.sum(MatrixReadoutMitigation._readout_matrix_normalized[:, column])
-                if column_sum > 1e-9:  # Threshold to handle potential near-zero sums
-                    MatrixReadoutMitigation._readout_matrix_normalized[:, column] /= column_sum
-
-
-        observed_bit_string = list(self.all_results(results, num_qubits).keys())
+        observed_bit_string = list(all_results(results, num_qubits).keys())
 
         #Build the reduced A-matrix
         if MatrixReadoutMitigation._readout_matrix_reduced is None:
-            MatrixReadoutMitigation._readout_matrix_reduced = self._get_reduced_a_matrix(MatrixReadoutMitigation._readout_matrix_normalized, observed_bit_string, self.all_combinations(num_qubits))
+            MatrixReadoutMitigation._readout_matrix_reduced = self._get_reduced_a_matrix(MatrixReadoutMitigation._readout_matrix_normalized, observed_bit_string, all_combinations(num_qubits))
             for column in range(MatrixReadoutMitigation._readout_matrix_reduced.shape[1]):
                 column_sum= np.sum(MatrixReadoutMitigation._readout_matrix_reduced[:, column])
                 if column_sum > 1e-9:  # Threshold to handle potential near-zero sums
@@ -297,13 +231,14 @@ class MatrixReadoutMitigation(PostProcStep):
         """
         wires = [wire for wire in tape.wires]
         num_qubits = len(wires)
-        real_counts = np.array([v for v in self.all_results(results, num_qubits).values()])
+        real_counts = np.array([v for v in all_results(results, num_qubits).values()])
         
         inverted_reduced_readout_matrix = self._get_inverted_reduced_a_matrix(wires, results)
         
         # Correction
         corrected_counts = np.dot(inverted_reduced_readout_matrix, real_counts)
         corrected_counts = [np.round(count) for count in corrected_counts]
+
         # reconstruct counts dict
-        return {key:count for key,count in zip(self.all_combinations(num_qubits), corrected_counts)}
+        return {key:count for key,count in zip(all_combinations(num_qubits), corrected_counts)}
         
