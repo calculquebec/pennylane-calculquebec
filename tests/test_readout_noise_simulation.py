@@ -2,6 +2,11 @@ import pennylane_calculquebec.processing.steps.readout_noise_simulation as rns
 import pytest
 from unittest.mock import patch
 import numpy as np
+
+class MP:
+    def __init__(self, wire):
+        self.wires = [wire]
+
 class Shots:
     def __init__(self, shots):
         self.total_shots = shots
@@ -11,6 +16,7 @@ class Tape:
     def __init__(self, wires, shots):
         self.wires = wires
         self.shots = Shots(shots)
+        self.measurements = [MP(wire) for wire in wires] 
 
 @pytest.fixture
 def mock_readout_noise_matrices():
@@ -40,8 +46,13 @@ def test_execute(mock_readout_noise_matrices):
     expected = {
         "000" : 0, "001" : 0, "010" : 0, "011" : 0, "100" : 500, "101" : 0, "110" : 500, "111" : 0
     }
-    step = rns.ReadoutNoiseSimulation(True)
-    
-    results = step.execute(tape, results)
 
-    assert all(v1 == v2 for v1, v2 in zip(expected.values(), results.values()))
+    step = rns.ReadoutNoiseSimulation(False)
+    _ = step.execute(tape, results)
+    mock_readout_noise_matrices.assert_not_called()
+
+    step = rns.ReadoutNoiseSimulation(True)
+    result2 = step.execute(tape, results)
+    mock_readout_noise_matrices.assert_called_once()
+
+    assert all(v1 == v2 for v1, v2 in zip(expected.values(), result2.values()))
