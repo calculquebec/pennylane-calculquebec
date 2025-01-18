@@ -28,7 +28,8 @@ class ProcessingConfig:
         
         for i, step in enumerate(self.steps):
             step2 = other.steps[i]
-            if type(step) != type(step2) or vars(step) != vars(step):
+            
+            if type(step) != type(step2) or vars(step) != vars(step2):
                 return False
         
         return True

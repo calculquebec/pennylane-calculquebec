@@ -1,10 +1,34 @@
 from pennylane_calculquebec.processing.config import ProcessingConfig, MonarqDefaultConfig, MonarqDefaultConfigNoBenchmark, NoPlaceNoRouteConfig, EmptyConfig, FakeMonarqConfig
 from pennylane_calculquebec.processing.steps import DecomposeReadout, CliffordTDecomposition, ASTAR, ISMAGS, Swaps, IterativeCommuteAndMerge, MonarqDecomposition, GateNoiseSimulation, ReadoutNoiseSimulation
 
+class Step:
+    def __init__(self, arg):
+        self.arg = arg
+
 def test_processing_config():
-    config = ProcessingConfig(1, 2, 3)
-    assert all(a in config.steps for a in [1,2,3])
+    steps = [Step(1), Step(2), Step(3)]
+    config = ProcessingConfig(*steps)
+
+    assert all(a in config.steps for a in steps)
     assert len(config.steps) == 3
+
+    config2 = ProcessingConfig(Step(1), Step(2))
+    assert config != config2
+    
+    config2 = ProcessingConfig(Step(1), Step(2), Step(4))
+    assert config != config2
+
+    config2 = ProcessingConfig(Step(1), Step(2), Step([3]))
+    assert config != config2
+
+    config2 = ProcessingConfig(Step(1), Step(2), Step(3))
+    assert config == config2
+
+    assert config[0] == steps[0]
+
+    step = Step(4)
+    config[0] = step
+    assert config.steps[0] == step
 
 def test_presets():
     # default config should contain only default steps
