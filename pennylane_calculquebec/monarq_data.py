@@ -111,6 +111,11 @@ def get_broken_qubits_and_couplers(q1Acceptance, q2Acceptance):
 def get_readout1_and_cz_fidelities():
     """
     get state 1 fidelities and cz fidelities
+
+    Returns:
+        dict[str, dict[str, float] | dict[tuple[int], float]] : fidelity values for readout1 and couplers
+    
+    example : {"readoutState1Fidelity" : {"0" : 1}, "czGateFidelity" : {(0, 1) : 1}}
     """
     if cache._readout1_cz_fidelities is None or ApiAdapter.is_last_update_expired():
         cache._readout1_cz_fidelities = {keys.READOUT_STATE_1_FIDELITY:{}, keys.CZ_GATE_FIDELITY:{}}

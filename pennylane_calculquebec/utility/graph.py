@@ -11,6 +11,7 @@ from copy import deepcopy
 from itertools import combinations
 from pennylane_calculquebec.monarq_data import connectivity, get_broken_qubits_and_couplers, get_readout1_and_cz_fidelities
 from pennylane_calculquebec.utility.api import keys
+from networkx.exception import NetworkXNoPath
 
 def find_biggest_group(graph : nx.Graph) -> list:
     """Returns the biggest array of connected components in the graph
@@ -166,7 +167,10 @@ def shortest_path(a : int, b : int, graph : nx.Graph, excluding : list[int] = []
             return w - 1
         return w
     
-    return nx.astar_path(g_copy, a, b, weight = lambda u, v, _: weight(u, v))
+    try:
+        return nx.astar_path(g_copy, a, b, weight = lambda u, v, _: weight(u, v))
+    except NetworkXNoPath:
+        return None
 
 def find_best_neighbour(wire, topology : nx.Graph, use_benchmark = True):
     """

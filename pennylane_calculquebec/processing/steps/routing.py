@@ -8,6 +8,9 @@ import pennylane as qml
 from pennylane_calculquebec.processing.interfaces import PreProcStep
 from pennylane_calculquebec.utility.graph import circuit_graph, shortest_path, machine_graph, is_directly_connected
 
+class RoutingException(Exception):
+    pass
+
 class Routing(PreProcStep):
     """
     base class for routing algorithms
@@ -48,7 +51,9 @@ class Swaps(Routing):
         for operation in list_copy:
             if operation.num_wires == 2 and not is_directly_connected(operation, machine_topology):
                 path = shortest_path(operation.wires[0], operation.wires[1], machine_topology, prioritized_nodes=[n for n in circuit_topology.nodes], use_benchmark=self.use_benchmark)
-
+                
+                if path is None:
+                    raise RoutingException("It is not possible to route the circuit given available qubits and couplers")
                 for node in reversed(range(1, len(path) - 1)): 
                     new_operations += [qml.SWAP([path[node], path[node+1]])]
 
