@@ -16,16 +16,6 @@ class ReadoutNoiseSimulation(PostProcStep):
     def __init__(self, use_benchmark = True):
         self.use_benchmark = use_benchmark
         
-    def native_gates(self):
-        """the set of monarq-native gates"""
-        return  [
-            "T", "TDagger",
-            "PauliX", "PauliY", "PauliZ", 
-            "X90", "Y90", "Z90",
-            "XM90", "YM90", "ZM90",
-            "PhaseShift", "CZ", "RZ"
-        ]
-    
     def execute(self, tape, results):
         """adds readout noise to the results of a circuit
 
