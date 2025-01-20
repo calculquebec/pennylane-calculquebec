@@ -137,6 +137,15 @@ class MonarqDevice(Device):
 
 
     def _measure(self, tape : QuantumTape):
+        """
+        sends job to Monarq and returns value, converted to required measurement type
+
+        Args : 
+            tape (QuantumTape) : the tape from which to get results
+        
+        Returns :
+            a result, which format can change according to the measurement process
+        """
         if len(tape.measurements) != 1:
             raise DeviceException("Multiple measurements not supported")
         meas = type(tape.measurements[0]).__name__
