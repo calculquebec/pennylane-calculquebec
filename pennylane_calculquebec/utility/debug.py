@@ -11,6 +11,26 @@ import numpy as np
 import pennylane_calculquebec.processing.custom_gates as custom
 import random
 
+def compute_expval(probabilities):
+    """
+    Compute the expectation value using the parity of each outcome
+    """
+
+    if isinstance(probabilities, dict):
+        probabilities = counts_to_probs(probabilities)
+
+    expval = 0
+    for i, prob in enumerate(probabilities):
+        hamming_weight = bin(i).count('1')  # Count the 1s in the binary representation
+        parity = (-1) ** hamming_weight  # +1 for even parity, -1 for odd parity
+        expval += prob * parity
+    return expval
+
+def counts_to_probs(counts : dict):
+    max_count = sum(counts.values())
+    all_labels = get_labels(2 ** len(counts.keys()[0]) - 1)
+    return [(counts[label] if label in counts else 0) / max_count for label in all_labels]
+
 def remove_global_phase(matrix):
     """
     Removes the global phase from a matrix by normalizing its determinant to 1.
