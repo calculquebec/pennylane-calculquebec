@@ -11,7 +11,7 @@ from pennylane.operation import Operator
 from pennylane.devices.preprocess import decompose
 from pennylane_calculquebec.pennylane_converter import PennylaneConverter
 from pennylane_calculquebec.pennylane_converter import SNOWFLURRY_OPERATION_MAP
-from pennylane_calculquebec.execution_config import (
+from pennylane.devices import (
     ExecutionConfig,
     DefaultExecutionConfig,
 )

@@ -15,7 +15,6 @@ import time
 import re
 from pennylane.typing import TensorLike
 from typing import Callable, Type
-from pennylane.ops import Sum, Hamiltonian
 
 from pennylane_calculquebec.measurements import (
     MeasurementStrategy,
