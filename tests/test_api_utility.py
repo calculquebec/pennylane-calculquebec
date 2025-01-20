@@ -39,14 +39,14 @@ def test_convert_circuit(mock_convert_instruction):
     
     wires = [4, 1, 5]
     
-    tape = QuantumTape([qml.X(4), qml.Y(1), qml.Z(5)], [], 1000)
+    tape = QuantumTape(ops=[qml.PauliX(4), qml.PauliY(1), qml.PauliZ(5)], measurements=[], shots=1000)
     result = ApiUtility.convert_circuit(tape)
     assert mock_convert_instruction.call_count == 3
     
     for i, op in enumerate(result[keys.OPERATIONS]):
         assert op == tape.operations[i].name
     
-    tape = QuantumTape([], [qml.counts(wires=wires)], 1000)
+    tape = QuantumTape(ops=[], measurements=[qml.counts(wires=wires)], shots=1000)
     result = ApiUtility.convert_circuit(tape)
     
     for i, op in enumerate(result[keys.OPERATIONS]):

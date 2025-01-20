@@ -85,7 +85,7 @@ def test_custom_sdag():
     assert are_matrices_equivalent(mat, mat2)
 
 def test_custom_h():
-    mat = qml.H([0]).matrix()
+    mat = qml.Hadamard([0]).matrix()
     result = decomp._custom_h([0])
     mat2 = reduce(lambda i, s: i @ s.matrix(), result, np.identity(2))
     assert are_matrices_equivalent(mat, mat2)

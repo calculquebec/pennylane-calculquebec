@@ -12,22 +12,22 @@ def mock_get_ops_for_product():
         yield mock
 
 @pytest.mark.parametrize("obs, expected", [
-    (qml.Z(0) @ qml.Z(1), [qml.Identity(0), qml.Identity(1)]),
-    (qml.X(0) @ qml.Z(1), [qml.RY(np.pi / 2, 0), qml.Identity(1)]),
-    (qml.Y(0) @ qml.Z(1), [qml.RX(-np.pi / 2, 0), qml.Identity(1)]),
-    (qml.H(0) @ qml.Z(1), [qml.RY(np.pi / 4, 0), qml.Identity(1)]),
-    (qml.Z(0) @ qml.X(1), [qml.Identity(0), qml.RY(np.pi / 2, 1)]),
-    (qml.X(0) @ qml.X(1), [qml.RY(np.pi / 2, 0), qml.RY(np.pi / 2, 1)]),
-    (qml.Y(0) @ qml.X(1), [qml.RX(-np.pi / 2, 0), qml.RY(np.pi / 2, 1)]),
-    (qml.H(0) @ qml.X(1), [qml.RY(np.pi / 4, 0), qml.RY(np.pi / 2, 1)]),
-    (qml.Z(0) @ qml.Y(1), [qml.Identity(0), qml.RX(-np.pi / 2, 1)]),
-    (qml.X(0) @ qml.Y(1), [qml.RY(np.pi / 2, 0), qml.RX(-np.pi / 2, 1)]),
-    (qml.Y(0) @ qml.Y(1), [qml.RX(-np.pi / 2, 0), qml.RX(-np.pi / 2, 1)]),
-    (qml.H(0) @ qml.Y(1), [qml.RY(np.pi / 4, 0), qml.RX(-np.pi / 2, 1)]),
-    (qml.Z(0) @ qml.H(1), [qml.Identity(0), qml.RY(np.pi / 4, 1)]),
-    (qml.X(0) @ qml.H(1), [qml.RY(np.pi / 2, 0), qml.RY(np.pi / 4, 1)]),
-    (qml.Y(0) @ qml.H(1), [qml.RX(-np.pi / 2, 0), qml.RY(np.pi / 4, 1)]),
-    (qml.H(0) @ qml.H(1), [qml.RY(np.pi / 4, 0), qml.RY(np.pi / 4, 1)])
+    (qml.PauliZ(0) @ qml.PauliZ(1), [qml.Identity(0), qml.Identity(1)]),
+    (qml.PauliX(0) @ qml.PauliZ(1), [qml.RY(np.pi / 2, 0), qml.Identity(1)]),
+    (qml.PauliY(0) @ qml.PauliZ(1), [qml.RX(-np.pi / 2, 0), qml.Identity(1)]),
+    (qml.Hadamard(0) @ qml.PauliZ(1), [qml.RY(np.pi / 4, 0), qml.Identity(1)]),
+    (qml.PauliZ(0) @ qml.PauliX(1), [qml.Identity(0), qml.RY(np.pi / 2, 1)]),
+    (qml.PauliX(0) @ qml.PauliX(1), [qml.RY(np.pi / 2, 0), qml.RY(np.pi / 2, 1)]),
+    (qml.PauliY(0) @ qml.PauliX(1), [qml.RX(-np.pi / 2, 0), qml.RY(np.pi / 2, 1)]),
+    (qml.Hadamard(0) @ qml.PauliX(1), [qml.RY(np.pi / 4, 0), qml.RY(np.pi / 2, 1)]),
+    (qml.PauliZ(0) @ qml.PauliY(1), [qml.Identity(0), qml.RX(-np.pi / 2, 1)]),
+    (qml.PauliX(0) @ qml.PauliY(1), [qml.RY(np.pi / 2, 0), qml.RX(-np.pi / 2, 1)]),
+    (qml.PauliY(0) @ qml.PauliY(1), [qml.RX(-np.pi / 2, 0), qml.RX(-np.pi / 2, 1)]),
+    (qml.Hadamard(0) @ qml.PauliY(1), [qml.RY(np.pi / 4, 0), qml.RX(-np.pi / 2, 1)]),
+    (qml.PauliZ(0) @ qml.Hadamard(1), [qml.Identity(0), qml.RY(np.pi / 4, 1)]),
+    (qml.PauliX(0) @ qml.Hadamard(1), [qml.RY(np.pi / 2, 0), qml.RY(np.pi / 4, 1)]),
+    (qml.PauliY(0) @ qml.Hadamard(1), [qml.RX(-np.pi / 2, 0), qml.RY(np.pi / 4, 1)]),
+    (qml.Hadamard(0) @ qml.Hadamard(1), [qml.RY(np.pi / 4, 0), qml.RY(np.pi / 4, 1)])
 ])
 def test_get_ops_for_product(obs, expected):
     step = DecomposeReadout()
@@ -43,7 +43,7 @@ def test_get_ops_for_product_edge_cases():
     step = DecomposeReadout()
     
     # three operands
-    obs = qml.X(0) @ qml.Z(1) @ qml.H(2)
+    obs = qml.PauliX(0) @ qml.PauliZ(1) @ qml.Hadamard(2)
     results = step.get_ops_for_product(obs)
     solution = [qml.RY(np.pi/2, 0), qml.Identity(1), qml.RY(np.pi/4, 2)]
     for i, r in enumerate(results):
@@ -51,7 +51,7 @@ def test_get_ops_for_product_edge_cases():
         assert r == r2
 
     # nested operands
-    obs = qml.X(0) @ (qml.Z(1) @ qml.H(2))
+    obs = qml.PauliX(0) @ (qml.PauliZ(1) @ qml.Hadamard(2))
     results = step.get_ops_for_product(obs)
     solution = [qml.RY(np.pi/2, 0), qml.Identity(1), qml.RY(np.pi/4, 2)]
     for i, r in enumerate(results):
@@ -59,7 +59,7 @@ def test_get_ops_for_product_edge_cases():
         assert r == r2
     
     # two operands on same wires
-    obs = qml.X(0) @ qml.Y(0)
+    obs = qml.PauliX(0) @ qml.PauliY(0)
     results = step.get_ops_for_product(obs)
     solution = [qml.RY(np.pi/2, 0), qml.RX(-np.pi/2, 0)]
     for i, r in enumerate(results):
@@ -67,7 +67,7 @@ def test_get_ops_for_product_edge_cases():
         assert r == r2
         
     # unsupported operand
-    obs = qml.T(0) @ qml.Z(1)
+    obs = qml.T(0) @ qml.PauliZ(1)
     with pytest.raises(ValueError):
         step.get_ops_for_product(obs)
 
@@ -76,28 +76,28 @@ def test_execute(mock_get_ops_for_product):
     step = DecomposeReadout()
     
     # observable Z
-    tape = QuantumTape([], [qml.counts(qml.Z(0))])
+    tape = QuantumTape([], [qml.counts(qml.PauliZ(0))])
     tape = step.execute(tape)
     assert len(tape.operations) == 1 and len(tape.measurements) == 1
     assert tape.operations[0] == qml.Identity(0)
     mock_get_ops_for_product.assert_not_called()
     
     # observable X
-    tape = QuantumTape([], [qml.counts(qml.X(0))])
+    tape = QuantumTape([], [qml.counts(qml.PauliX(0))])
     tape = step.execute(tape)
     assert len(tape.operations) == 1 and len(tape.measurements) == 1
     assert tape.operations[0] == qml.RY(np.pi/2, 0)
     mock_get_ops_for_product.assert_not_called()
     
     # observable Y
-    tape = QuantumTape([], [qml.counts(qml.Y(0))])
+    tape = QuantumTape([], [qml.counts(qml.PauliY(0))])
     tape = step.execute(tape)
     assert len(tape.operations) == 1 and len(tape.measurements) == 1
     assert tape.operations[0] == qml.RX(-np.pi/2, 0)
     mock_get_ops_for_product.assert_not_called()
     
     # observable H
-    tape = QuantumTape([], [qml.counts(qml.H(0))])
+    tape = QuantumTape([], [qml.counts(qml.Hadamard(0))])
     tape = step.execute(tape)
     assert len(tape.operations) == 1 and len(tape.measurements) == 1
     assert tape.operations[0] == qml.RY(np.pi/4, 0)
@@ -105,7 +105,7 @@ def test_execute(mock_get_ops_for_product):
     
     # observable Z @ Z
     mock_get_ops_for_product.return_value = ["success"]
-    tape = QuantumTape([], [qml.counts(qml.Z(0) @ qml.Z(0))])
+    tape = QuantumTape([], [qml.counts(qml.PauliZ(0) @ qml.PauliZ(0))])
     tape = step.execute(tape)
     assert len(tape.operations) == 1 and len(tape.measurements) == 1
     assert tape.operations[0] == "success"

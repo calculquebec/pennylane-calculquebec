@@ -46,7 +46,7 @@ def grover4():
     for i in range(num_qubits):
         qml.Hadamard(i)
         qml.PauliX(i)
-    qml.ControlledQubitUnitary(qml.Z(0), [1, 2, 3])
+    qml.ControlledQubitUnitary(qml.PauliZ(0), [1, 2, 3])
     for i in range(num_qubits):
         qml.PauliX(i)
         qml.Hadamard(i)
@@ -97,7 +97,7 @@ def bernstein_vazirani(number : int, num_qubits : int, measurement = qml.counts)
     for i in range(num_qubits - 1):
         value.insert(0, (number & (1 << i)) != 0)
 
-    qml.X(num_qubits-1)
+    qml.PauliX(num_qubits-1)
         
     [qml.Hadamard(i) for i in range(num_qubits)]
     

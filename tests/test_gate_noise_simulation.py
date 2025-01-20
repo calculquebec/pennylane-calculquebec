@@ -56,7 +56,7 @@ def test_execute(mock_get_qubit_noise,
     mock_get_amplitude_damping.return_value = [0.3 for _ in range(4)]
     mock_get_phase_damping.return_value = [0.4 for _ in range(4)]
     
-    tape = QuantumTape([qml.X(0), qml.Z(1), qml.CZ([2 ,3])], [], 1000)
+    tape = QuantumTape([qml.PauliX(0), qml.PauliZ(1), qml.CZ([2 ,3])], [], 1000)
     tape = GateNoiseSimulation.execute(FakeStep(True), tape)
     
     assert qml.DepolarizingChannel(0.2, 2) in tape.operations
@@ -71,7 +71,7 @@ def test_execute(mock_get_qubit_noise,
         tape = GateNoiseSimulation.execute(FakeStep(True), tape)
     
     # dont use benchmark, noise should be reciprocal to benchmark
-    tape = QuantumTape([qml.X(0), qml.Z(4), qml.CZ([8, 12])], [], 1000)
+    tape = QuantumTape([qml.PauliX(0), qml.PauliZ(4), qml.CZ([8, 12])], [], 1000)
     tape = GateNoiseSimulation.execute(FakeStep(False), tape)
     
     assert qml.DepolarizingChannel(noise.depolarizing_noise(TypicalBenchmark.cz), 8) in tape.operations
