@@ -82,8 +82,8 @@ class TDagger(Operation):
             0: [],
             1: [copy(self)],
             2: [qml.adjoint(qml.S)(wires=self.wires)],
-            3: [qml.Z(wires=self.wires), qml.T(wires=self.wires)],
-            4: [qml.Z(wires=self.wires)],
+            3: [qml.PauliZ(wires=self.wires), qml.T(wires=self.wires)],
+            4: [qml.PauliZ(wires=self.wires)],
             5: [qml.S(wires=self.wires), qml.T(wires=self.wires)],
             6: [qml.S(wires=self.wires)],
             7: [qml.T(wires=self.wires)]
