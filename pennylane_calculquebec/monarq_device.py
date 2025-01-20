@@ -13,6 +13,7 @@ from pennylane_calculquebec.processing import PreProcessor, PostProcessor
 from pennylane_calculquebec.processing.config import ProcessingConfig, MonarqDefaultConfig
 from pennylane_calculquebec.API.client import ApiClient
 from pennylane_calculquebec.API.job import Job
+from pennylane_calculquebec.utility.debug import counts_to_probs
 import pennylane.measurements as measurements
 
 
@@ -51,6 +52,11 @@ class MonarqDevice(Device):
         "PauliZ"
     }
     
+    measurement_methods = {
+        "CountsMP" : lambda counts : counts,
+        "ProbabilityMP" : counts_to_probs
+    }
+
     _processing_config : ProcessingConfig
     
     def __init__(self, 
@@ -131,12 +137,14 @@ class MonarqDevice(Device):
 
 
     def _measure(self, tape : QuantumTape):
-        meas = set([type(measure).__name__ for measure in tape.measurements])
-        if len(meas) != 1:
+        if len(tape.measurements) != 1:
             raise DeviceException("Multiple measurements not supported")
-        meas = tape.measurements[0]
-        if isinstance(meas, measurements.CountsMP):
-            return Job(tape).run()
-        else:
-            raise DeviceException("Measurement process " + type(meas).__name__ + " is not supported by this device.")
-        
+        meas = type(tape.measurements[0]).__name__
+
+        if not any(meas == measurement for measurement in MonarqDevice.measurement_methods.keys()):
+            raise DeviceException("Measurement not supported")
+
+        results = Job(tape).run()
+        measurement_method = MonarqDevice.measurement_methods[meas]
+
+        return measurement_method(results)
