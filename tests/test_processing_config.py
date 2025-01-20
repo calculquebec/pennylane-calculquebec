@@ -12,17 +12,17 @@ def test_processing_config():
     assert all(a in config.steps for a in steps)
     assert len(config.steps) == 3
 
-    config2 = ProcessingConfig(Step(1), Step(2))
-    assert config != config2
+    expected_config = ProcessingConfig(Step(1), Step(2))
+    assert config != expected_config
     
-    config2 = ProcessingConfig(Step(1), Step(2), Step(4))
-    assert config != config2
+    expected_config = ProcessingConfig(Step(1), Step(2), Step(4))
+    assert config != expected_config
 
-    config2 = ProcessingConfig(Step(1), Step(2), Step([3]))
-    assert config != config2
+    expected_config = ProcessingConfig(Step(1), Step(2), Step([3]))
+    assert config != expected_config
 
-    config2 = ProcessingConfig(Step(1), Step(2), Step(3))
-    assert config == config2
+    expected_config = ProcessingConfig(Step(1), Step(2), Step(3))
+    assert config == expected_config
 
     assert config[0] == steps[0]
 
