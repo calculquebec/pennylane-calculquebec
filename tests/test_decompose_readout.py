@@ -104,11 +104,12 @@ def test_execute(mock_get_ops_for_product):
     mock_get_ops_for_product.assert_not_called()
     
     # observable Z @ Z
-    mock_get_ops_for_product.return_value = ["success"]
+    obs = qml.PauliX(0)
+    mock_get_ops_for_product.return_value = [obs]
     tape = QuantumTape([], [qml.counts(qml.PauliZ(0) @ qml.PauliZ(0))])
     tape = step.execute(tape)
     assert len(tape.operations) == 1 and len(tape.measurements) == 1
-    assert tape.operations[0] == "success"
+    assert tape.operations[0] is obs
     mock_get_ops_for_product.assert_called_once()
     
     # pas d'observable
