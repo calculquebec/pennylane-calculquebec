@@ -107,7 +107,7 @@ def test_measure():
         
         # invalid measurement
         quantum_tape.measurements.append(qml.sample())
-        with pytest.raises(Exception):
+        with pytest.raises(DeviceException):
             _ = MonarqDevice._measure(None, quantum_tape)
         job.assert_not_called()
 
@@ -128,5 +128,5 @@ def test_measure():
         
         # too many measurements
         quantum_tape.measurements.append(qml.counts())
-        with pytest.raises(Exception):
+        with pytest.raises(DeviceException):
             _ = MonarqDevice._measure(None, quantum_tape)
