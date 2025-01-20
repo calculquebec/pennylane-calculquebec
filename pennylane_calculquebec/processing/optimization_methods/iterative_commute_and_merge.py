@@ -6,6 +6,7 @@ from pennylane.tape import QuantumTape
 from pennylane_calculquebec.utility.optimization import  find_previous_gate, find_next_gate
 import pennylane.transforms as transforms
 import numpy as np
+from pennylane.ops.op_math.adjoint import adjoint, Adjoint
 
 def remove_root_zs(tape : QuantumTape, iterations = 3) -> QuantumTape:
     """
@@ -45,18 +46,30 @@ def remove_leaf_zs(tape : QuantumTape, iterations = 3) -> QuantumTape:
             break
     return type(tape)(new_operations, tape.measurements, tape.shots)
 
+
+def _get_adjoint_base(op):
+    isAdjoint = False
+    while(isinstance(op, Adjoint)):
+        isAdjoint = not isAdjoint
+        op = op.base
+    return op, isAdjoint
+
+
 def _remove_trivials(tape : QuantumTape, iteration = 3, epsilon = 1E-8):
     """
     removes 0rad rotations and identities
     """
     new_operations = []
     for op in tape.operations:
+        op, isAdjoint = _get_adjoint_base(op)
+
         if len(op.parameters) > 0:
             angle = op.parameters[0]
             while angle > 2 * np.pi - epsilon: angle -= 2 * np.pi
             while angle < 0: angle += 2 * np.pi
             if abs(angle) > epsilon:
-                new_operations.append(type(op)(angle, wires=op.wires))
+                op = (type(op) if not isAdjoint else adjoint(type(op)))(angle, wires=op.wires)
+                new_operations.append(op)
         elif op.name == "Identity":
             continue
         else:
