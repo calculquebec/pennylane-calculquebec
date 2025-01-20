@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from unittest.mock import patch
-import pennylane_calculquebec.processing.steps.readout_error_mitigation as mitig
+import pennylane_calculquebec.processing.steps.readout_error_mitigation as mitigation
 from pennylane_calculquebec.utility.api import keys
 from typing import Tuple
 from pennylane.tape import QuantumTape
@@ -46,18 +46,18 @@ def mock_qubits_couplers():
 def test_all_combinations():
     results = ["000", "001", "010", "011", "100", "101", "110", "111"]
     qubits = 3
-    combs = mitig.all_combinations(qubits)
+    combs = mitigation.all_combinations(qubits)
     assert all(a == b for a, b in zip(sorted(results), sorted(combs)))
 
     with patch("pennylane_calculquebec.processing.steps.readout_error_mitigation.get_labels") as mock:
-        mitig.all_combinations(qubits)
+        mitigation.all_combinations(qubits)
         mock.assert_called_once()
 
 def test_all_results():
     input = {"00":5, "10":7}
     output = {"00":5, "01":0, "10":7, "11":0}
 
-    result = mitig.all_results(input, 2)
+    result = mitigation.all_results(input, 2)
 
     assert len(result.items()) == len(output.items())
 
@@ -71,7 +71,7 @@ def test_get_readout_fidelities(mock_qubits_couplers):
     readout0Expected = [.9, .7, .6]
     readout1Expected = [.1, .3, .4]
 
-    readout0, readout1 = mitig.get_readout_fidelities([0, 2, 3])
+    readout0, readout1 = mitigation.get_readout_fidelities([0, 2, 3])
     
     mock_qubits_couplers.assert_called_once()
 
@@ -86,7 +86,7 @@ def test_get_calibration_data(mock_qubits_couplers):
         np.array([[.7, .7], [.3, .3]]),
         np.array([[.6, .6], [.4, .4]])
     ]
-    results = mitig.get_calibration_data([0, 2, 3])
+    results = mitigation.get_calibration_data([0, 2, 3])
 
     assert len(expected) == len(results)
     zipped = list(zip(expected, results))
@@ -111,7 +111,7 @@ def test_tensor_product_calibration(mock_qubits_couplers):
         np.array([[.7, .7], [.3, .3]]),
         np.array([[.6, .6], [.4, .4]])
     ]
-    results = mitig.tensor_product_calibration(calibration_matrices)
+    results = mitigation.tensor_product_calibration(calibration_matrices)
     assert expected.shape == results.shape
     assert all(abs(a - b) < TOLERANCE for a, b in zip(expected.flatten(), results.flatten()))
 
@@ -126,11 +126,11 @@ def test_matrix_readout_mitigation_full(mock_qubits_couplers):
     sim = ReadoutNoiseSimulation(False)
     simulated_noise = sim.execute(tape, expected)
 
-    step = mitig.MatrixReadoutMitigation()
+    step = mitigation.MatrixReadoutMitigation()
     
     results = step.execute(tape, simulated_noise)
     
-    for key in mitig.all_combinations(4):
+    for key in mitigation.all_combinations(4):
         if key not in expected:
             assert abs(results[key]) < TOLERANCE
             continue
@@ -147,11 +147,11 @@ def test_ibu_readout_mitigation_full(mock_qubits_couplers):
     sim = ReadoutNoiseSimulation(False)
     simulated_noise = sim.execute(tape, expected)
 
-    step = mitig.IBUReadoutMitigation()
+    step = mitigation.IBUReadoutMitigation()
     
     results = step.execute(tape, simulated_noise)
     
-    for key in mitig.all_combinations(4):
+    for key in mitigation.all_combinations(4):
         if key not in expected:
             assert abs(results[key]) < TOLERANCE
             continue
