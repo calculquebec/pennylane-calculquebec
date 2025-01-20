@@ -28,7 +28,7 @@ def compute_expval(probabilities):
 
 def counts_to_probs(counts : dict):
     max_count = sum(counts.values())
-    all_labels = get_labels(2 ** len(counts.keys()[0]) - 1)
+    all_labels = get_labels(2 ** len(list(counts.keys())[0]) - 1)
     return [(counts[label] if label in counts else 0) / max_count for label in all_labels]
 
 def remove_global_phase(matrix):

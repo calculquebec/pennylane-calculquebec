@@ -89,8 +89,11 @@ def test_execute(mock_measure, mock_PostProcessor_get_processor):
 def test_measure():
     class Job:
         def run(self):
-            return 42
+            return {"0" : 750, "1" : 25}
     
+    expected_counts = Job().run()
+    expected_probs = [750/775, 25/775]
+
     quantum_tape = QuantumTape([], [], 1000)
     
     with patch("pennylane_calculquebec.API.job.Job.__new__") as job:
@@ -102,17 +105,28 @@ def test_measure():
         
         job.assert_not_called()
         
-        # measurement != counts
-        quantum_tape.measurements.append(qml.probs())
-        
-        with pytest.raises(DeviceException):
-            MonarqDevice._measure(None, quantum_tape)
-        
+        # invalid measurement
+        quantum_tape.measurements.append(qml.sample())
+        with pytest.raises(Exception):
+            _ = MonarqDevice._measure(None, quantum_tape)
         job.assert_not_called()
-        
-        # one count measurement only
-        quantum_tape.measurements[0] = qml.counts()
-        assert MonarqDevice._measure(None, quantum_tape) == 42
+
+        # measurement is probs
+        quantum_tape.measurements[0] = qml.probs()
+        probs = MonarqDevice._measure(None, quantum_tape)
+        tolerance = 1E-5
+        assert all(abs(a - b) < tolerance for a, b in zip(probs, expected_probs))
         
         job.assert_called_once()
+
+        # measurement is counts
+        quantum_tape.measurements[0] = qml.counts()
+        counts = MonarqDevice._measure(None, quantum_tape)
+        assert counts == expected_counts
         
+        assert job.call_count == 2
+        
+        # too many measurements
+        quantum_tape.measurements.append(qml.counts())
+        with pytest.raises(Exception):
+            _ = MonarqDevice._measure(None, quantum_tape)
