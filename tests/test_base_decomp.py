@@ -2,7 +2,7 @@ import numpy as np
 from pennylane_calculquebec.processing.steps.base_decomposition import CliffordTDecomposition, BaseDecomposition
 from pennylane_calculquebec.processing.steps.native_decomposition import MonarqDecomposition
 from pennylane_calculquebec.utility.api import instructions
-from pennylane_calculquebec.utility.debug import is_equal_matrices, are_tape_same_probs
+from pennylane_calculquebec.utility.debug import are_tape_same_probs
 import pennylane as qml
 from pennylane.tape import QuantumTape
 import pytest
