@@ -124,6 +124,7 @@ def test_measure():
         counts = MonarqDevice._measure(None, quantum_tape)
         assert counts == expected_counts
         
+        # since the method has been called one time before, the call count is incremented to 2
         assert job.call_count == 2
         
         # too many measurements
