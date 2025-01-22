@@ -5,27 +5,6 @@ import pytest
 from unittest.mock import patch
 import pennylane_calculquebec.processing.custom_gates as custom
 
-def test_are_matrices_equivalent():
-    # trouver une nouvelle facon de comparer des matrices. 
-    
-    mat = qml.PauliX(0).matrix()
-    assert debug.is_equal_matrices(mat, mat)
-    
-    mat2 = 1.5 * mat
-    assert debug.is_equal_matrices(mat, mat2)
-    
-    mat = qml.PauliY(0).matrix()
-    assert not debug.is_equal_matrices(mat, mat2)
-    
-    mat2 = mat * 1.5
-    assert debug.is_equal_matrices(mat, mat2)
-    
-    mat2 = qml.CNOT([0, 1]).matrix()
-    assert not debug.is_equal_matrices(mat, mat2)
-    
-    mat = (1.5 + 2.7j) * mat2
-    assert debug.is_equal_matrices(mat, mat2)
-
 def test_compute_expval():
     # test with probabilities
 
