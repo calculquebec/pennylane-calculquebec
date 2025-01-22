@@ -31,78 +31,26 @@ def counts_to_probs(counts : dict):
     all_labels = get_labels(2 ** len(list(counts.keys())[0]) - 1)
     return [(counts[label] if label in counts else 0) / max_count for label in all_labels]
 
-def remove_global_phase(matrix):
-    """
-    Removes the global phase from a matrix by normalizing its determinant to 1.
-
-    Parameters:
-        matrix (ndarray): The input matrix (square and complex).
-
-    Returns:
-        ndarray: The matrix with the global phase removed.
-    """
-    # Compute the determinant of the matrix
-    determinant = np.linalg.det(matrix)
-
-    # Compute the global phase factor
-    global_phase = np.exp(1j * np.angle(determinant))
-
-    # Normalize the matrix to remove the global phase
-    normalized_matrix = matrix / global_phase
-
-    return normalized_matrix
-
 def are_tape_same_probs(tape1, tape2):
     """
     returns true if both tapes yield the same probabilities
     """
-    dev = qml.device("default.qubit")
-    results1 = qml.execute([tape1], dev)
-    results2 = qml.execute([tape2], dev)
+    tolerance_place = 5
 
-    results1 = np.round(results1, 5)
-    results2 = np.round(results2, 5)
+    dev = qml.device("default.qubit")
+    results1 = qml.execute([tape1], dev)[0]
+    results2 = qml.execute([tape2], dev)[0]
+
+    if isinstance(results1, dict):
+        results1 = counts_to_probs(results1)
+
+    if isinstance(results2, dict):
+        results2 = counts_to_probs(results2)
+    
+    results1 = np.round(results1, tolerance_place)
+    results2 = np.round(results2, tolerance_place)
 
     return np.array_equal(results1, results2)
-
-
-def is_equal_matrices(matrix1, matrix2, tolerance=1e-9):
-    """
-    Checks if two matrices are equal up to a complex multiplicative factor.
-
-    Args:
-        matrix1 (ndarray): First matrix.
-        matrix2 (ndarray): Second matrix.
-        tolerance (float): Numerical tolerance for comparison.
-
-    Returns:
-        bool: True if the matrices are equal up to a complex factor, False otherwise.
-    """
-    det = np.linalg.det(matrix2)
-    
-    if abs(det) < tolerance:
-        raise ValueError("cannot invert matrix. cannot check equivalence")
-    
-    if matrix1.shape != matrix2.shape:
-        return False
-
-    matrix1_normalized = remove_global_phase(matrix1)
-    matrix2_normalized = remove_global_phase(matrix2)
-
-    matrix2_inv = np.linalg.inv(matrix2_normalized)
-    id = np.round(matrix1_normalized @ matrix2_inv, 4)
-    value = id[0][0]
-    
-    # check if matrix is diagonal
-    for i in range(id.shape[0]):
-        for j in range(id.shape[1]):
-            # if non-diagonal position is > 0, not equivalent
-            if i != j and abs(id[i][j]) > tolerance:
-                return False
-            # if diagonal positions are not equal, not equivalent
-            if i == j and abs(id[i][j] - value) > tolerance:
-                return False
-    return True
 
 def to_qasm(tape : QuantumTape) -> str:
     """
