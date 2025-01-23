@@ -13,6 +13,10 @@ from pennylane_calculquebec.monarq_data import connectivity, get_broken_qubits_a
 from pennylane_calculquebec.utility.api import keys
 from networkx.exception import NetworkXNoPath
 
+class GraphException(Exception):
+    pass
+
+
 def find_biggest_group(graph : nx.Graph) -> list:
     """Returns the biggest array of connected components in the graph
 
@@ -22,6 +26,8 @@ def find_biggest_group(graph : nx.Graph) -> list:
     Returns:
         list: the biggest group
     """
+    if graph.number_of_edges() == 0:
+        return []
     return max(nx.connected_components(graph), key=len)
 
 def is_directly_connected(operation : Operation, machine_topology : nx.Graph) -> bool:
@@ -32,6 +38,11 @@ def is_directly_connected(operation : Operation, machine_topology : nx.Graph) ->
         operation (Operation) : a two qubits operation
         machine_topology (Graph) : the machine's graph
     """
+    if len(operation.wires) < 2:
+        raise GraphException(f"{operation.name} is not a 2 qubit operation")
+    if operation.wires[1] not in machine_topology.nodes or operation.wires[0] not in machine_topology.nodes:
+        raise GraphException(f"operation {operation} is not properly mapped to physical qubits")
+    
     return operation.wires[1] in machine_topology.neighbors(operation.wires[0])
 
 def circuit_graph(tape : QuantumTape) -> nx.Graph:
