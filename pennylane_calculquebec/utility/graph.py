@@ -56,7 +56,9 @@ def circuit_graph(tape : QuantumTape) -> nx.Graph:
     links : list[Tuple[int, int]] = []
 
     for operation in tape.operations:
-        if len(operation.wires) != 2:
+        if len(operation.wires) > 2:
+            raise GraphException("All operations in the circuit should be using <= 2 wires")
+        if len(operation.wires) < 2:
             continue
         toAdd = (operation.wires[0], operation.wires[1])
         links.append(toAdd)
@@ -64,7 +66,7 @@ def circuit_graph(tape : QuantumTape) -> nx.Graph:
     graph.add_nodes_from([wire for wire in tape.wires if wire not in graph.nodes])
     return graph
 
-def machine_graph(use_benchmark, q1Acceptance, q2Acceptance, excluded_qubits = [], excluded_couplers = []):
+def machine_graph(use_benchmark, q1Acceptance, q2Acceptance, excluded_qubits = [], excluded_couplers = []) -> nx.Graph:
     """
     builds a bidirectional graph from the qubits and coupler of a machine
 
@@ -82,7 +84,11 @@ def machine_graph(use_benchmark, q1Acceptance, q2Acceptance, excluded_qubits = [
     broken_nodes += [qubit for qubit in excluded_qubits if qubit not in broken_nodes]
     
     broken_couplers = [coupler for coupler in broken_qubits_and_couplers[keys.COUPLERS]] if use_benchmark else []
-    broken_couplers += [coupler for coupler in excluded_couplers if not any([broken_coupler[0] == coupler[0] and broken_coupler[1] == coupler[1] or broken_coupler[1]== coupler[0] and broken_coupler[0] == coupler[1] for broken_coupler in broken_couplers])]
+    # add excluded couplers to couplers
+    broken_couplers += [coupler for coupler in excluded_couplers \
+                        if not any([broken_coupler[0] == coupler[0] and broken_coupler[1] == coupler[1] \
+                        or broken_coupler[1]== coupler[0] and broken_coupler[0] == coupler[1] \
+                        for broken_coupler in broken_couplers])]
     links = [(coupler[0], coupler[1]) for coupler in connectivity[keys.COUPLERS].values()]
     
     return nx.Graph([link for link in links if link[0] not in broken_nodes and link[1] not in broken_nodes \
