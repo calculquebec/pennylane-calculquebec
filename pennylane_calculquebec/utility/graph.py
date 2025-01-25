@@ -139,7 +139,7 @@ def find_largest_common_subgraph_ismags(circuit : nx.Graph, machine : nx.Graph):
     for mapping in ismags.largest_common_subgraph():
         return {v:k for (k, v) in mapping.items()} if mapping is not None and len(mapping) > 0 else mapping
 
-def shortest_path(a : int, b : int, graph : nx.Graph, excluding : list[int] = [], prioritized_nodes : list[int] = [], use_benchmark=True):
+def shortest_path(start : int, end : int, graph : nx.Graph, excluding : list[int] = [], prioritized_nodes : list[int] = [], use_benchmark=True):
     """
     find the shortest path between node a and b
 
@@ -185,7 +185,7 @@ def shortest_path(a : int, b : int, graph : nx.Graph, excluding : list[int] = []
         return w
     
     try:
-        return nx.astar_path(g_copy, a, b, weight = lambda u, v, _: weight(u, v))
+        return nx.astar_path(g_copy, start, end, weight = lambda u, v, _: weight(u, v))
     except NetworkXNoPath:
         return None
 
