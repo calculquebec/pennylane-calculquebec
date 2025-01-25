@@ -8,6 +8,16 @@ from pennylane_calculquebec.utility.api import keys
 from pennylane.tape import QuantumTape
 
 @pytest.fixture
+def mock_calculate_score():
+    with patch("pennylane_calculquebec.utility.graph.calculate_score") as mock:
+        yield mock
+
+@pytest.fixture
+def mock_readout1_cz_fidelities():
+    with patch("pennylane_calculquebec.utility.graph.get_readout1_and_cz_fidelities") as mock:
+        yield mock
+
+@pytest.fixture
 def mock_broken_qubits_couplers():
     with patch("pennylane_calculquebec.utility.graph.get_broken_qubits_and_couplers") as mock:
         yield mock
@@ -128,3 +138,110 @@ def test_machine_graph(mock_broken_qubits_couplers, mock_connectivity):
     expected = [(0, 1), (2, 3)]
     results = g.machine_graph(False, 0.5, 0.5, [], [(1, 2)])
     assert all(a == b for a, b in zip(expected, list(results.edges)))
+
+def test_find_isomorphism():
+    # isomorphism exists
+    subgraph = nx.Graph([(0, 1), (0, 2)])
+    graph = nx.Graph([(4, 5), (5, 6)])
+    
+    expected = {0 : 5, 1 : 4, 2 : 6}
+    results = g._find_isomorphisms(subgraph, graph)
+
+    assert len(expected.items()) == len(results.items())
+    assert all(a == b for a, b in zip(expected.items(), results.items()))
+    
+    # isomoprhism doesn't exist
+    subgraph = nx.Graph([(0, 1), (1, 2)])
+    graph = nx.Graph([(4, 5)])
+
+    results = g._find_isomorphisms(subgraph, graph)
+
+    assert results == None
+
+    # there are no links
+    subgraph = nx.Graph()
+    subgraph.add_nodes_from((0, 1, 2))
+    graph = nx.Graph([(4, 5), (5, 6)])
+
+    expected = {0 : 4, 1 : 5, 2 : 6}
+    results = g._find_isomorphisms(subgraph, graph)
+
+    assert len(expected) == len(results)
+    assert all(a == b for a, b in zip(expected.items(), results.items()))
+
+def test_find_largest_common_subgraph_vf2():
+    subgraph = nx.Graph([(0, 1), (1, 2), (0, 3)])
+    graph = nx.Graph([(0, 1), (1, 2)])
+
+    expected = {0 : 1, 1 : 0, 3 : 2}
+    results = g.find_largest_common_subgraph_vf2(subgraph, graph)
+
+    assert len(expected.items()) == len(results.items())
+    assert all(a == b for a, b in zip(expected.items(), results.items()))
+
+def test_find_largest_common_subgraph_ismags():
+    subgraph = nx.Graph([(0, 1), (1, 2), (0, 3)])
+    graph = nx.Graph([(0, 1), (1, 2)])
+
+    expected = {0 : 0, 1 : 1, 2 : 2}
+    results = g.find_largest_common_subgraph_ismags(subgraph, graph)
+
+    assert len(expected.items()) == len(results.items())
+    assert all(a == b for a, b in zip(expected.items(), results.items()))
+
+def test_shortest_path(mock_readout1_cz_fidelities):
+    mock_readout1_cz_fidelities.return_value = {
+        keys.READOUT_STATE_1_FIDELITY : {
+            "0" : 1,
+            "1" : 1,
+            "2" : 1,
+            "3" : 1,
+            "4" : 1,
+            "5" : 1,
+            "6" : 1,
+            "7" : 1,
+            "8" : 1,
+        },
+        keys.CZ_GATE_FIDELITY : {
+            (0, 1) : 1,
+            (1, 2) : 1,
+            (2, 3) : 1,
+            (5, 6) : 1,
+            (2, 4) : 1,
+            (4, 5) : 1,
+            (1, 6) : 1,
+            (7, 8) : 1,
+        }
+    }
+
+    graph = nx.Graph([
+        (0, 1), (1, 2), (2, 3), 
+        (2, 4), (4, 5), (1, 6), 
+        (5, 6), (7, 8)])
+
+    # path exists
+    start = 6
+    end = 4
+    expected = [6, 5, 4]
+    results = g.shortest_path(start, end, graph)
+    assert len(expected) == len(results)
+    assert all(a == b for a, b in zip(expected, results))
+    
+    # excluded nodes changes path
+    expected = [6, 1, 2, 4]
+    results = g.shortest_path(start, end, graph, excluding=[5])
+    assert len(expected) == len(results)
+    assert all(a == b for a, b in zip(expected, results))
+    
+    # prioritized node changes path
+    expected = [6, 1, 2, 4]
+    results = g.shortest_path(start, end, graph, prioritized_nodes=[1, 2])
+    assert len(expected) == len(results)
+    assert all(a == b for a, b in zip(expected, results))
+
+    # path doesn't exist
+    start = 4
+    end = 8
+    results = g.shortest_path(start, end, graph)
+    assert results == None
+
