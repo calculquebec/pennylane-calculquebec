@@ -9,3 +9,8 @@ class PrintResults(PostProcStep):
     def execute(self, tape, results):
         print(results)
         return results
+    
+class PrintWires(PreProcStep):
+    def execute(self, tape):
+        print(*[w for w in tape.wires])
+        return tape
