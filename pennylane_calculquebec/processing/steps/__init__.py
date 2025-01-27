@@ -11,4 +11,4 @@ from .readout_error_mitigation import MatrixReadoutMitigation, IBUReadoutMitigat
 from .decompose_readout import DecomposeReadout
 from .gate_noise_simulation import GateNoiseSimulation
 from .readout_noise_simulation import ReadoutNoiseSimulation
-from .print_steps import PrintResults, PrintTape
+from .print_steps import PrintResults, PrintTape, PrintWires

@@ -3,7 +3,7 @@ contains the base configuration class and presets that can be used to specify mo
 """
 
 from pennylane_calculquebec.processing.interfaces.base_step import BaseStep
-from pennylane_calculquebec.processing.steps import DecomposeReadout, CliffordTDecomposition, ISMAGS, Swaps, IterativeCommuteAndMerge, MonarqDecomposition, GateNoiseSimulation, ReadoutNoiseSimulation
+from pennylane_calculquebec.processing.steps import DecomposeReadout, CliffordTDecomposition, ISMAGS, Swaps, IterativeCommuteAndMerge, MonarqDecomposition, GateNoiseSimulation, ReadoutNoiseSimulation, PrintWires, PrintTape
 from typing import Callable
 
 class ProcessingConfig:
@@ -50,40 +50,62 @@ class ProcessingConfig:
         """
         self._steps[idx] = value
         
-MonarqDefaultConfig : Callable[[bool, float, float, list[int], list[list[int]]], ProcessingConfig] = \
-    lambda use_benchmark = True, q1_acceptance = 0.5, q2_acceptance = 0.5, excluded_qubits = [], excluded_couplers = [] : \
-        ProcessingConfig(DecomposeReadout(), CliffordTDecomposition(), \
+def MonarqDefaultConfig(use_benchmark = True, q1_acceptance = 0.5, q2_acceptance = 0.5, excluded_qubits = [], excluded_couplers = []):
+    """The default configuration preset for MonarQ"""
+    return ProcessingConfig(DecomposeReadout(), CliffordTDecomposition(), \
             ISMAGS(use_benchmark, q1_acceptance, q2_acceptance, excluded_qubits, excluded_couplers),
             Swaps(use_benchmark, q1_acceptance, q2_acceptance, excluded_qubits, excluded_couplers), 
             IterativeCommuteAndMerge(), MonarqDecomposition(), IterativeCommuteAndMerge(), MonarqDecomposition())
-"""The default configuration preset for MonarQ"""
 
 
-MonarqDefaultConfigNoBenchmark : Callable[[list[int], list[list[int]]], ProcessingConfig]= lambda excluded_qubits = [], excluded_couplers = [] : \
-    MonarqDefaultConfig(use_benchmark = False, excluded_qubits = excluded_qubits, excluded_couplers = excluded_couplers)
-"""The default configuration preset, minus the benchmarking acceptance tests on qubits and couplers in the placement and routing steps."""
 
-EmptyConfig = lambda : ProcessingConfig()
-"""A configuration preset that you can use if you want to skip the transpiling step alltogether, and send your job to monarq as is."""
+def MonarqDefaultConfigNoBenchmark(excluded_qubits = [], excluded_couplers = []):
+    """The default configuration preset, minus the benchmarking acceptance tests on qubits and couplers in the placement and routing steps."""
+    return MonarqDefaultConfig(use_benchmark = False, excluded_qubits = excluded_qubits, excluded_couplers = excluded_couplers)
 
-NoPlaceNoRouteConfig  = lambda : ProcessingConfig(DecomposeReadout(),
-                                        CliffordTDecomposition(),
-                                        IterativeCommuteAndMerge(),
-                                        MonarqDecomposition(), 
-                                        IterativeCommuteAndMerge(),
-                                        MonarqDecomposition())
-"""A configuration preset that omits placement and routing. be sure to use existing qubits and couplers """
 
-FakeMonarqConfig = lambda use_benchmark = False: ProcessingConfig(DecomposeReadout(),
-                                             CliffordTDecomposition(),
-                                             ISMAGS(use_benchmark),
-                                             Swaps(use_benchmark),
-                                             IterativeCommuteAndMerge(),
-                                             MonarqDecomposition(),
-                                             IterativeCommuteAndMerge(),
-                                             MonarqDecomposition(),
-                                             GateNoiseSimulation(use_benchmark),
-                                             ReadoutNoiseSimulation(use_benchmark))
-"""
-A configuration preset that does the same thing as the default config, but adds gate and readout noise at the end
-"""
+def EmptyConfig(): 
+    """A configuration preset that you can use if you want to skip the transpiling step alltogether, and send your job to monarq as is."""
+    return ProcessingConfig()
+
+
+def NoPlaceNoRouteConfig(): 
+    """A configuration preset that omits placement and routing. be sure to use existing qubits and couplers """
+    return ProcessingConfig(DecomposeReadout(),
+                            CliffordTDecomposition(),
+                            IterativeCommuteAndMerge(),
+                            MonarqDecomposition(), 
+                            IterativeCommuteAndMerge(),
+                            MonarqDecomposition())
+
+
+
+def PrintDefaultConfig(only_wires = True, use_benchmark = True, q1_acceptance = 0.5, q2_acceptance = 0.5, excluded_qubits = [], excluded_couplers = []):
+    """The same as the default config, but it prints wires/circuit before and after transpilation"""
+    config = MonarqDefaultConfig(use_benchmark, q1_acceptance, q2_acceptance, excluded_qubits, excluded_couplers)
+    config.steps.insert(0, PrintWires() if only_wires else PrintTape())
+    config.steps.append(PrintWires() if only_wires else PrintTape())
+
+    return config
+
+def PrintNoPlaceNoRouteConfig(only_wires = True):
+    """The same as the NoPlaceNoRoute config, but it prints wires/circuit before and after transpilation"""
+    config = NoPlaceNoRouteConfig()
+    config.steps.insert(0, PrintWires() if only_wires else PrintTape())
+    config.steps.append(PrintWires() if only_wires else PrintTape())
+    return config
+
+def FakeMonarqConfig(use_benchmark = False): 
+    """
+    A configuration preset that does the same thing as the default config, but adds gate and readout noise at the end
+    """
+    return ProcessingConfig(DecomposeReadout(),
+                            CliffordTDecomposition(),
+                            ISMAGS(use_benchmark),
+                            Swaps(use_benchmark),
+                            IterativeCommuteAndMerge(),
+                            MonarqDecomposition(),
+                            IterativeCommuteAndMerge(),
+                            MonarqDecomposition(),
+                            GateNoiseSimulation(use_benchmark),
+                            ReadoutNoiseSimulation(use_benchmark))
