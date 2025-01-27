@@ -36,7 +36,7 @@ classifiers = [
 Source = "https://github.com/calculquebec/pennylane-calculquebec"
 
 [project.optional-dependencies]
-test = ["matplotlib", "pytest", "pytest-mock", "flaky"]
+test = ["matplotlib", "pytest", "pytest-mock", "flaky", "tox"]
 
 [project.entry-points."pennylane.plugins"]
 "snowflurry.qubit" = "pennylane_calculquebec:SnowflurryQubitDevice"
@@ -49,3 +49,18 @@ packages = ["pennylane_calculquebec", "pennylane_calculquebec.measurements", "pe
 
 [tool.setuptools.dynamic]
 version = { attr = "pennylane_calculquebec._version.__version__" }
+
+[tool.tox]
+legacy_tox_ini = """
+    [tox]
+    min_version = 4.0
+    env_list =
+        py310
+        py311
+        py312
+        py313
+
+    [testenv]
+    deps = pytest
+    commands = pytest tests
+"""
