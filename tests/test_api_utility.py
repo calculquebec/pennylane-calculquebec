@@ -52,6 +52,13 @@ def test_convert_circuit(mock_convert_instruction):
     for i, op in enumerate(result[keys.OPERATIONS]):
         assert op[keys.QUBITS] == [wires[i]]
         assert op[keys.BITS] == [i]
+    
+    tape = QuantumTape(ops=[], measurements=[qml.expval(qml.PauliZ(4) @ qml.PauliZ(1))], shots=1000)
+    result = ApiUtility.convert_circuit(tape)
+    
+    for i, op in enumerate(result[keys.OPERATIONS]):
+        assert op[keys.QUBITS] == [wires[i]]
+        assert op[keys.BITS] == [i]
 
 def test_basic_auth():
     test = ApiUtility.basic_auth("user", "password")
