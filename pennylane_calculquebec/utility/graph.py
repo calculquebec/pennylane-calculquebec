@@ -198,7 +198,13 @@ def find_best_neighbour(wire, topology : nx.Graph, use_benchmark = True):
         topology (Graph) : the graph on which we are searching for neighbours
         use_benchmark (bool) : should we use fidelities?
     """
+    if wire not in topology:
+        raise GraphException(f"node {wire} is not in graph")
+    
     neigh = list(topology.neighbors(wire))
+    if len(neigh) <= 0:
+        raise GraphException(f"there are no neighbour to node {wire}")
+
     return max(neigh, key = lambda n : calculate_score(n, topology, use_benchmark))
         
 def find_best_wire(graph : nx.Graph, excluded : list[int] = [], use_benchmark = True):

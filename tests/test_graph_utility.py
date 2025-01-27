@@ -8,11 +8,6 @@ from pennylane_calculquebec.utility.api import keys
 from pennylane.tape import QuantumTape
 
 @pytest.fixture
-def mock_calculate_score():
-    with patch("pennylane_calculquebec.utility.graph.calculate_score") as mock:
-        yield mock
-
-@pytest.fixture
 def mock_readout1_cz_fidelities():
     with patch("pennylane_calculquebec.utility.graph.get_readout1_and_cz_fidelities") as mock:
         yield mock
@@ -25,6 +20,11 @@ def mock_broken_qubits_couplers():
 @pytest.fixture
 def mock_connectivity():
     with patch("pennylane_calculquebec.utility.graph.connectivity") as mock:
+        yield mock
+
+@pytest.fixture
+def mock_calculate_score():
+    with patch("pennylane_calculquebec.utility.graph.calculate_score") as mock:
         yield mock
 
 def test_find_biggest_group():
@@ -245,3 +245,35 @@ def test_shortest_path(mock_readout1_cz_fidelities):
     results = g.shortest_path(start, end, graph)
     assert results == None
 
+def test_find_best_neighbour(mock_calculate_score):
+    # return the number of the node as cost (for test)
+    mock_calculate_score.side_effect = lambda a, b, c: a
+
+    graph = nx.Graph([(0, 1), (0, 2), (0, 3), (0, 4)])
+    graph.add_node(5)
+    expected = 4
+
+    results = g.find_best_neighbour(0, graph)
+    assert results == expected
+    mock_calculate_score.assert_called()
+    
+    with pytest.raises(g.GraphException):
+        g.find_best_neighbour(5, graph)
+
+    with pytest.raises(g.GraphException):
+        g.find_best_neighbour(6, graph)
+
+def test_find_best_wire(mock_calculate_score):
+    # return the number of the node as cost (for test)
+    mock_calculate_score.side_effect = lambda a, b, c: a
+
+    graph = nx.Graph([(0, 1), (0, 2), (0, 3), (0, 4)])
+    expected = 4
+
+    results = g.find_best_wire(graph)
+    assert results == expected
+    mock_calculate_score.assert_called()
+
+    expected = 3
+    results = g.find_best_wire(graph, [4])
+    assert results == expected
