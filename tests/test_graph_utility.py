@@ -27,6 +27,12 @@ def mock_calculate_score():
     with patch("pennylane_calculquebec.utility.graph.calculate_score") as mock:
         yield mock
 
+@pytest.fixture
+def mock_shortest_path():
+    with patch("pennylane_calculquebec.utility.graph.shortest_path") as mock:
+        yield mock
+
+
 def test_find_biggest_group():
     # two groups, one is bigger
     graph = nx.Graph([(0, 1), (0, 2), (3, 4)])
@@ -277,3 +283,119 @@ def test_find_best_wire(mock_calculate_score):
     expected = 3
     results = g.find_best_wire(graph, [4])
     assert results == expected
+
+def test_find_closest_wire(mock_readout1_cz_fidelities):
+    mock_readout1_cz_fidelities.return_value = {
+        keys.READOUT_STATE_1_FIDELITY : {
+            "0" : 1,
+            "1" : 1,
+            "2" : 1,
+            "3" : 1,
+            "4" : 1,
+            "5" : 1,
+            "6" : 1,
+            "7" : 1,
+            "8" : 1,
+        },
+        keys.CZ_GATE_FIDELITY : {
+            (0, 1) : 1,
+            (1, 2) : 1,
+            (2, 3) : 1,
+            (5, 6) : 1,
+            (2, 4) : 1,
+            (4, 5) : 1,
+            (1, 6) : 1,
+            (7, 8) : 1,
+        }
+    }
+    
+    graph = nx.Graph([
+        (0, 1), (1, 2), (2, 3), 
+        (2, 4), (4, 5), (1, 6), 
+        (5, 6), (7, 8)])
+
+    result = g.find_closest_wire(1, graph)
+    expected = 0
+    assert result == expected
+
+    result = g.find_closest_wire(1, graph, [0])
+    expected = 2
+    assert result == expected
+
+    result = g.find_closest_wire(1, graph, [0, 2, 6])
+    expected = 3
+    assert result == expected
+
+    graph = nx.Graph()
+    graph.add_node(1)
+    with pytest.raises(g.GraphException):
+        g.find_closest_wire(1, graph)
+    
+    graph.remove_node(1)
+    graph.add_nodes_from([0, 2, 3])
+    with pytest.raises(g.GraphException):
+        g.find_closest_wire(1, graph)
+
+def test_path_length():
+    path = None
+    expected = g.BIG_VALUE
+    assert expected == g.path_length(path)
+
+    path = [0, 1, 2]
+    expected = len(path)
+    assert expected == g.path_length(path)
+
+def test_node_with_shortest_path_from_selection(mock_readout1_cz_fidelities):
+    mock_readout1_cz_fidelities.return_value = {
+        keys.READOUT_STATE_1_FIDELITY : {
+            "0" : 1,
+            "1" : 1,
+            "2" : 1,
+            "3" : 1,
+            "4" : 1,
+            "5" : 1,
+            "6" : 1,
+            "7" : 1,
+            "8" : 1,
+        },
+        keys.CZ_GATE_FIDELITY : {
+            (0, 1) : 1,
+            (1, 2) : 1,
+            (2, 3) : 1,
+            (5, 6) : 1,
+            (2, 4) : 1,
+            (4, 5) : 1,
+            (1, 6) : 1,
+            (7, 8) : 1,
+        }
+    }
+    
+    graph = nx.Graph([
+        (0, 1), (1, 2), (2, 3), 
+        (2, 4), (4, 5), (1, 6), 
+        (5, 6), (7, 8)])
+
+    source = 0
+
+    selection = [0, 1, 2, 3]
+    expected = 1
+    result = g.node_with_shortest_path_from_selection(source, selection, graph)
+
+    assert result == expected
+
+    selection = [0, 2, 3]
+    expected = 2
+    result = g.node_with_shortest_path_from_selection(source, selection, graph)
+
+    assert result == expected
+
+    selection = [0, 3]
+    expected = 3
+    result = g.node_with_shortest_path_from_selection(source, selection, graph)
+
+    assert result == expected
+
+    selection = [0]
+
+    with pytest.raises(g.GraphException):
+        g.node_with_shortest_path_from_selection(source, selection, graph)

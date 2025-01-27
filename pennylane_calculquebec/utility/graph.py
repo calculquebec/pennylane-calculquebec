@@ -13,6 +13,8 @@ from pennylane_calculquebec.monarq_data import connectivity, get_broken_qubits_a
 from pennylane_calculquebec.utility.api import keys
 from networkx.exception import NetworkXNoPath
 
+BIG_VALUE = 100000000000
+
 class GraphException(Exception):
     pass
 
@@ -160,7 +162,6 @@ def shortest_path(start : int, end : int, graph : nx.Graph, excluding : list[int
         this function is used to determine the cost of a link
         it is determined by the error of the source + the error of the coupler + the error of the destination
         """
-        infinite = 10000000
 
         if not use_benchmark: 
             return 1 # return default value of one if we should not use benchmarks
@@ -173,7 +174,7 @@ def shortest_path(start : int, end : int, graph : nx.Graph, excluding : list[int
         
         # this node has no coupler. we should never chose it!
         if len(source_dest_cz) < 1:
-            return infinite
+            return BIG_VALUE
         
         # weight corresponds to the cz error (ie 1 - fidelity)
         # we add one at the end so that if the node is prioritized, 
@@ -231,12 +232,25 @@ def find_closest_wire(source : int, machine_graph : nx.Graph, excluding : list[i
         prioritized (list[int]) : nodes that should be in the path if possible
         use_benchmark (bool) : should we use qubit fidelities?
     """
-    nodes = [node for node in machine_graph.nodes if node not in excluding]
-    return min(nodes, key=lambda dest: shortest_path(source, 
+    if source not in machine_graph:
+        raise GraphException(f"node {source} doesn't exist in the machine's graph")
+    
+    nodes = [node for node in machine_graph.nodes if node not in excluding and node != source]
+
+    if len(nodes) <= 0:
+        raise GraphException(f"Impossible to find closest wire for {source}")
+
+    return min(nodes, key=lambda dest: path_length(shortest_path(source, 
                                                      dest, 
                                                      machine_graph, 
-                                                     use_benchmark=use_benchmark))
+                                                     prioritized_nodes=prioritized,
+                                                     use_benchmark=use_benchmark)))
 
+def path_length(path):
+        if path is None:
+            return BIG_VALUE
+        return len(path)
+    
 def node_with_shortest_path_from_selection(source : int, selection : list[int], graph : nx.Graph, use_benchmark = True):
     """
     find the unmapped node node in graph minus mapped nodes that has shortest path to given source node
@@ -244,8 +258,12 @@ def node_with_shortest_path_from_selection(source : int, selection : list[int], 
     Args:
         source (int) : the source node
     """
+    
     nodes_minus_source = [node for node in selection if node != source]
-    return min(nodes_minus_source, key=lambda n: len(shortest_path(source, n, graph, use_benchmark=use_benchmark)))
+    if len(nodes_minus_source) <= 0:
+        raise GraphException("There are not enough nodes for this circuit to run on the machine")
+    
+    return min(nodes_minus_source, key=lambda n: path_length(shortest_path(source, n, graph, use_benchmark=use_benchmark)))
 
 def calculate_score(source : int, graph : nx.Graph, use_benchmark = True) -> float:
     """Defines a score for a node by using cz fidelities on neighbouring couplers and state 1 readout fidelity\n
