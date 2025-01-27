@@ -93,6 +93,7 @@ def test_measure():
     
     expected_counts = Job().run()
     expected_probs = [750/775, 25/775]
+    expected_expectation = 0.935483870967742
 
     quantum_tape = QuantumTape([], [], 1000)
     
@@ -127,6 +128,14 @@ def test_measure():
         # since the method has been called one time before, the call count is incremented to 2
         assert job.call_count == 2
         
+        # measurement is expval
+        quantum_tape.measurements[0] = qml.expval(qml.PauliZ(0))
+        expval = MonarqDevice._measure(None, quantum_tape)
+        assert expval == expected_expectation
+        
+        # since the method has been called one time before, the call count is incremented to 2
+        assert job.call_count == 3
+
         # too many measurements
         quantum_tape.measurements.append(qml.counts())
         with pytest.raises(DeviceException):
