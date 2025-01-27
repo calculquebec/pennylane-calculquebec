@@ -13,7 +13,7 @@ from pennylane_calculquebec.processing import PreProcessor, PostProcessor
 from pennylane_calculquebec.processing.config import ProcessingConfig, MonarqDefaultConfig
 from pennylane_calculquebec.API.client import ApiClient
 from pennylane_calculquebec.API.job import Job
-from pennylane_calculquebec.utility.debug import counts_to_probs
+from pennylane_calculquebec.utility.debug import counts_to_probs, compute_expval
 import pennylane.measurements as measurements
 
 
@@ -54,7 +54,8 @@ class MonarqDevice(Device):
     
     measurement_methods = {
         "CountsMP" : lambda counts : counts,
-        "ProbabilityMP" : counts_to_probs
+        "ProbabilityMP" : counts_to_probs,
+        "ExpectationMP" : compute_expval
     }
 
     _processing_config : ProcessingConfig
