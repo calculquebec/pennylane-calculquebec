@@ -7,4 +7,6 @@ from .processing_config \
     NoPlaceNoRouteConfig, \
     MonarqDefaultConfigNoBenchmark, \
     EmptyConfig, \
-    FakeMonarqConfig
+    FakeMonarqConfig, \
+    PrintDefaultConfig, \
+    PrintNoPlaceNoRouteConfig

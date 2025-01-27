@@ -1,5 +1,22 @@
-from pennylane_calculquebec.processing.config import ProcessingConfig, MonarqDefaultConfig, MonarqDefaultConfigNoBenchmark, NoPlaceNoRouteConfig, EmptyConfig, FakeMonarqConfig
-from pennylane_calculquebec.processing.steps import DecomposeReadout, CliffordTDecomposition, ASTAR, ISMAGS, Swaps, IterativeCommuteAndMerge, MonarqDecomposition, GateNoiseSimulation, ReadoutNoiseSimulation
+from pennylane_calculquebec.processing.config import (ProcessingConfig, 
+                                                      MonarqDefaultConfig, 
+                                                      MonarqDefaultConfigNoBenchmark, 
+                                                      NoPlaceNoRouteConfig, 
+                                                      EmptyConfig, 
+                                                      FakeMonarqConfig,
+                                                      PrintNoPlaceNoRouteConfig, 
+                                                      PrintDefaultConfig)
+from pennylane_calculquebec.processing.steps import (DecomposeReadout, 
+                                                    CliffordTDecomposition,
+                                                    ASTAR, 
+                                                    ISMAGS, 
+                                                    Swaps, 
+                                                    IterativeCommuteAndMerge, 
+                                                    MonarqDecomposition, 
+                                                    GateNoiseSimulation, 
+                                                    ReadoutNoiseSimulation,
+                                                    PrintTape,
+                                                    PrintWires)
 
 def test_processing_config():
     config = ProcessingConfig(1, 2, 3)
@@ -36,3 +53,25 @@ def test_presets():
     
     for step in default.steps:
         assert any(type(def_step) == type(step) for def_step in config.steps)
+    assert any(type(def_step) == type(GateNoiseSimulation(False)) for def_step in config.steps)
+    assert any(type(def_step) == type(ReadoutNoiseSimulation(False)) for def_step in config.steps)
+
+    # print default config is the same as default + prints at start and end
+    config = PrintDefaultConfig()
+    for step in default.steps:
+        assert any(type(def_step) == type(step) for def_step in config.steps)
+    assert any(type(def_step) == type(PrintWires()) for def_step in config.steps)
+
+    config = PrintDefaultConfig(False)
+    assert any(type(def_step) == type(PrintTape()) for def_step in config.steps)
+    
+    # print no place no route config is the same as default + prints at start and end
+    config = PrintNoPlaceNoRouteConfig()
+    no_place_no_route = NoPlaceNoRouteConfig()
+    for step in no_place_no_route.steps:
+        assert any(type(def_step) == type(step) for def_step in config.steps)
+    assert any(type(def_step) == type(PrintWires()) for def_step in config.steps)
+
+    config = PrintNoPlaceNoRouteConfig(False)
+    assert any(type(def_step) == type(PrintTape()) for def_step in config.steps)
+    
