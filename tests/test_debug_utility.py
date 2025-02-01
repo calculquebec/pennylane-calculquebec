@@ -5,49 +5,27 @@ import pytest
 from unittest.mock import patch
 import pennylane_calculquebec.processing.custom_gates as custom
 
-def test_compute_expval():
+@pytest.mark.parametrize("input, expected", [
+    ([0.5, 0, 0, 0.5], 1),
+    ([0.25, 0.25, 0.25, 0.25], 0),
+    ({"00":500, "01":0, "10":0, "11":500}, 1),
+    ({"00":250, "01":250, "10":250, "11":250}, 0),
+])
+def test_compute_expval(input, expected):
     # test with probabilities
 
-    probs = [0.5, 0, 0, 0.5]
-    expected = 1
-    result = debug.compute_expval(probs)
+    result = debug.compute_expval(input)
     assert expected == result
 
-    probs = [0.25, 0.25, 0.25, 0.25]
-    expected = 0
-    result = debug.compute_expval(probs)
-    assert expected == result
-
-    # test with counts
-    counts = {"00":500, "01":0, "10":0, "11":500}
-    expected = 1
-    result = debug.compute_expval(counts)
-    assert expected == result
-
-    counts = {"00":250, "01":250, "10":250, "11":250}
-    expected = 0
-    result = debug.compute_expval(counts)
-    assert expected == result
-
-def test_counts_to_probs():
+@pytest.mark.parametrize("input, expected", [
+    ({"00":500, "01":0, "10":0, "11":500}, [0.5, 0, 0, 0.5]),
+    ({"01":500, "10":500}, [0, 0.5, 0.5, 0]),
+    ({"11":500, "01":500}, [0, 0.5, 0, 0.5]),
+])
+def test_counts_to_probs(input, expected):
     tolerance = 1e-5
 
-    # typical use case
-    counts = {"00":500, "01":0, "10":0, "11":500}
-    expected = [0.5, 0, 0, 0.5]
-    result = debug.counts_to_probs(counts)
-    assert all(abs(a-b) < tolerance for a, b in zip(result, expected))
-
-    # missing counts
-    counts = {"01":500, "10":500}
-    expected = [0, 0.5, 0.5, 0]
-    result = debug.counts_to_probs(counts)
-    assert all(abs(a-b) < tolerance for a, b in zip(result, expected))
-
-    # counts in wrong order
-    counts = {"11":500, "01":500}
-    expected = [0, 0.5, 0, 0.5]
-    result = debug.counts_to_probs(counts)
+    result = debug.counts_to_probs(input)
     assert all(abs(a-b) < tolerance for a, b in zip(result, expected))
 
 def test_are_tape_same_probs():

@@ -1,22 +1,5 @@
-from pennylane_calculquebec.processing.config import (ProcessingConfig, 
-                                                      MonarqDefaultConfig, 
-                                                      MonarqDefaultConfigNoBenchmark, 
-                                                      NoPlaceNoRouteConfig, 
-                                                      EmptyConfig, 
-                                                      FakeMonarqConfig,
-                                                      PrintNoPlaceNoRouteConfig, 
-                                                      PrintDefaultConfig)
-from pennylane_calculquebec.processing.steps import (DecomposeReadout, 
-                                                    CliffordTDecomposition,
-                                                    ASTAR, 
-                                                    ISMAGS, 
-                                                    Swaps, 
-                                                    IterativeCommuteAndMerge, 
-                                                    MonarqDecomposition, 
-                                                    GateNoiseSimulation, 
-                                                    ReadoutNoiseSimulation,
-                                                    PrintTape,
-                                                    PrintWires)
+from pennylane_calculquebec.processing.config import *
+from pennylane_calculquebec.processing.steps import *
 
 class Step:
     def __init__(self, arg):
