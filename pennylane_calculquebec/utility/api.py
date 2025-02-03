@@ -51,10 +51,9 @@ class ApiUtility:
         }
         wires = [wire for wire in circuit.wires]
         for measurement in circuit.measurements:
-            for wire in measurement.wires:
-                bit = wires.index(wire)
+            for bit, qubit in enumerate(measurement.wires):
                 circuit_dict[keys.OPERATIONS].append({
-                    keys.QUBITS : [wire],
+                    keys.QUBITS : [qubit],
                     keys.BITS : [bit],
                     keys.TYPE : "readout"
                 })
