@@ -7,8 +7,8 @@ import pennylane as qml
 from pennylane.devices import Device
 from pennylane.transforms.core import TransformProgram
 from pennylane.tape import QuantumScript, QuantumTape
-from pennylane_calculquebec.execution_config import DefaultExecutionConfig, ExecutionConfig
 from pennylane_calculquebec.utility.api import instructions
+from pennylane.devices import DefaultExecutionConfig, ExecutionConfig
 from pennylane_calculquebec.processing.monarq_postproc import PostProcessor
 from pennylane_calculquebec.processing.monarq_preproc import PreProcessor
 from pennylane_calculquebec.processing.config import MonarqDefaultConfig, MonarqDefaultConfigNoBenchmark, FakeMonarqConfig
