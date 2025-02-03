@@ -45,6 +45,7 @@ class ApiUtility:
         """
 
         circuit_dict = {
+            keys.TYPE : keys.CIRCUIT,
             keys.BIT_COUNT : 24,
             keys.OPERATIONS : [ApiUtility.convert_instruction(operation) for operation in circuit.operations],
             keys.QUBIT_COUNT : 24
@@ -123,6 +124,7 @@ class routes:
     
 class keys:
     BIT_COUNT = "bitCount"
+    TYPE = "type"
     QUBIT_COUNT = "qubitCount"
     OPERATIONS = "operations"
     CIRCUIT = "circuit"
