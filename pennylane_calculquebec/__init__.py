@@ -4,7 +4,5 @@ import importlib.util
 
 if importlib.util.find_spec("juliacall") is not None:
     from .snowflurry_device import SnowflurryQubitDevice
-else:
-    pass
 
 from .monarq_device import MonarqDevice
