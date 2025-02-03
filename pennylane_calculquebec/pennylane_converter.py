@@ -15,7 +15,7 @@ import time
 import re
 from pennylane.typing import TensorLike
 from typing import Callable, Type
-
+import importlib.util
 from pennylane_calculquebec.measurements import (
     MeasurementStrategy,
     Sample,
@@ -24,6 +24,14 @@ from pennylane_calculquebec.measurements import (
     ExpectationValue,
     State
 )
+
+
+if importlib.util.find_spec("juliacall") is None:
+    raise Exception("""
+    juliacall is required.
+    Please install the extra julia in order to import snowflurry_device : pip install --no-index pennylane-calculquebec[julia]
+    """)
+
 
 # Dictionary mapping PennyLane operations to Snowflurry operations
 # The available Snowflurry operations are listed here:
