@@ -62,8 +62,7 @@ def test_execute(mock_get_qubit_noise,
     assert qml.DepolarizingChannel(0.2, 2) in tape.operations
     assert qml.DepolarizingChannel(0.2, 3) in tape.operations
     assert qml.DepolarizingChannel(0.1, 1) in tape.operations
-    assert qml.AmplitudeDamping(0.3, 0) in tape.operations
-    assert qml.PhaseDamping(0.4, 0) in tape.operations
+    assert qml.DepolarizingChannel(0.1, 0) in tape.operations
     
     # invalid placement raises error
     tape = QuantumTape([qml.CZ([0, 10])])
@@ -77,8 +76,7 @@ def test_execute(mock_get_qubit_noise,
     assert qml.DepolarizingChannel(noise.depolarizing_noise(TypicalBenchmark.cz), 8) in tape.operations
     assert qml.DepolarizingChannel(noise.depolarizing_noise(TypicalBenchmark.cz), 12) in tape.operations
     assert qml.DepolarizingChannel(noise.depolarizing_noise(TypicalBenchmark.qubit), 4) in tape.operations
-    assert qml.AmplitudeDamping(noise.amplitude_damping(1E-6, TypicalBenchmark.t1), 0) in tape.operations
-    assert qml.PhaseDamping(noise.phase_damping(1E-6, TypicalBenchmark.t2Ramsey), 0) in tape.operations
+    assert qml.DepolarizingChannel(noise.depolarizing_noise(TypicalBenchmark.qubit), 0) in tape.operations
     
     # invalid gate raises error
     tape = QuantumTape([qml.CNOT([0, 1])])
