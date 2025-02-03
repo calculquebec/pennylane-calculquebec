@@ -17,7 +17,13 @@ from pennylane.devices import (
 )
 from pennylane.typing import Result, ResultBatch
 from ._version import __version__
+import importlib.util
 
+if importlib.util.find_spec("juliacall") is None:
+    raise Exception("""
+    juliacall is required.
+    Please install the extra julia in order to import snowflurry_device : pip install --no-index pennylane-calculquebec[julia]
+    """)
 
 # The plugin does not support batching yet, but this is a placeholder for future implementation
 Result_or_ResultBatch = Union[Result, ResultBatch]
