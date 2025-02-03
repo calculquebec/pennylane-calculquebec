@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "pennylane-calculquebec"
 dynamic = ["version"]
 requires-python = ">=3.10"
-dependencies = ["numpy", "juliacall >= 0.9.0", "pennylane >= 0.36.0", "networkx >= 3.3"]
+dependencies = ["numpy", "pennylane >= 0.36.0", "networkx >= 3.3"]
 description = "Pennylane plugin enabling seamless job execution on MonarQ, Calcul Québec’s nonprofit-hosted quantum computer"
 readme = "README.md"
 maintainers = [
@@ -37,6 +37,7 @@ Source = "https://github.com/calculquebec/pennylane-calculquebec"
 
 [project.optional-dependencies]
 test = ["matplotlib", "pytest", "pytest-mock", "flaky", "tox"]
+julia = ["juliacall >= 0.9.0"]
 
 [project.entry-points."pennylane.plugins"]
 "snowflurry.qubit" = "pennylane_calculquebec:SnowflurryQubitDevice"
