@@ -1,6 +1,22 @@
 from unittest.mock import patch
 import pytest
 
+@pytest.fixture(autouse=True)
+def setup_module():
+    import sys
+    sf = "pennylane_calculquebec.snowflurry_device"
+    plc = "pennylane_calculquebec.pennylane_converter"
+    plcq = "pennylane_calculquebec"
+
+    if sf in sys.modules:
+        del sys.modules[sf]
+    
+    if plc in sys.modules:
+        del sys.modules[plc]
+    
+    if plcq in sys.modules:
+        del sys.modules[plcq]
+
 @pytest.fixture
 def mock_snowflurry_device():
     with patch("pennylane_calculquebec.snowflurry_device.SnowflurryQubitDevice") as mock:
