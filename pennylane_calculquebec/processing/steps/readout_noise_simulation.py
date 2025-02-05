@@ -6,7 +6,7 @@ from pennylane_calculquebec.processing.interfaces import PostProcStep
 from pennylane_calculquebec.monarq_data import get_readout_noise_matrices
 import pennylane as qml
 import numpy as np
-from pennylane_calculquebec.utility.debug import get_labels
+from pennylane_calculquebec.utility.debug import get_labels, get_measurement_wires
 from pennylane_calculquebec.utility.noise import readout_error, TypicalBenchmark
 
 class ReadoutNoiseSimulation(PostProcStep):
@@ -34,7 +34,7 @@ class ReadoutNoiseSimulation(PostProcStep):
 
         readout_matrix = np.identity(1)
         
-        wires = [w for w in tape.wires]
+        wires = get_measurement_wires(tape)
         
         for wire in wires:
             readout_matrix = np.kron(readout_matrix, readout_error_matrices[wire])
