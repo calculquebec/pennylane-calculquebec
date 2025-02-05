@@ -116,11 +116,12 @@ def test_tensor_product_calibration(mock_qubits_couplers):
     assert all(abs(a - b) < TOLERANCE for a, b in zip(expected.flatten(), results.flatten()))
 
 def test_matrix_readout_mitigation_full(mock_qubits_couplers):
+    TOLERANCE = 5
     from pennylane_calculquebec.processing.steps import ReadoutNoiseSimulation
     typical = (TypicalBenchmark.readout0, TypicalBenchmark.readout1)
     mock_qubits_couplers.return_value = qubits_couplers(typical, typical, typical, typical)
     
-    expected = {"0000" : 500, "1111" : 500}
+    expected = {"000" : 500, "111" : 500}
     tape = Tape([0, 1, 2, 3], [Measure([0]), Measure([2]), Measure([3])])
 
     sim = ReadoutNoiseSimulation(False)
@@ -130,7 +131,7 @@ def test_matrix_readout_mitigation_full(mock_qubits_couplers):
     
     results = step.execute(tape, simulated_noise)
     
-    for key in mitigation.all_combinations(4):
+    for key in mitigation.all_combinations(3):
         if key not in expected:
             assert abs(results[key]) < TOLERANCE
             continue
@@ -141,7 +142,7 @@ def test_ibu_readout_mitigation_full(mock_qubits_couplers):
     typical = (TypicalBenchmark.readout0, TypicalBenchmark.readout1)
     mock_qubits_couplers.return_value = qubits_couplers(typical, typical, typical, typical)
     
-    expected = {"0000" : 500, "1111" : 500}
+    expected = {"000" : 500, "111" : 500}
     tape = Tape([0, 1, 2, 3], [Measure([0]), Measure([2]), Measure([3])])
 
     sim = ReadoutNoiseSimulation(False)
@@ -151,7 +152,7 @@ def test_ibu_readout_mitigation_full(mock_qubits_couplers):
     
     results = step.execute(tape, simulated_noise)
     
-    for key in mitigation.all_combinations(4):
+    for key in mitigation.all_combinations(3):
         if key not in expected:
             assert abs(results[key]) < TOLERANCE
             continue

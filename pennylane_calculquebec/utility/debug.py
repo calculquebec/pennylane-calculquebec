@@ -87,3 +87,10 @@ def get_labels(up_to : int):
     
     num = int(np.log2(up_to)) + 1
     return [format(i, f"0{num}b") for i in range(up_to + 1)]
+
+def get_measurement_wires(tape : QuantumTape):
+    measurement_wires = []
+    for mp in tape.measurements:
+        measurement_wires += list(mp.wires)
+    return measurement_wires
+    
