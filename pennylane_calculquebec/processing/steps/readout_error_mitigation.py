@@ -3,7 +3,7 @@ Contains readout error mitigation post-processing steps
 """
 
 from pennylane.tape import QuantumTape
-from pennylane_calculquebec.utility.debug import get_labels
+from pennylane_calculquebec.utility.debug import get_labels, get_measurement_wires
 from pennylane_calculquebec.API.adapter import ApiAdapter
 import json
 import numpy as np
@@ -98,7 +98,6 @@ def get_full_readout_matrix(chosen_qubits):
     return full_readout_matrix
 
 
-
 class IBUReadoutMitigation(PostProcStep):
     """a mitigation method that uses iterative bayesian unfolding to mitigate readout errors on a circuit's results
     
@@ -134,11 +133,10 @@ class IBUReadoutMitigation(PostProcStep):
         
         Returns:
             final probabilities (numpy.ndarray): The final estimate of the true distribution.
-            num_iterations (int): The number of iterations it took to converge.
         """
         current_probs = initial_guess.copy()
         
-        for iteration in range(max_iterations):
+        for _ in range(max_iterations):
             next_probs = np.zeros_like(current_probs)
             
             for true_prob in range(len(current_probs)):  # Loop over true states
@@ -152,14 +150,14 @@ class IBUReadoutMitigation(PostProcStep):
             
             # Check for convergence
             if np.linalg.norm(next_probs - current_probs) < tolerance:
-                return next_probs, iteration + 1
+                return next_probs
             
             current_probs = next_probs
         
         return current_probs
 
     def execute(self, tape, results):
-        chosen_qubits = [wire for wire in tape.wires]
+        chosen_qubits = get_measurement_wires(tape)
         num_qubits = len(chosen_qubits)
         shots = tape.shots.total_shots
         
@@ -167,10 +165,10 @@ class IBUReadoutMitigation(PostProcStep):
         _all_results = all_results(results, num_qubits)
         probs = [v/shots for _,v in _all_results.items()]
         
-        result, _ = self.iterative_bayesian_unfolding(readout_matrix, 
+        result = self.iterative_bayesian_unfolding(readout_matrix, 
                                                    probs, 
                                                    self.initial_guess(num_qubits))
-        result_dict = {key:round(shots * prob) for key, prob in zip(_all_results.keys(), result)}
+        result_dict = {key:np.round(shots * prob) for key, prob in zip(_all_results.keys(), result)}
         return result_dict
     
 
@@ -194,7 +192,7 @@ class MatrixReadoutMitigation(PostProcStep):
         
         return reduced_readout_matrix
 
-    def _get_inverted_reduced_a_matrix(self, chosen_qubits, results):
+    def _get_inverted_reduced_a_matrix(self, chosen_qubits : list, results : dict):
         """
         create iverted reduced A matrix and cache it
         """
@@ -225,12 +223,14 @@ class MatrixReadoutMitigation(PostProcStep):
         
         return MatrixReadoutMitigation._readout_matrix_reduced_inverted
 
+
     def execute(self, tape : QuantumTape, results : dict[str, int]):
         """
         mitigates readout errors from results using state 0 and 1 readouts
         """
-        wires = [wire for wire in tape.wires]
+        wires = get_measurement_wires(tape)
         num_qubits = len(wires)
+
         real_counts = np.array([v for v in all_results(results, num_qubits).values()])
         
         inverted_reduced_readout_matrix = self._get_inverted_reduced_a_matrix(wires, results)

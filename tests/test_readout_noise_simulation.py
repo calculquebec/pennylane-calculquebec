@@ -13,10 +13,11 @@ class Shots:
     
 class Tape:
     
-    def __init__(self, wires, shots):
+    def __init__(self, wires : list[int], shots : int, measurements : list[int] = None):
+        measurements = measurements if measurements is not None else wires
         self.wires = wires
         self.shots = Shots(shots)
-        self.measurements = [MP(wire) for wire in wires] 
+        self.measurements = [MP(wire) for wire in measurements] 
 
 @pytest.fixture
 def mock_readout_noise_matrices():
@@ -30,21 +31,22 @@ def test_execute(mock_readout_noise_matrices):
                 [1 - f0, f1]
             ])
     """
-
+    tol = 1e-5
     mock_readout_noise_matrices.return_value = np.array([
         [[0, 1], [1, 0]], # q0 has 0% fidelity
         [[0.5, 0.5], [0.5, 0.5]], # q1 has 50% fidelity
         [[1, 0], [0, 1]], # q2 has 100% fidelity
+        [[0.5, 0.5], [0.5, 0.5]], # q3 has 50% fidelity
     ])
 
-    tape = Tape([0, 1, 2], 1000)
+    tape = Tape([0, 1, 2, 3], 1000, [0, 1, 3])
 
     results = {
         "000" : 1000
     }
     
     expected = {
-        "000" : 0, "001" : 0, "010" : 0, "011" : 0, "100" : 500, "101" : 0, "110" : 500, "111" : 0
+        "000" : 0, "001" : 0, "010" : 0, "011" : 0, "100" : 250, "101" : 250, "110" : 250, "111" : 250
     }
 
     step = rns.ReadoutNoiseSimulation(False)
@@ -55,4 +57,4 @@ def test_execute(mock_readout_noise_matrices):
     result2 = step.execute(tape, results)
     mock_readout_noise_matrices.assert_called_once()
 
-    assert all(v1 == v2 for v1, v2 in zip(expected.values(), result2.values()))
+    assert all(abs(expected[a] - result2[b]) < tol for a, b in zip(expected, result2))
