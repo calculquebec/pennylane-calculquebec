@@ -86,3 +86,21 @@ def test_get_labels():
     expected = ["000", "001", "010", "011", "100", "101", "110"]
     result = debug.get_labels(test_value)
     assert all(a == b for a, b in zip(expected, result))
+
+
+def test_get_measurement_wires():
+    class Tape:
+        def __init__(self, wires, measures):
+            self.wires = wires
+            self.measurements = measures
+    
+    class Measure:
+        def __init__(self, wires):
+            self.wires = wires
+
+    tape = Tape([0, 1, 2, 3], [Measure([0]), Measure([1]), Measure([3])])
+    expected = [0, 1, 3]
+    result = debug.get_measurement_wires(tape)
+
+    assert len(expected) == len(result) and all(a in result for a in expected)
+
