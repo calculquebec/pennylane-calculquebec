@@ -42,6 +42,7 @@ julia = ["juliacall >= 0.9.0"]
 [project.entry-points."pennylane.plugins"]
 "snowflurry.qubit" = "pennylane_calculquebec:SnowflurryQubitDevice"
 "monarq.default" = "pennylane_calculquebec:MonarqDevice"
+"monarq.sim" = "pennylane_calculquebec:MonarqSim"
 
 [project.entry-points."pennylane.io"]
 
