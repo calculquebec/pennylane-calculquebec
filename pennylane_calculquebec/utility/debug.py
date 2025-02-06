@@ -26,6 +26,10 @@ def compute_expval(probabilities):
         expval += prob * parity
     return expval
 
+def probs_to_counts(probs : list, count : int):
+    return {label_from(i) : round(p * count) for i, p in enumerate(probs)}
+        
+
 def counts_to_probs(counts : dict):
     max_count = sum(counts.values())
     all_labels = get_labels(2 ** len(list(counts.keys())[0]) - 1)
@@ -94,3 +98,5 @@ def get_measurement_wires(tape : QuantumTape):
         measurement_wires += list(mp.wires)
     return measurement_wires
     
+def label_from(number : int, binary_places : int):
+    return format(number, f"0{binary_places}b")
