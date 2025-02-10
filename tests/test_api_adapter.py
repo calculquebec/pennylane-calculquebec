@@ -43,7 +43,11 @@ class Res:
     def __init__(self, status_code, text):
         self.status_code = status_code
         self.text = text
-    
+
+@pytest.fixture(autouse=True)
+def setup():
+    ApiAdapter._instance = None
+
 # ------------- TESTS ---------------------
 
 
