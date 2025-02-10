@@ -1,10 +1,11 @@
 import pytest
 from unittest.mock import patch
-from pennylane_calculquebec.processing.steps.print_steps import PrintResults, PrintTape
+from pennylane_calculquebec.processing.steps.print_steps import PrintResults, PrintTape, PrintWires
 
 class Tape:
     def __init__(self, ops):
         self.operations = ops
+        self.wires = [0, 1, 2]
 
 
 class Op:
@@ -34,4 +35,14 @@ def test_print_results(mock_print):
 
     new_results = step.execute(tape, results)
     assert results is new_results
+    mock_print.assert_called_once()
+
+
+def test_print_wires(mock_print):
+    step = PrintWires()
+    tape = Tape(ops=[Op(), Op(), Op()])
+    results = {"0" : 0, "1" : 1, "2" : 2}
+
+    new_tape = step.execute(tape)
+    assert tape is new_tape
     mock_print.assert_called_once()
