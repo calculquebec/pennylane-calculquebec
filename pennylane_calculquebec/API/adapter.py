@@ -49,7 +49,12 @@ class ApiAdapter(object):
         """
         cls._instance = cls.__new__(cls)
         cls._instance.headers = ApiUtility.headers(client.user, client.access_token, client.realm)
-        cls.client = client
+        cls._instance.client = client
+
+        cls._qubits_and_couplers = None
+        cls._machine = None
+        cls._benchmark = None
+        cls._last_update = None
     
     @staticmethod
     def is_last_update_expired():
