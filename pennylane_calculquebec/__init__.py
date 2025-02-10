@@ -6,3 +6,4 @@ if importlib.util.find_spec("juliacall") is not None:
     from .snowflurry_device import SnowflurryQubitDevice
 
 from .monarq_device import MonarqDevice
+from .monarq_sim import MonarqSim
