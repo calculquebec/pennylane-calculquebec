@@ -44,7 +44,7 @@ class MonarqDevice(BaseDevice):
                  wires = None, 
                  shots = None,  
                  client : ApiClient = None,
-                 processing_config : ProcessingConfig = None) -> None:
+                 processing_config : ProcessingConfig = MonarqDefaultConfig()) -> None:
 
         super().__init__(wires, shots, client, processing_config)
 
@@ -81,6 +81,3 @@ class MonarqDevice(BaseDevice):
 
         return measurement_method(results)
     
-    @property
-    def default_processing_config(self):
-        return MonarqDefaultConfig()
