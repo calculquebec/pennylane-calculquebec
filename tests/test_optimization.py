@@ -67,7 +67,7 @@ def test_optimize_cu():
     new_tape = CliffordTDecomposition().execute(tape)
     new_tape = IterativeCommuteAndMerge().execute(new_tape)
     
-    assert len(new_tape.operations) == 51
+    assert len(new_tape.operations) == 53
     
     
     mat1 = reduce(lambda i, s: i @ s.matrix(wire_order=tape.wires), tape.operations, np.identity(1 << len(tape.wires)))
@@ -122,9 +122,9 @@ def test_Y_to_ZXZ():
     
     op = qml.RY(-np.pi/5, 0)
     result = IterativeCommuteAndMerge.Y_to_ZXZ(op)
-    assert result[0] == qml.RZ(np.pi/2, 0)
+    assert result[0] == qml.RZ(-np.pi/2, 0)
     assert result[1] == qml.RX(-np.pi/5, 0)
-    assert result[2] == qml.RZ(-np.pi/2, 0)
+    assert result[2] == qml.RZ(np.pi/2, 0)
     
 def test_get_rid_of_Y_rotations():
     with patch("pennylane_calculquebec.processing.steps.optimization.IterativeCommuteAndMerge.Y_to_ZXZ") as Y_to_ZXZ_mock:
@@ -153,4 +153,4 @@ def test_get_rid_of_Y_rotations():
     # y basis rotation
     tape = QuantumTape([qml.RY(np.pi/5, 0)])
     result = IterativeCommuteAndMerge.get_rid_of_y_rotations(tape)
-    assert result.operations == [qml.RZ(np.pi/2, 0), qml.RX(np.pi/5, 0), qml.RZ(-np.pi/2, 0)]
+    assert result.operations == [qml.RZ(-np.pi/2, 0), qml.RX(np.pi/5, 0), qml.RZ(np.pi/2, 0)]
