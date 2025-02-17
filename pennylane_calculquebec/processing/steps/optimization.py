@@ -98,7 +98,7 @@ class IterativeCommuteAndMerge(Optimize):
         if operation.basis != "Y":
             raise ValueError("Operation must be in the Y basis")
         rot_angles = operation.single_qubit_rot_angles()
-        return [qml.RZ(np.pi/2, operation.wires), qml.RX(rot_angles[1], operation.wires), qml.RZ(-np.pi/2, operation.wires)]
+        return [qml.RZ(-np.pi/2, operation.wires), qml.RX(rot_angles[1], operation.wires), qml.RZ(np.pi/2, operation.wires)]
 
     @staticmethod
     def get_rid_of_y_rotations(tape : QuantumTape):

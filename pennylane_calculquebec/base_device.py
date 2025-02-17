@@ -31,7 +31,7 @@ class BaseDevice(Device):
         super().__init__(wires, shots)
 
         if processing_config is None:
-            processing_config = self.default_processing_config
+            processing_config = self.default_processing_config()
         self._processing_config = processing_config
 
         if client is not None:
@@ -88,8 +88,4 @@ class BaseDevice(Device):
 
 
     def _measure(self, tape : QuantumTape):
-        raise NotImplementedError()
-    
-    @property
-    def default_processing_config(self):
         raise NotImplementedError()
