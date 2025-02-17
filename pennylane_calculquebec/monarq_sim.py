@@ -5,10 +5,11 @@ Contains a wrapper around default.mixed which uses MonarQ pre/post processing\n
 import pennylane as qml
 from pennylane.tape import QuantumTape
 from pennylane_calculquebec.processing.monarq_postproc import PostProcessor
-from pennylane_calculquebec.processing.config import FakeMonarqConfig
+from pennylane_calculquebec.processing.config import MonarqDefaultConfig
 from pennylane.measurements import CountsMP
 from pennylane_calculquebec.device_exception import DeviceException
 from pennylane_calculquebec.base_device import BaseDevice
+from pennylane_calculquebec.processing.steps import GateNoiseSimulation, ReadoutNoiseSimulation
 
 
 class MonarqSim(BaseDevice):
@@ -33,6 +34,13 @@ class MonarqSim(BaseDevice):
     def name(self):
         return MonarqSim.short_name
     
+    def __init__(self, wires = None, shots = None, client = None, processing_config = None, use_benchmark = False):
+        if processing_config is None:
+            processing_config = MonarqDefaultConfig(use_benchmark)
+
+        super().__init__(wires, shots, client, processing_config)
+        self.use_benchmark_for_simulation = use_benchmark
+
     def _measure(self, tape : QuantumTape):
         """
         simulates job to Monarq and returns value, converted to required measurement type
@@ -54,15 +62,15 @@ class MonarqSim(BaseDevice):
         counts_tape = type(tape)(ops=tape.operations, 
                                 measurements=[CountsMP(wires=mp.wires) for mp in tape.measurements],
                                 shots=1000)
-        results = qml.execute([counts_tape], qml.device("default.mixed", wires = tape.wires))[0]
+        
+        sim_tape = GateNoiseSimulation(self.use_benchmark_for_simulation).execute(counts_tape)
+        results = qml.execute([sim_tape], qml.device("default.mixed", wires = sim_tape.wires))[0]
 
         # apply post processing
-        results = PostProcessor.get_processor(self._processing_config, self.wires)(counts_tape, results)
+        sim_results = ReadoutNoiseSimulation(self.use_benchmark_for_simulation).execute(counts_tape, results)
+        results = PostProcessor.get_processor(self._processing_config, self.wires)(counts_tape, sim_results)
+    
 
         # return desired measurement method
         measurement_method = MonarqSim.measurement_methods[meas]
         return measurement_method(results)
-
-    @property
-    def default_processing_config(self):
-        return FakeMonarqConfig()
