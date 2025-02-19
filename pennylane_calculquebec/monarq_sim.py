@@ -64,7 +64,7 @@ class MonarqSim(BaseDevice):
                                 shots=1000)
         
         sim_tape = GateNoiseSimulation(self.use_benchmark_for_simulation).execute(counts_tape)
-        results = qml.execute([sim_tape], qml.device("default.mixed", wires = sim_tape.wires))[0]
+        results = qml.execute([sim_tape], qml.device("default.mixed", wires = sim_tape.wires, shots=tape.shots.total_shots))[0]
 
         # apply post processing
         sim_results = ReadoutNoiseSimulation(self.use_benchmark_for_simulation).execute(counts_tape, results)

@@ -399,3 +399,52 @@ def test_node_with_shortest_path_from_selection(mock_readout1_cz_fidelities):
 
     with pytest.raises(g.GraphException):
         g.node_with_shortest_path_from_selection(source, selection, graph)
+
+def test_calculate_score(mock_readout1_cz_fidelities):
+    # calculate score without benchmarking is always zero
+    assert abs(g.calculate_score(None, None, False) - 1) < 1E-5
+
+    graph = nx.Graph([(0, 1), (1, 2)])
+
+    mock_readout1_cz_fidelities.return_value = {
+        "readoutState1Fidelity" : {
+            "0" : 0.1,
+            "1" : 0.1,
+            "2" : 0.1,
+        }, 
+        "czGateFidelity" : {
+            (0, 1) : 0.5,
+            (1, 2) : 0.5,
+        }
+    }
+
+    # sum(neighbour readout 1) / n + readout1 + sum(neighbour cz) / n
+    # 0.1 + 0.1 + 0.5 = 0.7 in any case
+    expected = 0.7
+    result = g.calculate_score(1, graph)
+    assert abs(result - expected) < 1E-5
+
+    # 1 * 0.1 / 1 + 0.1 + 0.5
+    expected = 0.7
+    result = g.calculate_score(0, graph)
+    assert abs(result - expected) < 1E-5
+
+    # specific case
+    mock_readout1_cz_fidelities.return_value = {
+        "readoutState1Fidelity" : {
+            "0" : 0.1,
+            "1" : 0.2,
+            "2" : 0.3,
+        }, 
+        "czGateFidelity" : {
+            (0, 1) : 0.4,
+            (1, 2) : 0.5,
+        }
+    }
+    expected = 0.85
+    result = g.calculate_score(1, graph)
+    assert abs(result - expected) < 1E-5
+
+    expected = 1
+    result = g.calculate_score(2, graph)
+    assert abs(result - expected) < 1E-5
