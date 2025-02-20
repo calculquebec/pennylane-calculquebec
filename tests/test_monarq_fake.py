@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from pennylane_calculquebec.monarq_sim import MonarqSim, FakeMonarqConfig
+from pennylane_calculquebec.monarq_sim import MonarqSim, MonarqDefaultConfig
 from pennylane_calculquebec.monarq_device import DeviceException
 from pennylane_calculquebec.API.client import MonarqClient
 from pennylane_calculquebec.processing.config import EmptyConfig
@@ -29,6 +29,18 @@ def mock_api_initialize():
     with patch("pennylane_calculquebec.API.adapter.ApiAdapter.initialize") as initialize:
         yield initialize
 
+
+@pytest.fixture
+def mock_gate_noise():
+    with patch("pennylane_calculquebec.monarq_sim.GateNoiseSimulation.execute") as mock:
+        yield mock
+
+@pytest.fixture
+def mock_readout_noise():
+    with patch("pennylane_calculquebec.monarq_sim.ReadoutNoiseSimulation.execute") as mock:
+        yield mock
+
+
 @pytest.fixture
 def mock_PostProcessor_get_processor():
     with patch("pennylane_calculquebec.processing.PostProcessor.get_processor") as proc:
@@ -45,7 +57,7 @@ def test_constructor(mock_api_initialize):
     dev = MonarqSim(shots=1000)
     mock_api_initialize.assert_not_called()
     assert dev.shots.total_shots == 1000
-    assert dev._processing_config == FakeMonarqConfig()
+    assert dev._processing_config == MonarqDefaultConfig(False)
     
     dev = MonarqSim(shots=1000, client=client)
     mock_api_initialize.assert_called_once()
@@ -78,12 +90,15 @@ def test_execute(mock_measure):
     result = dev.execute([quantum_tape, quantum_tape, quantum_tape])
     assert mock_measure.call_count == 4
 
-def test_measure(mock_PostProcessor_get_processor):
+def test_measure(mock_PostProcessor_get_processor, mock_gate_noise, mock_readout_noise):
     from pennylane.tape import QuantumTape
+
+    mock_gate_noise.side_effect = lambda tape : tape
+    mock_readout_noise.side_effect = lambda tape, result : result
 
     mock_PostProcessor_get_processor.return_value = lambda a, b : b
     
-    dev = BaseDevice([0], 1000, client = None, processing_config = EmptyConfig())
+    dev = MonarqSim([0], 1000, client = None, processing_config = EmptyConfig())
     expected_counts = {"0":968, "1":32}
     expected_probs = [968/1000, 32/1000]
     expected_expectation = 0.936
