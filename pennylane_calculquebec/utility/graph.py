@@ -12,8 +12,9 @@ from itertools import combinations
 from pennylane_calculquebec.monarq_data import connectivity, get_broken_qubits_and_couplers, get_readout1_and_cz_fidelities
 from pennylane_calculquebec.utility.api import keys
 from networkx.exception import NetworkXNoPath
+import sys
 
-BIG_VALUE = 100000000000
+MAX_INT = sys.maxsize
 
 class GraphException(Exception):
     pass
@@ -174,7 +175,7 @@ def shortest_path(start : int, end : int, graph : nx.Graph, excluding : list[int
         
         # this node has no coupler. we should never chose it!
         if len(source_dest_cz) < 1:
-            return BIG_VALUE
+            return MAX_INT
         
         # weight corresponds to the cz error (ie 1 - fidelity)
         # we add one at the end so that if the node is prioritized, 
@@ -248,7 +249,7 @@ def find_closest_wire(source : int, machine_graph : nx.Graph, excluding : list[i
 
 def path_length(path):
         if path is None:
-            return BIG_VALUE
+            return MAX_INT
         return len(path)
     
 def node_with_shortest_path_from_selection(source : int, selection : list[int], graph : nx.Graph, use_benchmark = True):
