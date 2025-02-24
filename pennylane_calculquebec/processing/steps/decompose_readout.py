@@ -5,13 +5,15 @@ contains a pre-processing step for decomposing readouts that are not observed fr
 from pennylane_calculquebec.processing.interfaces import PreProcStep
 from pennylane.tape import QuantumTape
 import pennylane as qml
+from pennylane.operation import Observable
+from pennylane.ops import Prod
 import numpy as np
+from pennylane_calculquebec.processing.processing_exception import ProcessingException
 class DecomposeReadout(PreProcStep):
     """
-    a pre-processing step that decomposes readouts so they are all made in the computational basis \n
-    Supported observables are : X, Y, Z and H
+    a pre-processing step that decomposes readouts so they are all made in the computational basis
     """
-    def get_ops_for_product(self, observable):
+    def get_ops_for_product(self, observable : Prod):
         """
         decomposes a product of observables to separated operations on different wires
 
@@ -24,27 +26,18 @@ class DecomposeReadout(PreProcStep):
         Returns:
             A list of operations
         """
+        if not observable.is_hermitian:
+            raise ProcessingException(f"the observable {observable} is not supported")
+        
         operations = []
         for operation in observable.operands:
-            if operation.name in self.observable_dict:
-                for wire in operation.wires:
-                    operations.append(self.observable_dict[operation.name](wire))
+            if isinstance(operation, Observable):
+                operations += operation.diagonalizing_gates()
                 continue
             
             raise ValueError("this readout observable is not supported")
         return operations
-        
-    @property
-    def observable_dict(self):
-        """a dictionary of observables and their respective rotation operations
-        """
-        return {
-            "PauliZ" : lambda wire : qml.Identity(wire),
-            "PauliX" : lambda wire : qml.RY(np.pi / 2, wire),
-            "PauliY" : lambda wire : qml.RX(-np.pi / 2, wire),
-            "Hadamard" : lambda wire : qml.RY(np.pi / 4, wire)
-        }
-        
+
     def execute(self, tape : QuantumTape):
         """
         implementation of the execution method from pre-processing steps. \n
@@ -68,12 +61,14 @@ class DecomposeReadout(PreProcStep):
             if measurement.obs is None:
                 measurements.append(measurement)
                 continue
+
+            if not measurement.obs.is_hermitian:
+                raise ProcessingException(f"the observable {measurement.obs} is not supported")
             
             # if op is supported, apply rotation and change mp's observable to Z
-            if measurement.obs.name in self.observable_dict:
+            if isinstance(measurement.obs, Observable):
                 wires = [wire for wire in measurement.obs.wires]
-                for wire in wires:
-                    operations.append(self.observable_dict[measurement.obs.name](wire))
+                operations += measurement.obs.diagonalizing_gates()
                 measurements.append(type(measurement)(wires=wires))
                 continue
             
