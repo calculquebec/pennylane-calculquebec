@@ -57,7 +57,7 @@ def test_constructor(mock_api_initialize):
     dev = MonarqSim(shots=1000)
     mock_api_initialize.assert_not_called()
     assert dev.shots.total_shots == 1000
-    assert dev._processing_config == MonarqDefaultConfig(False)
+    assert dev._processing_config == MonarqDefaultConfig("yamaska", False)
     
     dev = MonarqSim(shots=1000, client=client)
     mock_api_initialize.assert_called_once()
