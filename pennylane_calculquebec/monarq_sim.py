@@ -18,13 +18,12 @@ class MonarqSim(BaseDevice):
     """
     name = "MonarqSim"
     short_name = "monarq.sim"
-    pennylane_requires = ">=0.30.0"
+    pennylane_requires = ">=0.36.0"
     author = "CalculQuebec"
     
     realm = "calculqc"
     circuit_name = "test circuit"
     project_id = ""
-    machine_name = "yamaska"
 
     observables = {
         "PauliZ"
@@ -34,11 +33,11 @@ class MonarqSim(BaseDevice):
     def name(self):
         return MonarqSim.short_name
     
-    def __init__(self, wires = None, shots = None, machine_name="yamaska", client = None, processing_config = None, use_benchmark = False):
+    def __init__(self, wires = None, shots = None, client = None, processing_config = None, use_benchmark = False):
         if processing_config is None:
-            processing_config = MonarqDefaultConfig(machine_name, use_benchmark)
+            processing_config = MonarqDefaultConfig(self.machine_name, use_benchmark)
 
-        super().__init__(wires, shots, machine_name, client, processing_config)
+        super().__init__(wires, shots, client, processing_config)
         self.use_benchmark_for_simulation = use_benchmark
 
     def _measure(self, tape : QuantumTape):
@@ -74,3 +73,7 @@ class MonarqSim(BaseDevice):
         # return desired measurement method
         measurement_method = MonarqSim.measurement_methods[meas]
         return measurement_method(results)
+    
+    @property
+    def machine_name(self):
+        return "yamaska"

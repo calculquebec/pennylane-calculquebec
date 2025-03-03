@@ -96,7 +96,13 @@ def test_measure(mock_PostProcessor_get_processor):
             self.wires = [0]
             self.measurements = []
 
-    dev = BaseDevice([0], 1000, client = None, processing_config = EmptyConfig())
+    class MockDevice:
+        def __init__(self):
+            self.machine_name = "yamaska"
+            self._processing_config = EmptyConfig()
+            self.wires = [0]
+    
+    dev = MockDevice()
     expected_counts = Job().run()
     expected_probs = [750/775, 25/775]
     expected_expectation = 0.935483870967742
