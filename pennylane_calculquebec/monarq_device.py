@@ -28,14 +28,12 @@ class MonarqDevice(BaseDevice):
 
     name = "MonarqDevice"
     short_name = "monarq.default"
-    pennylane_requires = ">=0.30.0"
+    pennylane_requires = ">=0.36.0"
     author = "CalculQuebec"
     
     realm = "calculqc"
-    circuit_name = "test circuit"
     project_id = ""
-    machine_name = "yamaska"
-
+    
     observables = {
         "PauliZ"
     }
@@ -43,20 +41,24 @@ class MonarqDevice(BaseDevice):
     def __init__(self, 
                  wires = None, 
                  shots = None,  
-                 machine_name = "yamaska",
                  client : ApiClient = None,
                  processing_config : ProcessingConfig = None) -> None:
 
         if processing_config is None:
-            processing_config = MonarqDefaultConfig(machine_name)
+            processing_config = MonarqDefaultConfig(self.machine_name)
         
-        super().__init__(wires, shots, machine_name, client, processing_config)
+        super().__init__(wires, shots, client, processing_config)
 
         if isinstance(shots, int) and (shots < 1 or shots > 1000) or isinstance(shots, list) and (len(shots) < 1 or len(shots) > 1000) or shots == None:
             raise DeviceException("The number of shots must be contained between 1 and 1000")
         
         if client is None:
             raise DeviceException("The client has not been defined. Cannot establish connection with MonarQ.")
+
+    
+    @property
+    def machine_name(self):
+        return "yamaska"
 
     @property
     def name(self):

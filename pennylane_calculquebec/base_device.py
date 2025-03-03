@@ -27,9 +27,8 @@ class BaseDevice(Device):
     _client : ApiClient
     _processing_config : ProcessingConfig
     
-    def __init__(self, wires = None, shots = None, machine_name = None, client = None, processing_config = None):
+    def __init__(self, wires = None, shots = None, client = None, processing_config = None):
         super().__init__(wires, shots)
-        self.machine_name = machine_name
         self._processing_config = processing_config
 
         if client is not None:
@@ -84,6 +83,9 @@ class BaseDevice(Device):
         results = [self._measure(tape) for tape in circuits]       
         return results if not is_single_circuit else results[0]
 
+    @property
+    def machine_name(self):
+        raise NotImplementedError()
 
     def _measure(self, tape : QuantumTape):
         raise NotImplementedError()

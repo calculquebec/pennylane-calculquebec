@@ -106,46 +106,50 @@ def test_measure(mock_PostProcessor_get_processor, mock_gate_noise, mock_readout
     quantum_tape = QuantumTape(ops=[qml.PauliX(0)], measurements=[])
     
     with patch("pennylane.execute") as job:
-        job.return_value = [expected_counts]
-        
-        # measurement != 1, DeviceException
-        with pytest.raises(DeviceException):
-            MonarqSim._measure(dev, quantum_tape)
-        
-        job.assert_not_called()
-        
-        # invalid measurement
-        quantum_tape = QuantumTape(ops=[qml.PauliX(0)], measurements=[qml.sample()])
+        with patch("pennylane_calculquebec.monarq_sim.ReadoutNoiseSimulation.execute") as rns:
+            rns.side_effect = lambda _, results : results
+            with patch("pennylane_calculquebec.monarq_sim.GateNoiseSimulation.execute") as gns:
+                gns.side_effect = lambda tape : tape
+                job.return_value = [expected_counts]
+                
+                # measurement != 1, DeviceException
+                with pytest.raises(DeviceException):
+                    MonarqSim._measure(dev, quantum_tape)
+                
+                job.assert_not_called()
+                
+                # invalid measurement
+                quantum_tape = QuantumTape(ops=[qml.PauliX(0)], measurements=[qml.sample()])
 
-        with pytest.raises(DeviceException):
-            _ = MonarqSim._measure(dev, quantum_tape)
-        job.assert_not_called()
+                with pytest.raises(DeviceException):
+                    _ = MonarqSim._measure(dev, quantum_tape)
+                job.assert_not_called()
 
-        # measurement is probs
-        quantum_tape.measurements[0] = qml.probs(wires=[0])
-        probs = MonarqSim._measure(dev, quantum_tape)
-        tolerance = 1E-1
-        assert all(abs(a - b) < tolerance for a, b in zip(probs, expected_probs))
-        
-        job.assert_called_once()
+                # measurement is probs
+                quantum_tape.measurements[0] = qml.probs(wires=[0])
+                probs = MonarqSim._measure(dev, quantum_tape)
+                tolerance = 1E-1
+                assert all(abs(a - b) < tolerance for a, b in zip(probs, expected_probs))
+                
+                job.assert_called_once()
 
-        # measurement is counts
-        quantum_tape.measurements[0] = qml.counts(wires=[0])
-        counts = MonarqSim._measure(dev, quantum_tape)
-        assert all(abs(expect - count) < tolerance * 1000 for expect, count in zip(counts.values(), expected_counts.values()))
-        
-        # since the method has been called one time before, the call count is incremented to 2
-        assert job.call_count == 2
-        
-        # measurement is expval
-        quantum_tape.measurements[0] = qml.expval(qml.PauliZ(0))
-        expval = MonarqSim._measure(dev, quantum_tape)
-        assert abs(expval - expected_expectation) < tolerance
-        
-        # since the method has been called one time before, the call count is incremented to 2
-        assert job.call_count == 3
+                # measurement is counts
+                quantum_tape.measurements[0] = qml.counts(wires=[0])
+                counts = MonarqSim._measure(dev, quantum_tape)
+                assert all(abs(expect - count) < tolerance * 1000 for expect, count in zip(counts.values(), expected_counts.values()))
+                
+                # since the method has been called one time before, the call count is incremented to 2
+                assert job.call_count == 2
+                
+                # measurement is expval
+                quantum_tape.measurements[0] = qml.expval(qml.PauliZ(0))
+                expval = MonarqSim._measure(dev, quantum_tape)
+                assert abs(expval - expected_expectation) < tolerance
+                
+                # since the method has been called one time before, the call count is incremented to 2
+                assert job.call_count == 3
 
-        # too many measurements
-        quantum_tape.measurements.append(qml.counts())
-        with pytest.raises(DeviceException):
-            _ = MonarqSim._measure(dev, quantum_tape)
+                # too many measurements
+                quantum_tape.measurements.append(qml.counts())
+                with pytest.raises(DeviceException):
+                    _ = MonarqSim._measure(dev, quantum_tape)
