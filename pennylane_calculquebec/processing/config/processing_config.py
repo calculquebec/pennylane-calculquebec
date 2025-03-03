@@ -3,7 +3,7 @@ contains the base configuration class and presets that can be used to specify mo
 """
 
 from pennylane_calculquebec.processing.interfaces.base_step import BaseStep
-from pennylane_calculquebec.processing.steps import DecomposeReadout, CliffordTDecomposition, ISMAGS, Swaps, IterativeCommuteAndMerge, MonarqDecomposition, GateNoiseSimulation, ReadoutNoiseSimulation, PrintWires, PrintTape
+from pennylane_calculquebec.processing.steps import DecomposeReadout, CliffordTDecomposition, VF2, Swaps, IterativeCommuteAndMerge, MonarqDecomposition, GateNoiseSimulation, ReadoutNoiseSimulation, PrintWires, PrintTape
 from typing import Callable
 
 class ProcessingConfig:
@@ -51,18 +51,18 @@ class ProcessingConfig:
         """
         self._steps[idx] = value
         
-def MonarqDefaultConfig(use_benchmark = True, q1_acceptance = 0.5, q2_acceptance = 0.5, excluded_qubits = [], excluded_couplers = []):
+def MonarqDefaultConfig(machine_name : str, use_benchmark = True, q1_acceptance = 0.5, q2_acceptance = 0.5, excluded_qubits = [], excluded_couplers = []):
     """The default configuration preset for MonarQ"""
     return ProcessingConfig(DecomposeReadout(), CliffordTDecomposition(), \
-            ISMAGS(use_benchmark, q1_acceptance, q2_acceptance, excluded_qubits, excluded_couplers),
-            Swaps(use_benchmark, q1_acceptance, q2_acceptance, excluded_qubits, excluded_couplers), 
+            VF2(machine_name, use_benchmark, q1_acceptance, q2_acceptance, excluded_qubits, excluded_couplers),
+            Swaps(machine_name, use_benchmark, q1_acceptance, q2_acceptance, excluded_qubits, excluded_couplers), 
             IterativeCommuteAndMerge(), MonarqDecomposition(), IterativeCommuteAndMerge(), MonarqDecomposition())
 
 
 
-def MonarqDefaultConfigNoBenchmark(excluded_qubits = [], excluded_couplers = []):
+def MonarqDefaultConfigNoBenchmark(machine_name : str, excluded_qubits = [], excluded_couplers = []):
     """The default configuration preset, minus the benchmarking acceptance tests on qubits and couplers in the placement and routing steps."""
-    return MonarqDefaultConfig(use_benchmark = False, excluded_qubits = excluded_qubits, excluded_couplers = excluded_couplers)
+    return MonarqDefaultConfig(machine_name, use_benchmark = False, excluded_qubits = excluded_qubits, excluded_couplers = excluded_couplers)
 
 
 def EmptyConfig(): 
@@ -81,9 +81,9 @@ def NoPlaceNoRouteConfig():
 
 
 
-def PrintDefaultConfig(only_wires = True, use_benchmark = True, q1_acceptance = 0.5, q2_acceptance = 0.5, excluded_qubits = [], excluded_couplers = []):
+def PrintDefaultConfig(machine_name : str, only_wires = True, use_benchmark = True, q1_acceptance = 0.5, q2_acceptance = 0.5, excluded_qubits = [], excluded_couplers = []):
     """The same as the default config, but it prints wires/circuit before and after transpilation"""
-    config = MonarqDefaultConfig(use_benchmark, q1_acceptance, q2_acceptance, excluded_qubits, excluded_couplers)
+    config = MonarqDefaultConfig(machine_name, use_benchmark, q1_acceptance, q2_acceptance, excluded_qubits, excluded_couplers)
     config.steps.insert(0, PrintWires() if only_wires else PrintTape())
     config.steps.append(PrintWires() if only_wires else PrintTape())
 
@@ -96,14 +96,14 @@ def PrintNoPlaceNoRouteConfig(only_wires = True):
     config.steps.append(PrintWires() if only_wires else PrintTape())
     return config
 
-def FakeMonarqConfig(use_benchmark = False): 
+def FakeMonarqConfig(machine_name : str, use_benchmark = False): 
     """
     A configuration preset that does the same thing as the default config, but adds gate and readout noise at the end
     """
     return ProcessingConfig(DecomposeReadout(),
                             CliffordTDecomposition(),
-                            ISMAGS(use_benchmark),
-                            Swaps(use_benchmark),
+                            VF2(machine_name, use_benchmark),
+                            Swaps(machine_name, use_benchmark),
                             IterativeCommuteAndMerge(),
                             MonarqDecomposition(),
                             IterativeCommuteAndMerge(),

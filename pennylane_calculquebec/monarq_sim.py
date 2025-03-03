@@ -34,11 +34,11 @@ class MonarqSim(BaseDevice):
     def name(self):
         return MonarqSim.short_name
     
-    def __init__(self, wires = None, shots = None, client = None, processing_config = None, use_benchmark = False):
+    def __init__(self, wires = None, shots = None, machine_name="yamaska", client = None, processing_config = None, use_benchmark = False):
         if processing_config is None:
-            processing_config = MonarqDefaultConfig(use_benchmark)
+            processing_config = MonarqDefaultConfig(machine_name, use_benchmark)
 
-        super().__init__(wires, shots, client, processing_config)
+        super().__init__(wires, shots, machine_name, client, processing_config)
         self.use_benchmark_for_simulation = use_benchmark
 
     def _measure(self, tape : QuantumTape):
@@ -63,11 +63,11 @@ class MonarqSim(BaseDevice):
                                 measurements=[CountsMP(wires=mp.wires) for mp in tape.measurements],
                                 shots=1000)
         
-        sim_tape = GateNoiseSimulation(self.use_benchmark_for_simulation).execute(counts_tape)
+        sim_tape = GateNoiseSimulation(self.machine_name, self.use_benchmark_for_simulation).execute(counts_tape)
         results = qml.execute([sim_tape], qml.device("default.mixed", wires = sim_tape.wires, shots=tape.shots.total_shots))[0]
 
         # apply post processing
-        sim_results = ReadoutNoiseSimulation(self.use_benchmark_for_simulation).execute(counts_tape, results)
+        sim_results = ReadoutNoiseSimulation(self.machine_name, self.use_benchmark_for_simulation).execute(counts_tape, results)
         results = PostProcessor.get_processor(self._processing_config, self.wires)(counts_tape, sim_results)
     
 

@@ -4,6 +4,7 @@ Contains a post-processing step for adding noise to the results of a circuit usi
 
 from pennylane_calculquebec.processing.interfaces import PostProcStep
 from pennylane_calculquebec.monarq_data import get_readout_noise_matrices
+import pennylane_calculquebec.monarq_data as data
 import pennylane as qml
 import numpy as np
 from pennylane_calculquebec.utility.debug import get_labels, get_measurement_wires
@@ -13,7 +14,8 @@ class ReadoutNoiseSimulation(PostProcStep):
     """
     Adds readout noise on the results
     """
-    def __init__(self, use_benchmark = True):
+    def __init__(self, machine_name : str, use_benchmark = True):
+        self.machine_name = machine_name
         self.use_benchmark = use_benchmark
         
     def execute(self, tape, results):
@@ -26,11 +28,16 @@ class ReadoutNoiseSimulation(PostProcStep):
         Returns:
             dict[str, int]: results with readout noise added to it
         """
+        qubit_count = len(set([a 
+                               for b in data.cache._offline_connectivity[self.machine_name].values() 
+                               for a in b]))
+        coupler_count = len(data.cache._offline_connectivity[self.machine_name])
+
         results = results[0] if not isinstance(results, dict) else results
         
-        readout_error_matrices = get_readout_noise_matrices() \
+        readout_error_matrices = get_readout_noise_matrices(self.machine_name) \
             if self.use_benchmark \
-            else [readout_error(TypicalBenchmark.readout0, TypicalBenchmark.readout1) for _ in range(24)]
+            else [readout_error(TypicalBenchmark.readout0, TypicalBenchmark.readout1) for _ in range(qubit_count)]
 
         readout_matrix = np.identity(1)
         

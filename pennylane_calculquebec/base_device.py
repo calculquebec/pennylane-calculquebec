@@ -27,8 +27,9 @@ class BaseDevice(Device):
     _client : ApiClient
     _processing_config : ProcessingConfig
     
-    def __init__(self, wires = None, shots = None, client = None, processing_config = None):
+    def __init__(self, wires = None, shots = None, machine_name = None, client = None, processing_config = None):
         super().__init__(wires, shots)
+        self.machine_name = machine_name
         self._processing_config = processing_config
 
         if client is not None:

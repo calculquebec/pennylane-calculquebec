@@ -15,7 +15,7 @@ class Routing(PreProcStep):
     """
     base class for routing algorithms
     """
-    def __init__(self, use_benchmark = True, q1_acceptance = 0.5, q2_acceptance = 0.5, excluded_qubits=[], excluded_couplers=[]):
+    def __init__(self, machine_name : str, use_benchmark = True, q1_acceptance = 0.5, q2_acceptance = 0.5, excluded_qubits=[], excluded_couplers=[]):
         """constructor for usual routing algorithms
 
         Args:
@@ -26,6 +26,7 @@ class Routing(PreProcStep):
             excluded_couplers (list, optional): what couplers should we exclude from the mapping? Defaults to [].
         """
         self.use_benchmark = use_benchmark
+        self.machine_name = machine_name
         self.q1_acceptance = q1_acceptance
         self.q2_acceptance = q2_acceptance
         self.excluded_qubits=excluded_qubits
@@ -44,13 +45,13 @@ class Swaps(Routing):
         the new circuit will be : swap(4, 1), cnot(0, 4), swap(4, 1)
         """
         circuit_topology = circuit_graph(tape)
-        machine_topology = machine_graph(self.use_benchmark, self.q1_acceptance, self.q2_acceptance, self.excluded_qubits, self.excluded_couplers)
+        machine_topology = machine_graph(self.machine_name, self.use_benchmark, self.q1_acceptance, self.q2_acceptance, self.excluded_qubits, self.excluded_couplers)
         new_operations : list[Operation] = []
         list_copy = tape.operations.copy()
 
         for operation in list_copy:
             if operation.num_wires == 2 and not is_directly_connected(operation, machine_topology):
-                path = shortest_path(operation.wires[0], operation.wires[1], machine_topology, prioritized_nodes=[n for n in circuit_topology.nodes], use_benchmark=self.use_benchmark)
+                path = shortest_path(operation.wires[0], operation.wires[1], machine_topology, self.machine_name, prioritized_nodes=[n for n in circuit_topology.nodes], use_benchmark=self.use_benchmark)
                 
                 if path is None:
                     raise RoutingException("It is not possible to route the circuit given available qubits and couplers")

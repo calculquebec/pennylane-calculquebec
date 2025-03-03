@@ -123,6 +123,10 @@ class routes:
     MACHINE_NAME = "?machineName"
     
 class keys:
+    NAME = "name"
+    STATUS = "status"
+    ONLINE = "online"
+    COUPLER_TO_QUBIT_MAP = "couplerToQubitMap"
     BIT_COUNT = "bitCount"
     TYPE = "type"
     QUBIT_COUNT = "qubitCount"
