@@ -43,10 +43,14 @@ class MonarqDevice(BaseDevice):
     def __init__(self, 
                  wires = None, 
                  shots = None,  
+                 machine_name = "yamaska",
                  client : ApiClient = None,
-                 processing_config : ProcessingConfig = MonarqDefaultConfig()) -> None:
+                 processing_config : ProcessingConfig = None) -> None:
 
-        super().__init__(wires, shots, client, processing_config)
+        if processing_config is None:
+            processing_config = MonarqDefaultConfig(machine_name)
+        
+        super().__init__(wires, shots, machine_name, client, processing_config)
 
         if isinstance(shots, int) and (shots < 1 or shots > 1000) or isinstance(shots, list) and (len(shots) < 1 or len(shots) > 1000) or shots == None:
             raise DeviceException("The number of shots must be contained between 1 and 1000")
@@ -75,7 +79,7 @@ class MonarqDevice(BaseDevice):
         if not any(meas == measurement for measurement in MonarqDevice.measurement_methods.keys()):
             raise DeviceException("Measurement not supported")
 
-        results = Job(tape).run()
+        results = Job(tape, self.machine_name).run()
         results = PostProcessor.get_processor(self._processing_config, self.wires)(tape, results)
         measurement_method = MonarqDevice.measurement_methods[meas]
 

@@ -27,8 +27,9 @@ class Job:
         - circuit_name (str) : the name of the circuit
     """
     
-    def __init__(self, circuit : QuantumTape, circuit_name = "default"):
+    def __init__(self, circuit : QuantumTape, machine_name : str, circuit_name = "default"):
         self.circuit_dict = ApiUtility.convert_circuit(circuit)
+        self.machine_name = machine_name
         self.circuit_name = circuit_name
         self.shots = circuit.shots.total_shots
 
@@ -42,7 +43,7 @@ class Job:
         if max_tries == -1: max_tries = 2 ** 15
         response = None
         try:
-            response = ApiAdapter.create_job(self.circuit_dict, self.circuit_name, self.shots)
+            response = ApiAdapter.create_job(self.circuit_dict, self.machine_name, self.circuit_name, self.shots)
         except:
             raise
         if(response.status_code == 200):
