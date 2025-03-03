@@ -24,7 +24,7 @@ def test_directly_connected(mock_machine_graph):
     mock_machine_graph.return_value = nx.Graph([(0, 1), (1, 2), (2, 3)])
 
     tape = QuantumTape(ops=[qml.CNOT([0, 1])])
-    step = Swaps()
+    step = Swaps("yamaska")
     tape2 = step.execute(tape)
     assert all(op1 == op2 for op1, op2 in zip(tape.operations, tape2.operations))
 
@@ -46,7 +46,7 @@ def test_not_directly_connected(mock_machine_graph, mock_r1_cz_fidelities):
     expected = [qml.SWAP([1, 2]), qml.CNOT([0, 1]), qml.SWAP([1, 2])]
     tape = QuantumTape(ops=[qml.CNOT([0, 2])])
 
-    step = Swaps()
+    step = Swaps("yamaska")
     tape2 = step.execute(tape)
 
     assert [op1 == op2 for op1, op2 in zip(expected, tape2.operations)]
@@ -67,6 +67,6 @@ def test_inexistant_wire(mock_machine_graph, mock_r1_cz_fidelities):
 
     tape = QuantumTape(ops=[qml.CNOT([0, 2])])
 
-    step = Swaps()
+    step = Swaps("yamaska")
     with pytest.raises(RoutingException):
         _ = step.execute(tape)

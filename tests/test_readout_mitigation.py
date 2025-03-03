@@ -124,7 +124,7 @@ def test_matrix_readout_mitigation_full(mock_qubits_couplers):
     expected = {"000" : 500, "111" : 500}
     tape = Tape([0, 1, 2, 3], [Measure([0]), Measure([2]), Measure([3])])
 
-    sim = ReadoutNoiseSimulation(False)
+    sim = ReadoutNoiseSimulation("yamaska", False)
     simulated_noise = sim.execute(tape, expected)
 
     step = mitigation.MatrixReadoutMitigation()
@@ -145,7 +145,7 @@ def test_ibu_readout_mitigation_full(mock_qubits_couplers):
     expected = {"000" : 500, "111" : 500}
     tape = Tape([0, 1, 2, 3], [Measure([0]), Measure([2]), Measure([3])])
 
-    sim = ReadoutNoiseSimulation(False)
+    sim = ReadoutNoiseSimulation("yamaska", False)
     simulated_noise = sim.execute(tape, expected)
 
     step = mitigation.IBUReadoutMitigation()

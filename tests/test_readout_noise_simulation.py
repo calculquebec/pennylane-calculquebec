@@ -49,11 +49,11 @@ def test_execute(mock_readout_noise_matrices):
         "000" : 0, "001" : 0, "010" : 0, "011" : 0, "100" : 250, "101" : 250, "110" : 250, "111" : 250
     }
 
-    step = rns.ReadoutNoiseSimulation(False)
+    step = rns.ReadoutNoiseSimulation("yamaska", False)
     _ = step.execute(tape, results)
     mock_readout_noise_matrices.assert_not_called()
 
-    step = rns.ReadoutNoiseSimulation(True)
+    step = rns.ReadoutNoiseSimulation("yamaska", True)
     result2 = step.execute(tape, results)
     mock_readout_noise_matrices.assert_called_once()
 

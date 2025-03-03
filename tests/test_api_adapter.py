@@ -71,25 +71,28 @@ def test_get_machine_by_name(mock_requests_get):
     mock_requests_get.return_value.status_code = 200
     mock_requests_get.return_value.text = machine_test_str
     
+    ApiAdapter.clean_cache()
     ApiAdapter.initialize(client)
     
-    machine = ApiAdapter.get_machine_by_name()
+    machine = ApiAdapter.get_machine_by_name("yamaska")
     
     assert all([machine[k] == machine_test[k] for k in machine])
     
     mock_requests_get.return_value.status_code = 400
     # test cache 
-    machine = ApiAdapter.get_machine_by_name()
+    machine = ApiAdapter.get_machine_by_name("yamaska")
     assert all([machine[k] == machine_test[k] for k in machine])
     
     ApiAdapter._machine = None  
     
     with pytest.raises(ApiException):
-        machine = ApiAdapter.get_machine_by_name()
+        machine = ApiAdapter.get_machine_by_name("yamaska")
 
 def test_get_qubits_and_couplers(mock_get_benchmark):
+    ApiAdapter.clean_cache()
+    ApiAdapter.initialize(client)
     mock_get_benchmark.return_value = {keys.RESULTS_PER_DEVICE : True}
-    result = ApiAdapter.get_qubits_and_couplers()
+    result = ApiAdapter.get_qubits_and_couplers("yamaska")
     assert result
 
 def test_get_benchmark(mock_is_last_update_expired, mock_get_machine_by_name, mock_requests_get):
@@ -101,6 +104,7 @@ def test_get_benchmark(mock_is_last_update_expired, mock_get_machine_by_name, mo
     mock_is_last_update_expired.return_value = False
     
     test_benchmark = {"test" : "im a benchmark"}
+    ApiAdapter.clean_cache()
     ApiAdapter.initialize(client)
     
     # test 200 and cache is None
@@ -108,33 +112,34 @@ def test_get_benchmark(mock_is_last_update_expired, mock_get_machine_by_name, mo
         Res(200, test_machine_str) if "benchmark" not in route \
             else Res(200, test_benchmark_str)
             
-    benchmark = ApiAdapter.get_benchmark()
+    benchmark = ApiAdapter.get_benchmark("yamaska")
     assert all(test_benchmark[k] == benchmark[k] for k in benchmark)
 
     # test last_update < 24 h
     mock_requests_get.side_effect = lambda route, headers: \
         Res(400, test_machine_str) if "benchmark" not in route \
             else Res(400, test_benchmark_str2)
-    benchmark = ApiAdapter.get_benchmark()
+    benchmark = ApiAdapter.get_benchmark("yamaska")
     assert all(test_benchmark[k] == benchmark[k] for k in benchmark)    
 
     # test 400 and last_update > 24 h
     mock_is_last_update_expired.return_value = True
     with pytest.raises(ApiException):
-        benchmark = ApiAdapter.get_benchmark()
+        benchmark = ApiAdapter.get_benchmark("yamaska")
 
 def test_create_job(mock_job_body, mock_requests_post):
     ApiAdapter.initialize(client)
     
     mock_requests_post.return_value = Res(200, 42)
-    assert ApiAdapter.create_job(None).text == 42
+    assert ApiAdapter.create_job(None, "yamaska").text == 42
     
     mock_requests_post.return_value = Res(400, 42)
     with pytest.raises(ApiException):
-        ApiAdapter.create_job(None)
+        ApiAdapter.create_job(None, "yamaska")
     
 
 def test_list_jobs(mock_requests_get):
+    ApiAdapter.clean_cache()
     ApiAdapter.initialize(client)
     
     mock_requests_get.return_value = Res(200, 42)
@@ -144,6 +149,7 @@ def test_list_jobs(mock_requests_get):
         ApiAdapter.list_jobs()
 
 def test_job_by_id(mock_requests_get):
+    ApiAdapter.clean_cache()
     ApiAdapter.initialize(client)
     
     mock_requests_get.return_value = Res(200, 42)
@@ -152,3 +158,18 @@ def test_job_by_id(mock_requests_get):
     mock_requests_get.return_value = Res(400, 42)
     with pytest.raises(ApiException):
         ApiAdapter.job_by_id(None)
+
+def test_list_machines(mock_requests_get):
+    ApiAdapter.clean_cache()
+    ApiAdapter.initialize(client)
+
+    mock_requests_get.return_value = Res(200, '{"items" : [{"status" : "online", "answer" : 42}, {"status" : "offline", "answer" : 42}]}')
+    assert len(ApiAdapter.list_machines()) == 2
+    assert len(ApiAdapter.list_machines(True)) == 1
+
+def test_get_machine_by_name(mock_requests_get):
+    ApiAdapter.clean_cache()
+    ApiAdapter.initialize(client)
+
+    mock_requests_get.return_value = Res(200, '{"name" : "yamaska", "status" : "online", "answer" : 42}')
+    assert ApiAdapter.get_machine_by_name("yamaska")["name"] == "yamaska"
