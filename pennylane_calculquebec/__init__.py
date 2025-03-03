@@ -7,3 +7,4 @@ if importlib.util.find_spec("juliacall") is not None:
 
 from .monarq_device import MonarqDevice
 from .monarq_sim import MonarqSim
+from .monarq_backup import MonarqBackup
