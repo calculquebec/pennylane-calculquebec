@@ -27,7 +27,7 @@ class DecomposeReadout(PreProcStep):
             A list of operations
         """
         if not observable.is_hermitian:
-            raise ProcessingException(f"the observable {observable} is not supported")
+            raise ProcessingException(f"The observable {observable} is not supported")
         
         operations = []
         for operation in observable.operands:
@@ -35,7 +35,7 @@ class DecomposeReadout(PreProcStep):
                 operations += operation.diagonalizing_gates()
                 continue
             
-            raise ValueError("this readout observable is not supported")
+            raise ProcessingException("The observable {observable} is not supported")
         return operations
 
     def execute(self, tape : QuantumTape):
@@ -63,7 +63,7 @@ class DecomposeReadout(PreProcStep):
                 continue
 
             if not measurement.obs.is_hermitian:
-                raise ProcessingException(f"the observable {measurement.obs} is not supported")
+            raise ProcessingException(f"The observable {observable} is not supported")
             
             # if op is supported, apply rotation and change mp's observable to Z
             if isinstance(measurement.obs, Observable):
@@ -82,6 +82,6 @@ class DecomposeReadout(PreProcStep):
                 
                 
             # if we reach this point, it means that we can't readout on this observable
-            raise ValueError("this readout observable is not supported")
+            raise ProcessingException(f"The observable {observable} is not supported")
         
         return type(tape)(operations, measurements, shots=tape.shots)
