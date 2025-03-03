@@ -25,7 +25,7 @@ def test_monarq_default():
             get.return_value = Response('{"job" : {"status" : {"type" : "SUCCEEDED"}}, "result":{"histogram": {"0":500, "1":500}}}')
             results = qnode()
             assert results is not None
-            assert len(results) == 2 and all(a in results for a in ["0", "1"])
+            assert len(results) == 2 and all(result in results for result in ["0", "1"])
 
 def test_monarq_sim():
     config = MonarqDefaultConfig(False)
@@ -35,4 +35,4 @@ def test_monarq_sim():
     qnode = qml.QNode(circuit, dev)
     results = qnode()
     assert results is not None
-    assert len(results) == 2 and all(a in results for a in ["0", "1"])
+    assert len(results) == 2 and all(result in results for result in ["0", "1"])
