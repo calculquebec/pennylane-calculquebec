@@ -12,8 +12,9 @@ class GateNoiseSimulation(PreProcStep):
     """
     Adds gate noise to operations from a circuit using MonarQ's noise model
     """
-    def __init__(self, use_benchmark = True):
+    def __init__(self, machine_name : str, use_benchmark = True):
         self.use_benchmark = use_benchmark
+        self.machine_name = machine_name
     
     @property
     def native_gates(self):
@@ -28,22 +29,25 @@ class GateNoiseSimulation(PreProcStep):
     
     def execute(self, tape):
         # build qubit noise from readout 1 fidelity using typical value if benchmark should not be used
-        qubit_noise = data.get_qubit_noise() \
+        qubit_count = len(set([a for b in data.cache._offline_connectivity[self.machine_name].values() for a in b]))
+        coupler_count = len(data.cache._offline_connectivity[self.machine_name])
+
+        qubit_noise = data.get_qubit_noise(self.machine_name) \
             if self.use_benchmark \
-            else [depolarizing_noise(TypicalBenchmark.qubit) for _ in range(24)]
+            else [depolarizing_noise(TypicalBenchmark.qubit) for _ in range(qubit_count)]
         
         # build coupler noise from cz fidelity using typical value if benchmark should not be used
-        cz_noise = data.get_coupler_noise() \
+        cz_noise = data.get_coupler_noise(self.machine_name) \
             if self.use_benchmark \
-            else {tuple(data.connectivity[keys.COUPLERS][str(i)]):depolarizing_noise(TypicalBenchmark.cz) for i in range(35)}
+            else {tuple(data.get_connectivity(self.machine_name, False)[str(i)]):depolarizing_noise(TypicalBenchmark.cz) for i in range(coupler_count)}
         
         # build relaxation using typical t1 if not use_benchmark
-        relaxation = data.get_amplitude_damping() if self.use_benchmark \
-            else [amplitude_damping(1E-6, TypicalBenchmark.t1) for _ in range(24)]
+        relaxation = data.get_amplitude_damping(self.machine_name) if self.use_benchmark \
+            else [amplitude_damping(1E-6, TypicalBenchmark.t1) for _ in range(qubit_count)]
         
         # build decoherence using typical t2 if not use_benchmark
-        decoherence = data.get_phase_damping() if self.use_benchmark \
-            else [phase_damping(1E-6, TypicalBenchmark.t2Ramsey) for _ in range(24)]
+        decoherence = data.get_phase_damping(self.machine_name) if self.use_benchmark \
+            else [phase_damping(1E-6, TypicalBenchmark.t2Ramsey) for _ in range(qubit_count)]
                 
         operations = []
         

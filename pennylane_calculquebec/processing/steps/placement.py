@@ -11,7 +11,7 @@ class Placement(PreProcStep):
     """
     base class for any placement algorithm. 
     """
-    def __init__(self, use_benchmark = True, q1_acceptance = 0.5, q2_acceptance = 0.5, excluded_qubits=[], excluded_couplers=[]):
+    def __init__(self, machine_name : str, use_benchmark = True, q1_acceptance = 0.5, q2_acceptance = 0.5, excluded_qubits=[], excluded_couplers=[]):
         """constructor for placement algorithms
 
         Args:
@@ -22,6 +22,7 @@ class Placement(PreProcStep):
             excluded_couplers (list, optional): what couplers should we exclude from the mapping? Defaults to [].
         """
         self.use_benchmark = use_benchmark
+        self.machine_name = machine_name
         self.q1_acceptance = q1_acceptance
         self.q2_acceptance = q2_acceptance
         self.excluded_qubits = excluded_qubits
@@ -44,7 +45,7 @@ class ISMAGS(Placement):
         5. map wires in all operations and measurements\n
         """
         circuit_topology = graph_util.circuit_graph(tape)
-        machine_topology = graph_util.machine_graph(self.use_benchmark, self.q1_acceptance, self.q2_acceptance, self.excluded_qubits, self.excluded_couplers)
+        machine_topology = graph_util.machine_graph(self.machine_name, self.use_benchmark, self.q1_acceptance, self.q2_acceptance, self.excluded_qubits, self.excluded_couplers)
 
         if len(graph_util.find_biggest_group(circuit_topology)) > len(graph_util.find_biggest_group(machine_topology)):
             raise Exception(f"There are {machine_topology.number_of_nodes} qubits on the machine but your circuit has {circuit_topology.number_of_nodes}.")
@@ -58,13 +59,13 @@ class ISMAGS(Placement):
         for source in missing:
             if source in mapping:
                 continue
-            mapping[source] = graph_util.find_best_wire(machine_topology, [machine_node for machine_node in mapping.values()], self.use_benchmark)
+            mapping[source] = graph_util.find_best_wire(machine_topology, self.machine_name, [machine_node for machine_node in mapping.values()], self.use_benchmark)
 
             for destination in missing:
                 if (source, destination) not in circuit_topology.edges: 
                     continue
                 
-                ASTAR(False)._recurse(source, destination, mapping, missing, machine_topology, circuit_topology)
+                ASTAR(self.machine_name, False)._recurse(source, destination, mapping, missing, machine_topology, circuit_topology)
         
         # 5. map wires in all operations and measurements
         new_tape = type(tape)([operation.map_wires(mapping) for operation in tape.operations], [measurement.map_wires(mapping) for measurement in tape.measurements], shots=tape.shots)
@@ -88,7 +89,7 @@ class VF2(Placement):
         5. map wires in all operations and measurements\n
         """
         circuit_topology = graph_util.circuit_graph(tape)
-        machine_topology = graph_util.machine_graph(self.use_benchmark, self.q1_acceptance, self.q2_acceptance, self.excluded_qubits, self.excluded_couplers)
+        machine_topology = graph_util.machine_graph(self.machine_name, self.use_benchmark, self.q1_acceptance, self.q2_acceptance, self.excluded_qubits, self.excluded_couplers)
 
         if len(graph_util.find_biggest_group(circuit_topology)) > len(graph_util.find_biggest_group(machine_topology)):
             raise Exception(f"There are {machine_topology.number_of_nodes()} qubits on the machine but your circuit has {circuit_topology.number_of_nodes()}.")
@@ -101,7 +102,7 @@ class VF2(Placement):
             
         for node in missing:
             # 3. find the best neighbour (using cost function)
-            most_connected_node = graph_util.find_best_neighbour(node, circuit_topology, self.use_benchmark)
+            most_connected_node = graph_util.find_best_neighbour(node, circuit_topology, self.machine_name, self.use_benchmark)
 
             # 4. find machine node with shortest path from already mapped machine node
             possibles = [possible for possible in machine_topology.nodes if possible not in mapping.values()]
@@ -132,7 +133,7 @@ class ASTAR(Placement):
         if destination in mapping:
             return
         
-        mapping[destination] = graph_util.find_closest_wire(mapping[source], machine_topology, excluding=[machine_node for machine_node in mapping.values()], use_benchmark=self.use_benchmark)
+        mapping[destination] = graph_util.find_closest_wire(mapping[source], machine_topology, self.machine_name, excluding=[machine_node for machine_node in mapping.values()], use_benchmark=self.use_benchmark)
 
         source2 = destination
         for destination2 in to_explore:
@@ -146,7 +147,7 @@ class ASTAR(Placement):
         places the circuit on the machine's connectivity using astar algorithm and comparing path lengths
         """
         circuit_topology = graph_util.circuit_graph(tape)
-        machine_topology = graph_util.machine_graph(self.use_benchmark, self.q1_acceptance, self.q2_acceptance, self.excluded_qubits, self.excluded_couplers)
+        machine_topology = graph_util.machine_graph(self.machine_name, self.use_benchmark, self.q1_acceptance, self.q2_acceptance, self.excluded_qubits, self.excluded_couplers)
 
         if len(graph_util.find_biggest_group(circuit_topology)) > len(graph_util.find_biggest_group(machine_topology)):
             raise Exception(f"There are {machine_topology.number_of_nodes} qubits on the machine but your circuit has {circuit_topology.number_of_nodes}.")
@@ -158,7 +159,7 @@ class ASTAR(Placement):
         for source in to_explore:
             if source in mapping:
                 continue
-            mapping[source] = graph_util.find_best_wire(machine_topology, [machine_node for machine_node in mapping.values()], self.use_benchmark)
+            mapping[source] = graph_util.find_best_wire(machine_topology, self.machine_name, [machine_node for machine_node in mapping.values()], self.use_benchmark)
 
             for destination in to_explore:
                 if (source, destination) not in circuit_topology.edges: 
