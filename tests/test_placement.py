@@ -21,17 +21,14 @@ def mock_broken_qubit_and_couplers():
 
 @pytest.fixture
 def mock_connectivity():
-    with patch("pennylane_calculquebec.utility.graph.connectivity", {
-            keys.QUBITS: [0, 1, 2, 3, 4],
-            keys.COUPLERS: {
+    with patch("pennylane_calculquebec.utility.graph.get_connectivity") as mock:
+        mock.side_effect = lambda machine_name: {
                 "0":[4, 0],
                 "1":[0, 1],
                 "2":[1, 2],
                 "3":[2, 3],
                 "4":[1, 4]
             }
-        }) as mock:
-        
         yield mock
 
 @pytest.fixture
@@ -62,7 +59,7 @@ def mock_get_readout1_and_cz_fidelities():
 
 # vf2
 def test_vf2_trivial_default(mock_broken_qubit_and_couplers, mock_connectivity):
-    step = VF2()
+    step = VF2("yamaska")
     tape = QuantumTape(ops=[qml.CNOT([0, 1])])
 
     new_tape = step.execute(tape)
@@ -71,7 +68,7 @@ def test_vf2_trivial_default(mock_broken_qubit_and_couplers, mock_connectivity):
 
 # ismags
 def test_ismags_trivial_default(mock_broken_qubit_and_couplers, mock_connectivity):
-    step = ISMAGS()
+    step = ISMAGS("yamaska")
     tape = QuantumTape(ops=[qml.CNOT([0, 1])])
 
     new_tape = step.execute(tape)
@@ -80,7 +77,7 @@ def test_ismags_trivial_default(mock_broken_qubit_and_couplers, mock_connectivit
 
 # astar
 def test_astar_trivial_default(mock_broken_qubit_and_couplers, mock_get_readout1_and_cz_fidelities, mock_connectivity):
-    step = ASTAR()
+    step = ASTAR("yamaska")
     tape = QuantumTape(ops=[qml.CNOT([0, 1])])
 
     new_tape = step.execute(tape)
@@ -91,7 +88,7 @@ def test_astar_trivial_default(mock_broken_qubit_and_couplers, mock_get_readout1
 
 # vf2
 def test_vf2_trivial_no_benchmark(mock_broken_qubit_and_couplers, mock_connectivity):
-    step = VF2(False)
+    step = VF2("yamaska", False)
     tape = QuantumTape(ops=[qml.CNOT([0, 1])])
 
     new_tape = step.execute(tape)
@@ -100,7 +97,7 @@ def test_vf2_trivial_no_benchmark(mock_broken_qubit_and_couplers, mock_connectiv
 
 # ismags
 def test_ismags_trivial_no_benchmark(mock_broken_qubit_and_couplers, mock_connectivity):
-    step = ISMAGS(False)
+    step = ISMAGS("yamaska", False)
     tape = QuantumTape(ops=[qml.CNOT([0, 1])])
 
     new_tape = step.execute(tape)
@@ -109,7 +106,7 @@ def test_ismags_trivial_no_benchmark(mock_broken_qubit_and_couplers, mock_connec
 
 # astar
 def test_astar_trivial_no_benchmark(mock_broken_qubit_and_couplers, mock_get_readout1_and_cz_fidelities, mock_connectivity):
-    step = ASTAR(False)
+    step = ASTAR("yamaska", False)
     tape = QuantumTape(ops=[qml.CNOT([0, 1])])
 
     new_tape = step.execute(tape)
@@ -120,7 +117,7 @@ def test_astar_trivial_no_benchmark(mock_broken_qubit_and_couplers, mock_get_rea
 
 # vf2
 def test_vf2_trivial_excluded(mock_connectivity):
-    step = VF2(False, excluded_qubits=[0], excluded_couplers=[(2, 3)])
+    step = VF2("yamaska", False, excluded_qubits=[0], excluded_couplers=[(2, 3)])
     tape = QuantumTape(ops=[qml.CNOT([0, 1])])
 
     new_tape = step.execute(tape)
@@ -129,7 +126,7 @@ def test_vf2_trivial_excluded(mock_connectivity):
 
 # ismags
 def test_ismags_trivial_excluded(mock_connectivity):
-    step = ISMAGS(False, excluded_qubits=[0], excluded_couplers=[(2, 3)])
+    step = ISMAGS("yamaska", False, excluded_qubits=[0], excluded_couplers=[(2, 3)])
     tape = QuantumTape(ops=[qml.CNOT([0, 1])])
 
     new_tape = step.execute(tape)
@@ -138,7 +135,7 @@ def test_ismags_trivial_excluded(mock_connectivity):
 
 # astar
 def test_astar_trivial_excluded(mock_get_readout1_and_cz_fidelities, mock_connectivity):
-    step = ASTAR(False, excluded_qubits=[0], excluded_couplers=[(2, 3)])
+    step = ASTAR("yamaska", False, excluded_qubits=[0], excluded_couplers=[(2, 3)])
     tape = QuantumTape(ops=[qml.CNOT([0, 1])])
 
     new_tape = step.execute(tape)
@@ -151,7 +148,7 @@ def test_astar_trivial_excluded(mock_get_readout1_and_cz_fidelities, mock_connec
 
 # vf2
 def test_vf2_complex_default(mock_broken_qubit_and_couplers, mock_connectivity):
-    step = VF2()
+    step = VF2("yamaska")
     tape = QuantumTape(ops=[qml.CNOT([0, 1]), qml.CNOT([1, 2])])
 
     new_tape = step.execute(tape)
@@ -160,7 +157,7 @@ def test_vf2_complex_default(mock_broken_qubit_and_couplers, mock_connectivity):
 
 # ismags
 def test_ismags_complex_default(mock_broken_qubit_and_couplers, mock_connectivity):
-    step = ISMAGS()
+    step = ISMAGS("yamaska")
     tape = QuantumTape(ops=[qml.CNOT([0, 1]), qml.CNOT([1, 2])])
 
     new_tape = step.execute(tape)
@@ -169,7 +166,7 @@ def test_ismags_complex_default(mock_broken_qubit_and_couplers, mock_connectivit
 
 # astar
 def test_astar_complex_default(mock_broken_qubit_and_couplers, mock_get_readout1_and_cz_fidelities, mock_connectivity):
-    step = ASTAR()
+    step = ASTAR("yamaska")
     tape = QuantumTape(ops=[qml.CNOT([0, 1]), qml.CNOT([1, 2])])
 
     new_tape = step.execute(tape)
@@ -180,7 +177,7 @@ def test_astar_complex_default(mock_broken_qubit_and_couplers, mock_get_readout1
 
 # vf2
 def test_vf2_complex_no_benchmark(mock_broken_qubit_and_couplers, mock_connectivity):
-    step = VF2(False)
+    step = VF2("yamaska", False)
     tape = QuantumTape(ops=[qml.CNOT([0, 1]), qml.CNOT([1, 2])])
 
     new_tape = step.execute(tape)
@@ -189,7 +186,7 @@ def test_vf2_complex_no_benchmark(mock_broken_qubit_and_couplers, mock_connectiv
 
 # ismags
 def test_ismags_complex_no_benchmark(mock_broken_qubit_and_couplers, mock_connectivity):
-    step = ISMAGS(False)
+    step = ISMAGS("yamaska", False)
     tape = QuantumTape(ops=[qml.CNOT([0, 1]), qml.CNOT([1, 2])])
 
     new_tape = step.execute(tape)
@@ -198,7 +195,7 @@ def test_ismags_complex_no_benchmark(mock_broken_qubit_and_couplers, mock_connec
 
 # astar
 def test_astar_complex_no_benchmark(mock_broken_qubit_and_couplers, mock_get_readout1_and_cz_fidelities, mock_connectivity):
-    step = ASTAR(False)
+    step = ASTAR("yamaska", False)
     tape = QuantumTape(ops=[qml.CNOT([0, 1]), qml.CNOT([1, 2])])
 
     new_tape = step.execute(tape)
@@ -209,7 +206,7 @@ def test_astar_complex_no_benchmark(mock_broken_qubit_and_couplers, mock_get_rea
 
 # vf2
 def test_vf2_complex_excluded(mock_connectivity):
-    step = VF2(False, excluded_qubits=[0], excluded_couplers=[(2, 3)])
+    step = VF2("yamaska", False, excluded_qubits=[0], excluded_couplers=[(2, 3)])
     tape = QuantumTape(ops=[qml.CNOT([0, 1]), qml.CNOT([1, 2])])
 
     new_tape = step.execute(tape)
@@ -218,7 +215,7 @@ def test_vf2_complex_excluded(mock_connectivity):
 
 # ismags
 def test_ismags_complex_excluded(mock_connectivity):
-    step = ISMAGS(False, excluded_qubits=[0], excluded_couplers=[(2, 3)])
+    step = ISMAGS("yamaska", False, excluded_qubits=[0], excluded_couplers=[(2, 3)])
     tape = QuantumTape(ops=[qml.CNOT([0, 1]), qml.CNOT([1, 2])])
 
     new_tape = step.execute(tape)
@@ -227,7 +224,7 @@ def test_ismags_complex_excluded(mock_connectivity):
 
 # astar
 def test_astar_complex_excluded(mock_get_readout1_and_cz_fidelities, mock_connectivity):
-    step = ASTAR(False, excluded_qubits=[0], excluded_couplers=[(2, 3)])
+    step = ASTAR("yamaska", False, excluded_qubits=[0], excluded_couplers=[(2, 3)])
     tape = QuantumTape(ops=[qml.CNOT([0, 1]), qml.CNOT([1, 2])])
 
     new_tape = step.execute(tape)
@@ -241,7 +238,7 @@ def test_astar_complex_excluded(mock_get_readout1_and_cz_fidelities, mock_connec
 
 # vf2
 def test_vf2_impossible_default(mock_broken_qubit_and_couplers, mock_connectivity):
-    step = VF2()
+    step = VF2("yamaska")
     tape = QuantumTape(ops=[qml.CNOT([0, 1]), qml.CNOT([1, 2]), qml.CNOT([2, 3])])
 
     with pytest.raises(Exception):
@@ -249,14 +246,14 @@ def test_vf2_impossible_default(mock_broken_qubit_and_couplers, mock_connectivit
 
 # ismags
 def test_ismags_impossible_default(mock_broken_qubit_and_couplers, mock_connectivity):
-    step = ISMAGS()
+    step = ISMAGS("yamaska")
     tape = QuantumTape(ops=[qml.CNOT([0, 1]), qml.CNOT([1, 2]), qml.CNOT([2, 3])])
 
     with pytest.raises(Exception):
         new_tape = step.execute(tape)
 # astar
 def test_astar_impossible_default(mock_broken_qubit_and_couplers, mock_get_readout1_and_cz_fidelities, mock_connectivity):
-    step = ASTAR()
+    step = ASTAR("yamaska")
     tape = QuantumTape(ops=[qml.CNOT([0, 1]), qml.CNOT([1, 2]), qml.CNOT([2, 3])])
 
     with pytest.raises(Exception):
@@ -266,7 +263,7 @@ def test_astar_impossible_default(mock_broken_qubit_and_couplers, mock_get_reado
 
 # vf2
 def test_vf2_impossible_no_benchmark(mock_broken_qubit_and_couplers, mock_connectivity):
-    step = VF2(False)
+    step = VF2("yamaska", False)
     tape = QuantumTape(ops=[qml.CNOT([0, 1]), qml.CNOT([1, 2]), qml.CNOT([2, 3])])
 
     new_tape = step.execute(tape)
@@ -275,7 +272,7 @@ def test_vf2_impossible_no_benchmark(mock_broken_qubit_and_couplers, mock_connec
 
 # ismags
 def test_ismags_impossible_no_benchmark(mock_broken_qubit_and_couplers, mock_connectivity):
-    step = ISMAGS(False)
+    step = ISMAGS("yamaska", False)
     tape = QuantumTape(ops=[qml.CNOT([0, 1]), qml.CNOT([1, 2]), qml.CNOT([2, 3])])
 
     new_tape = step.execute(tape)
@@ -284,7 +281,7 @@ def test_ismags_impossible_no_benchmark(mock_broken_qubit_and_couplers, mock_con
 
 # astar
 def test_astar_impossible_no_benchmark(mock_broken_qubit_and_couplers, mock_get_readout1_and_cz_fidelities, mock_connectivity):
-    step = ASTAR(False)
+    step = ASTAR("yamaska", False)
     tape = QuantumTape(ops=[qml.CNOT([0, 1]), qml.CNOT([1, 2]), qml.CNOT([2, 3])])
 
     new_tape = step.execute(tape)
@@ -295,7 +292,7 @@ def test_astar_impossible_no_benchmark(mock_broken_qubit_and_couplers, mock_get_
 
 # vf2
 def test_vf2_impossible_excluded(mock_connectivity):
-    step = VF2(False, excluded_qubits=[0], excluded_couplers=[(2, 3)])
+    step = VF2("yamaska", False, excluded_qubits=[0], excluded_couplers=[(2, 3)])
     tape = QuantumTape(ops=[qml.CNOT([0, 1]), qml.CNOT([1, 2]), qml.CNOT([2, 3])])
 
     with pytest.raises(Exception):
@@ -303,7 +300,7 @@ def test_vf2_impossible_excluded(mock_connectivity):
 
 # ismags
 def test_ismags_impossible_excluded(mock_connectivity):
-    step = ISMAGS(False, excluded_qubits=[0], excluded_couplers=[(2, 3)])
+    step = ISMAGS("yamaska", False, excluded_qubits=[0], excluded_couplers=[(2, 3)])
     tape = QuantumTape(ops=[qml.CNOT([0, 1]), qml.CNOT([1, 2]), qml.CNOT([2, 3])])
 
     with pytest.raises(Exception):
@@ -311,7 +308,7 @@ def test_ismags_impossible_excluded(mock_connectivity):
 
 # astar
 def test_astar_impossible_excluded(mock_get_readout1_and_cz_fidelities, mock_connectivity):
-    step = ASTAR(False, excluded_qubits=[0], excluded_couplers=[(2, 3)])
+    step = ASTAR("yamaska", False, excluded_qubits=[0], excluded_couplers=[(2, 3)])
     tape = QuantumTape(ops=[qml.CNOT([0, 1]), qml.CNOT([1, 2]), qml.CNOT([2, 3])])
 
     with pytest.raises(Exception):

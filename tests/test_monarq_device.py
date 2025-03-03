@@ -55,7 +55,7 @@ def test_constructor(mock_api_initialize):
     dev = MonarqDevice(client = client, shots=1000)
     mock_api_initialize.assert_called_once()
     assert dev.shots.total_shots == 1000
-    assert dev._processing_config == MonarqDefaultConfig()
+    assert dev._processing_config == MonarqDefaultConfig("yamaska")
     
     # config given, should set given config
     mock_api_initialize.reset_mock()

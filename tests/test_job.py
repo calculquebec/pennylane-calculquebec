@@ -71,7 +71,7 @@ def test_run(mock_convert_circuit, mock_create_job, mock_job_by_id):
     # create job => code 400
     Circuit.i = 0
     with pytest.raises(JobException):
-        result = Job(Circuit()).run()
+        result = Job(Circuit(), "yamaska").run()
         
     mock_create_job.return_value.status_code = 200    
     mock_create_job.return_value.text = test_job_str
@@ -79,7 +79,7 @@ def test_run(mock_convert_circuit, mock_create_job, mock_job_by_id):
     
     # typical flow
     Circuit.i = 0
-    result = Job(Circuit()).run()
+    result = Job(Circuit(), "yamaska").run()
     assert result == 42
     assert Circuit.i == 3
     
@@ -88,16 +88,16 @@ def test_run(mock_convert_circuit, mock_create_job, mock_job_by_id):
     
     Circuit.i = 0
     with pytest.raises(JobException):
-        result = Job(Circuit()).run()
+        result = Job(Circuit(), "yamaska").run()
         
     # runs past iteration limit
     mock_job_by_id.side_effect = side_effect_generator(200)
     Circuit.i = 0
     with pytest.raises(JobException):
-        Job(Circuit()).run(2)
+        Job(Circuit(), "yamaska").run(2)
     Circuit.i == 2
     
 def test_raise_api_error():
     response = Response_Error()
     with pytest.raises(JobException):
-        Job(Circuit()).raise_api_error(response)
+        Job(Circuit(), "yamaska").raise_api_error(response)
