@@ -63,7 +63,7 @@ class DecomposeReadout(PreProcStep):
                 continue
 
             if not measurement.obs.is_hermitian:
-            raise ProcessingException(f"The observable {observable} is not supported")
+                raise ProcessingException(f"The observable {measurement.obs} is not supported")
             
             # if op is supported, apply rotation and change mp's observable to Z
             if isinstance(measurement.obs, Observable):
@@ -82,6 +82,6 @@ class DecomposeReadout(PreProcStep):
                 
                 
             # if we reach this point, it means that we can't readout on this observable
-            raise ProcessingException(f"The observable {observable} is not supported")
+            raise ProcessingException(f"The observable {measurement.obs} is not supported")
         
         return type(tape)(operations, measurements, shots=tape.shots)
