@@ -19,7 +19,7 @@ def mock_broken_qubits_couplers():
 
 @pytest.fixture
 def mock_connectivity():
-    with patch("pennylane_calculquebec.utility.graph.connectivity") as mock:
+    with patch("pennylane_calculquebec.utility.graph.get_connectivity") as mock:
         yield mock
 
 @pytest.fixture
@@ -116,12 +116,9 @@ def test_circuit_graph():
 
 def test_machine_graph(mock_broken_qubits_couplers, mock_connectivity):
     mock_connectivity.return_value = {
-        keys.QUBITS : [ 0, 1, 2, 3 ],   
-        keys.COUPLERS : {
             "0": (0, 1),
             "1": (1, 2),
             "2": (2, 3)
-        }
     }
 
     mock_broken_qubits_couplers.return_value = {
@@ -130,19 +127,19 @@ def test_machine_graph(mock_broken_qubits_couplers, mock_connectivity):
     }
 
     expected = [(0, 1), (1, 2), (2, 3)]
-    results = g.machine_graph(False, 0.5, 0.5)
+    results = g.machine_graph("yamaska", False, 0.5, 0.5)
     assert all(a == b for a, b in zip(expected, list(results.edges)))
 
     expected = [(0, 1), (2, 3)]
-    results = g.machine_graph(True, 0.5, 0.5)
+    results = g.machine_graph("yamaska", True, 0.5, 0.5)
     assert all(a == b for a, b in zip(expected, list(results.edges)))
 
     expected = [(1, 2), (2, 3)]
-    results = g.machine_graph(False, 0.5, 0.5, [0])
+    results = g.machine_graph("yamaska", False, 0.5, 0.5, [0])
     assert all(a == b for a, b in zip(expected, list(results.edges)))
 
     expected = [(0, 1), (2, 3)]
-    results = g.machine_graph(False, 0.5, 0.5, [], [(1, 2)])
+    results = g.machine_graph("yamaska", False, 0.5, 0.5, [], [(1, 2)])
     assert all(a == b for a, b in zip(expected, list(results.edges)))
 
 def test_find_isomorphism():
@@ -229,59 +226,59 @@ def test_shortest_path(mock_readout1_cz_fidelities):
     start = 6
     end = 4
     expected = [6, 5, 4]
-    results = g.shortest_path(start, end, graph)
+    results = g.shortest_path(start, end, graph, "yamaska")
     assert len(expected) == len(results)
     assert all(a == b for a, b in zip(expected, results))
     
     # excluded nodes changes path
     expected = [6, 1, 2, 4]
-    results = g.shortest_path(start, end, graph, excluding=[5])
+    results = g.shortest_path(start, end, graph, "yamaska", excluding=[5])
     assert len(expected) == len(results)
     assert all(a == b for a, b in zip(expected, results))
     
     # prioritized node changes path
     expected = [6, 1, 2, 4]
-    results = g.shortest_path(start, end, graph, prioritized_nodes=[1, 2])
+    results = g.shortest_path(start, end, graph, "yamaska", prioritized_nodes=[1, 2])
     assert len(expected) == len(results)
     assert all(a == b for a, b in zip(expected, results))
 
     # path doesn't exist
     start = 4
     end = 8
-    results = g.shortest_path(start, end, graph)
+    results = g.shortest_path(start, end, graph, "yamaska")
     assert results == None
 
 def test_find_best_neighbour(mock_calculate_score):
     # return the number of the node as cost (for test)
-    mock_calculate_score.side_effect = lambda a, b, c: a
+    mock_calculate_score.side_effect = lambda a, b, c, d: a
 
     graph = nx.Graph([(0, 1), (0, 2), (0, 3), (0, 4)])
     graph.add_node(5)
     expected = 4
 
-    results = g.find_best_neighbour(0, graph)
+    results = g.find_best_neighbour(0, graph, "yamaska")
     assert results == expected
     mock_calculate_score.assert_called()
     
     with pytest.raises(g.GraphException):
-        g.find_best_neighbour(5, graph)
+        g.find_best_neighbour(5, graph, "yamaska")
 
     with pytest.raises(g.GraphException):
-        g.find_best_neighbour(6, graph)
+        g.find_best_neighbour(6, graph, "yamaska")
 
 def test_find_best_wire(mock_calculate_score):
     # return the number of the node as cost (for test)
-    mock_calculate_score.side_effect = lambda a, b, c: a
+    mock_calculate_score.side_effect = lambda a, b, c, d: a
 
     graph = nx.Graph([(0, 1), (0, 2), (0, 3), (0, 4)])
     expected = 4
 
-    results = g.find_best_wire(graph)
+    results = g.find_best_wire(graph, "yamaska")
     assert results == expected
     mock_calculate_score.assert_called()
 
     expected = 3
-    results = g.find_best_wire(graph, [4])
+    results = g.find_best_wire(graph, "yamaska", [4])
     assert results == expected
 
 def test_find_closest_wire(mock_readout1_cz_fidelities):
@@ -314,31 +311,31 @@ def test_find_closest_wire(mock_readout1_cz_fidelities):
         (2, 4), (4, 5), (1, 6), 
         (5, 6), (7, 8)])
 
-    result = g.find_closest_wire(1, graph)
+    result = g.find_closest_wire(1, graph, "yamaska")
     expected = 0
     assert result == expected
 
-    result = g.find_closest_wire(1, graph, [0])
+    result = g.find_closest_wire(1, graph, "yamaska", [0])
     expected = 2
     assert result == expected
 
-    result = g.find_closest_wire(1, graph, [0, 2, 6])
+    result = g.find_closest_wire(1, graph, "yamaska", [0, 2, 6])
     expected = 3
     assert result == expected
 
     graph = nx.Graph()
     graph.add_node(1)
     with pytest.raises(g.GraphException):
-        g.find_closest_wire(1, graph)
+        g.find_closest_wire(1, graph, "yamaska")
     
     graph.remove_node(1)
     graph.add_nodes_from([0, 2, 3])
     with pytest.raises(g.GraphException):
-        g.find_closest_wire(1, graph)
+        g.find_closest_wire(1, graph, "yamaska")
 
 def test_path_length():
     path = None
-    expected = g.BIG_VALUE
+    expected = g.MAX_INT
     assert expected == g.path_length(path)
 
     path = [0, 1, 2]
@@ -379,30 +376,30 @@ def test_node_with_shortest_path_from_selection(mock_readout1_cz_fidelities):
 
     selection = [0, 1, 2, 3]
     expected = 1
-    result = g.node_with_shortest_path_from_selection(source, selection, graph)
+    result = g.node_with_shortest_path_from_selection(source, selection, graph, "yamaska")
 
     assert result == expected
 
     selection = [0, 2, 3]
     expected = 2
-    result = g.node_with_shortest_path_from_selection(source, selection, graph)
+    result = g.node_with_shortest_path_from_selection(source, selection, graph, "yamaska")
 
     assert result == expected
 
     selection = [0, 3]
     expected = 3
-    result = g.node_with_shortest_path_from_selection(source, selection, graph)
+    result = g.node_with_shortest_path_from_selection(source, selection, graph, "yamaska")
 
     assert result == expected
 
     selection = [0]
 
     with pytest.raises(g.GraphException):
-        g.node_with_shortest_path_from_selection(source, selection, graph)
+        g.node_with_shortest_path_from_selection(source, selection, graph, "yamaska")
 
 def test_calculate_score(mock_readout1_cz_fidelities):
     # calculate score without benchmarking is always zero
-    assert abs(g.calculate_score(None, None, False) - 1) < 1E-5
+    assert abs(g.calculate_score(None, None, "yamaska", False) - 1) < 1E-5
 
     graph = nx.Graph([(0, 1), (1, 2)])
 
@@ -421,12 +418,12 @@ def test_calculate_score(mock_readout1_cz_fidelities):
     # sum(neighbour readout 1) / n + readout1 + sum(neighbour cz) / n
     # 0.1 + 0.1 + 0.5 = 0.7 in any case
     expected = 0.7
-    result = g.calculate_score(1, graph)
+    result = g.calculate_score(1, graph, "yamaska")
     assert abs(result - expected) < 1E-5
 
     # 1 * 0.1 / 1 + 0.1 + 0.5
     expected = 0.7
-    result = g.calculate_score(0, graph)
+    result = g.calculate_score(0, graph, "yamaska")
     assert abs(result - expected) < 1E-5
 
     # specific case
@@ -442,9 +439,9 @@ def test_calculate_score(mock_readout1_cz_fidelities):
         }
     }
     expected = 0.85
-    result = g.calculate_score(1, graph)
+    result = g.calculate_score(1, graph, "yamaska")
     assert abs(result - expected) < 1E-5
 
     expected = 1
-    result = g.calculate_score(2, graph)
+    result = g.calculate_score(2, graph, "yamaska")
     assert abs(result - expected) < 1E-5

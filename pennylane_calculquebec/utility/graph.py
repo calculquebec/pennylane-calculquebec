@@ -125,6 +125,9 @@ def find_largest_common_subgraph_vf2(circuit : nx.Graph, machine : nx.Graph):
     returns (dict[int, int]) : a mapping between the circuit's wires and the machines qubits
     """
     edges = [e for e in circuit.edges]
+    if len(edges) <= 0:
+        return _find_isomorphisms(circuit, machine)
+    
     for i in reversed(range(len(edges) + 1)):
         for comb in combinations(edges, i):
             result = _find_isomorphisms(nx.Graph(comb), machine)
