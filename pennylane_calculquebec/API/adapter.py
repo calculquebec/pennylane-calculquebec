@@ -65,7 +65,7 @@ class ApiAdapter(object):
     
     @staticmethod
     def is_last_update_expired():
-        return datetime.now() - ApiAdapter._last_update > timedelta(hours=24)
+        return not ApiAdapter._last_update or datetime.now() - ApiAdapter._last_update > timedelta(hours=24)
     
     @staticmethod
     def get_machine_by_name(machine_name):

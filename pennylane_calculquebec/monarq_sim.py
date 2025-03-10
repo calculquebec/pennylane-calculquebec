@@ -50,7 +50,7 @@ class MonarqSim(BaseDevice):
 
         # simulate counts from given circuit on default mixed
         counts_tape = type(tape)(ops=tape.operations, 
-                                measurements=[CountsMP(wires=mp.wires) for mp in tape.measurements],
+                                measurements=[CountsMP(wires=mp.wires, all_outcomes=True) for mp in tape.measurements],
                                 shots=1000)
         
         sim_tape = GateNoiseSimulation(self.machine_name, self.use_benchmark_for_simulation).execute(counts_tape)

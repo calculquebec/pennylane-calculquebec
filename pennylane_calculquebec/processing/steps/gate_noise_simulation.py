@@ -32,6 +32,13 @@ class GateNoiseSimulation(PreProcStep):
         qubit_count = len(set([a for b in data.cache._offline_connectivity[self.machine_name].values() for a in b]))
         coupler_count = len(data.cache._offline_connectivity[self.machine_name])
 
+        readout_fidelities = data.get_readout_fidelities(self.machine_name) \
+            if self.use_benchmark \
+            else [(TypicalBenchmark.readout0, TypicalBenchmark.readout1) for _ in range(qubit_count)]
+        t1_t2 = data.get_t1_t2(self.machine_name) \
+            if self.use_benchmark \
+            else [(TypicalBenchmark.t1, TypicalBenchmark.t2Ramsey) for _ in range(qubit_count)]
+
         qubit_noise = data.get_qubit_noise(self.machine_name) \
             if self.use_benchmark \
             else [depolarizing_noise(TypicalBenchmark.qubit) for _ in range(qubit_count)]
@@ -62,11 +69,17 @@ class GateNoiseSimulation(PreProcStep):
                         raise ValueError("Cannot find CZ gate noise for operation " + str(operation))
                     
                 for wire in operation.wires:
+                    pe = 1 - readout_fidelities[wire][0]
+                    t1, t2 = t1_t2[wire]
                     operations.append(qml.DepolarizingChannel(noises[0], wires=wire))
+                    operations.append(qml.ThermalRelaxationError(pe, t1, t2, TypicalBenchmark.twoQubitsGateTime, wire))
                 continue
             
             operations.append(operation)
             for wire in operation.wires:
+                pe = 1 - readout_fidelities[wire][0]
+                t1, t2 = t1_t2[wire]
                 operations.append(qml.DepolarizingChannel(qubit_noise[wire], wires=wire))   
+                operations.append(qml.ThermalRelaxationError(pe, t1, t2, TypicalBenchmark.singleQubitGateTime, wire))
         
         return type(tape)(operations, tape.measurements, tape.shots)

@@ -24,11 +24,13 @@ class TypicalBenchmark:
     typical errors represented as constants
     """
     qubit = 0.99
-    cz = 0.95
+    cz = 0.985
     readout0 = 0.95
-    readout1 = 0.85
-    t1 = 9.6E-6
-    t2Ramsey = 2.3E-6
+    readout1 = 0.75
+    t1 = 8.2E-6
+    t2Ramsey = 1.3E-6
+    singleQubitGateTime = 3.2e-8
+    twoQubitsGateTime = 1e-7
     
 def readout_error(state0, state1):
     """
