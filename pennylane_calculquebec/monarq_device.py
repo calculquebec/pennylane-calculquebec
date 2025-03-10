@@ -28,16 +28,7 @@ class MonarqDevice(BaseDevice):
 
     name = "MonarqDevice"
     short_name = "monarq.default"
-    pennylane_requires = ">=0.36.0"
-    author = "CalculQuebec"
-    
-    realm = "calculqc"
-    project_id = ""
-    
-    observables = {
-        "PauliZ"
-    }
-    
+
     def __init__(self, 
                  wires = None, 
                  shots = None,  
