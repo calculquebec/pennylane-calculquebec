@@ -28,17 +28,7 @@ class MonarqBackup(MonarqDevice):
 
     name = "MonarqBackup"
     short_name = "monarq.backup"
-    pennylane_requires = ">=0.36.0"
-    author = "CalculQuebec"
-    
-    realm = "calculqc"
-    circuit_name = "test circuit"
-    project_id = ""
 
-    observables = {
-        "PauliZ"
-    }
-    
     def __init__(self, wires=None, shots=None, client = None, processing_config = None):
         super().__init__(wires, shots, client, processing_config)
     
