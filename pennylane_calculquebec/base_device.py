@@ -18,6 +18,16 @@ import pennylane.measurements as measurements
 from pennylane_calculquebec.device_exception import DeviceException
 
 class BaseDevice(Device):
+    pennylane_requires = ">=0.36.0"
+    author = "CalculQuebec"
+    
+    realm = "calculqc"
+    circuit_name = "test circuit"
+    project_id = ""
+
+    observables = {
+        "PauliZ"
+    }
     measurement_methods : dict = {
         "CountsMP" : lambda counts : counts,
         "ProbabilityMP" : counts_to_probs,

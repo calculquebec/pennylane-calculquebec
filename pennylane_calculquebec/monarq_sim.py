@@ -18,16 +18,7 @@ class MonarqSim(BaseDevice):
     """
     name = "MonarqSim"
     short_name = "monarq.sim"
-    pennylane_requires = ">=0.36.0"
-    author = "CalculQuebec"
     
-    realm = "calculqc"
-    circuit_name = "test circuit"
-    project_id = ""
-
-    observables = {
-        "PauliZ"
-    }
 
     @property
     def name(self):
