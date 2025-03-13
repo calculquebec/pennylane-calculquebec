@@ -33,7 +33,7 @@ def all_results(results, num_qubits):
         all_combs = all_combinations(num_qubits)
         return {bitstring:(results[bitstring] if bitstring in results else 0) for bitstring in all_combs}
 
-def get_readout_fidelities(chosen_qubits):
+def get_readout_fidelities(machine_name, chosen_qubits):
     """
     what are the readout 0 and 1 fidelities for given qubits?
 
@@ -43,7 +43,7 @@ def get_readout_fidelities(chosen_qubits):
     Returns
         a tuple appending readouts on 0 and 1 for given qubits
     """
-    benchmark = ApiAdapter.get_qubits_and_couplers()
+    benchmark = ApiAdapter.get_qubits_and_couplers(machine_name)
     
     readout0 = {}
     readout1 = {}
@@ -55,7 +55,7 @@ def get_readout_fidelities(chosen_qubits):
     readout1 = list(readout1.values())
     return readout0, readout1
 
-def get_calibration_data(chosen_qubits):
+def get_calibration_data(machine_name, chosen_qubits):
     """gets readout matrices for the observed qubits
 
     Args:
@@ -65,7 +65,7 @@ def get_calibration_data(chosen_qubits):
         readout matrices for given qubits
     """
     num_qubits = len(chosen_qubits)
-    readout0, readout1 = get_readout_fidelities(chosen_qubits)
+    readout0, readout1 = get_readout_fidelities(machine_name, chosen_qubits)
     calibration_data = [
         np.array([
             [readout0[qubit], 1 - readout1[qubit]],
@@ -86,8 +86,8 @@ def tensor_product_calibration(calibration_matrices):
         
     return readout_matrix
     
-def get_full_readout_matrix(chosen_qubits):
-    calibration_data = get_calibration_data(chosen_qubits)
+def get_full_readout_matrix(machine_name, chosen_qubits):
+    calibration_data = get_calibration_data(machine_name, chosen_qubits)
     full_readout_matrix = tensor_product_calibration(calibration_data)
 
     # normalize it
@@ -104,7 +104,8 @@ class IBUReadoutMitigation(PostProcStep):
     Args:
         * initial_guess (list[float]) : a probability distribution representing a starting point for the results (defaults to None)
     """
-    def __init__(self, initial_guess = None):
+    def __init__(self, machine_name : str, initial_guess = None):
+        self.machine_name = machine_name
         self._initial_guess = initial_guess
 
     def initial_guess(self, num_qubits):
@@ -161,7 +162,7 @@ class IBUReadoutMitigation(PostProcStep):
         num_qubits = len(chosen_qubits)
         shots = tape.shots.total_shots
         
-        readout_matrix = get_full_readout_matrix(chosen_qubits)
+        readout_matrix = get_full_readout_matrix(self.machine_name, chosen_qubits)
         _all_results = all_results(results, num_qubits)
         probs = [v/shots for _,v in _all_results.items()]
         
@@ -179,6 +180,9 @@ class MatrixReadoutMitigation(PostProcStep):
     _readout_matrix_normalized = None
     _readout_matrix_reduced = None
     _readout_matrix_reduced_inverted = None
+    
+    def __init__(self, machine_name : str):
+        self.machine_name = machine_name
 
     def _get_reduced_a_matrix(self, readout_matrix, observed_bit_strings, all_bit_strings):
         """
@@ -201,7 +205,7 @@ class MatrixReadoutMitigation(PostProcStep):
         if MatrixReadoutMitigation._readout_matrix_normalized is None or ApiAdapter.is_last_update_expired():
             MatrixReadoutMitigation._readout_matrix_reduced = None
             MatrixReadoutMitigation._readout_matrix_reduced_inverted = None
-            MatrixReadoutMitigation._readout_matrix_normalized = get_full_readout_matrix(chosen_qubits)
+            MatrixReadoutMitigation._readout_matrix_normalized = get_full_readout_matrix(self.machine_name, chosen_qubits)
 
         observed_bit_string = list(all_results(results, num_qubits).keys())
 
@@ -222,7 +226,6 @@ class MatrixReadoutMitigation(PostProcStep):
                 MatrixReadoutMitigation._readout_matrix_reduced_inverted = np.linalg.pinv(MatrixReadoutMitigation._readout_matrix_reduced)
         
         return MatrixReadoutMitigation._readout_matrix_reduced_inverted
-
 
     def execute(self, tape : QuantumTape, results : dict[str, int]):
         """

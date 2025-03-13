@@ -59,7 +59,6 @@ def MonarqDefaultConfig(machine_name : str, use_benchmark = True, q1_acceptance 
             IterativeCommuteAndMerge(), MonarqDecomposition(), IterativeCommuteAndMerge(), MonarqDecomposition())
 
 
-
 def MonarqDefaultConfigNoBenchmark(machine_name : str, excluded_qubits = [], excluded_couplers = []):
     """The default configuration preset, minus the benchmarking acceptance tests on qubits and couplers in the placement and routing steps."""
     return MonarqDefaultConfig(machine_name, use_benchmark = False, excluded_qubits = excluded_qubits, excluded_couplers = excluded_couplers)
@@ -80,7 +79,6 @@ def NoPlaceNoRouteConfig():
                             MonarqDecomposition())
 
 
-
 def PrintDefaultConfig(machine_name : str, only_wires = True, use_benchmark = True, q1_acceptance = 0.5, q2_acceptance = 0.5, excluded_qubits = [], excluded_couplers = []):
     """The same as the default config, but it prints wires/circuit before and after transpilation"""
     config = MonarqDefaultConfig(machine_name, use_benchmark, q1_acceptance, q2_acceptance, excluded_qubits, excluded_couplers)
@@ -89,12 +87,14 @@ def PrintDefaultConfig(machine_name : str, only_wires = True, use_benchmark = Tr
 
     return config
 
+
 def PrintNoPlaceNoRouteConfig(only_wires = True):
     """The same as the NoPlaceNoRoute config, but it prints wires/circuit before and after transpilation"""
     config = NoPlaceNoRouteConfig()
     config.steps.insert(0, PrintWires() if only_wires else PrintTape())
     config.steps.append(PrintWires() if only_wires else PrintTape())
     return config
+
 
 def FakeMonarqConfig(machine_name : str, use_benchmark = False): 
     """
