@@ -6,6 +6,7 @@ from pennylane.tape import QuantumTape
 from pennylane_calculquebec.utility.optimization import  find_previous_gate, find_next_gate
 import pennylane.transforms as transforms
 import numpy as np
+from autograd.numpy.numpy_boxes import ArrayBox
 from pennylane.ops.op_math.adjoint import adjoint, Adjoint
 
 def remove_root_zs(tape : QuantumTape, iterations = 3) -> QuantumTape:
