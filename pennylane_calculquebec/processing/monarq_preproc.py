@@ -2,12 +2,14 @@
 Contains a processor class for pre-processing steps
 """
 
+
 from copy import deepcopy
 from pennylane.tape import QuantumTape
 import pennylane as qml
 from pennylane.transforms import transform
 from pennylane_calculquebec.processing.config import ProcessingConfig
 from pennylane_calculquebec.processing.interfaces import PreProcStep
+from autograd.numpy.numpy_boxes import ArrayBox
 
 class PreProcessor:
     """
@@ -33,7 +35,7 @@ class PreProcessor:
             """
             wires = tape.wires if circuit_wires is None or len(tape.wires) > len(circuit_wires) else circuit_wires
             optimized_tape = PreProcessor.expand_full_measurements(tape, wires)
-            
+            optimized_tape = PreProcessor.unroll_array_boxes(tape, wires)
             with qml.QueuingManager.stop_recording():
                 prerpoc_steps = [step for step in behaviour_config.steps if isinstance(step, PreProcStep)]
                 for step in prerpoc_steps:
@@ -42,6 +44,28 @@ class PreProcessor:
             return [new_tape], lambda res : res[0]
 
         return transpile
+
+    def unroll_array_boxes(tape : QuantumTape, wires):
+        """
+        sets array boxes to the value they're currently at
+        """
+        tape = deepcopy(tape)
+        operations = []
+
+        for operation in tape.operations:
+            if operation.num_params < 0:
+                operations.append(operation)
+                continue
+
+            if not any(isinstance(param, ArrayBox) for param in operation.data):
+                operations.append(operation)
+                continue
+            
+            operation = deepcopy(operation)
+            operation.data = [param._value.item() for param in operation.data]
+            operations.append(operation)
+        
+        return type(tape)(operations, tape.measurements, tape.shots)
 
     def expand_full_measurements(tape, wires):
         """turns empty measurements to all-wire measurements
