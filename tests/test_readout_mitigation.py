@@ -71,7 +71,7 @@ def test_get_readout_fidelities(mock_qubits_couplers):
     readout0Expected = [.9, .7, .6]
     readout1Expected = [.1, .3, .4]
 
-    readout0, readout1 = mitigation.get_readout_fidelities([0, 2, 3])
+    readout0, readout1 = mitigation.get_readout_fidelities("yamaska", [0, 2, 3])
     
     mock_qubits_couplers.assert_called_once()
 
@@ -86,7 +86,7 @@ def test_get_calibration_data(mock_qubits_couplers):
         np.array([[.7, .7], [.3, .3]]),
         np.array([[.6, .6], [.4, .4]])
     ]
-    results = mitigation.get_calibration_data([0, 2, 3])
+    results = mitigation.get_calibration_data("yamaska", [0, 2, 3])
 
     assert len(expected) == len(results)
     zipped = list(zip(expected, results))
@@ -127,7 +127,7 @@ def test_matrix_readout_mitigation_full(mock_qubits_couplers):
     sim = ReadoutNoiseSimulation("yamaska", False)
     simulated_noise = sim.execute(tape, expected)
 
-    step = mitigation.MatrixReadoutMitigation()
+    step = mitigation.MatrixReadoutMitigation("yamaska")
     
     results = step.execute(tape, simulated_noise)
     
@@ -148,7 +148,7 @@ def test_ibu_readout_mitigation_full(mock_qubits_couplers):
     sim = ReadoutNoiseSimulation("yamaska", False)
     simulated_noise = sim.execute(tape, expected)
 
-    step = mitigation.IBUReadoutMitigation()
+    step = mitigation.IBUReadoutMitigation("yamaska")
     
     results = step.execute(tape, simulated_noise)
     
