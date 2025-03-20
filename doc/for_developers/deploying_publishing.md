@@ -1,3 +1,13 @@
+# The git flow
+
+There are 2 important branches : 
+-  **main** : it contains the version that's available to the public and should never be updated directly
+-  **dev** : it contains the most up to date version, and is updated as often as developers add changes.
+
+Those two branches are never pushed to directly. Developers work on **feature branches** which are created for specific tasks, and get deleted once the task is over and the feature branch is merged into the dev branch. 
+
+In order to contribute to the dev branch, a developer should create a new feature branch, commit their work into it, and push it to github. Once this is done, said developer can create a new **pull request** from their branch to the dev branch. 
+
 # The deployment and publishing process
 
 The aim of this file is to give a checklist to deploying and publishing a version of Pennylane-Snowflurry on Pypi, starting from the ```dev``` branch.
