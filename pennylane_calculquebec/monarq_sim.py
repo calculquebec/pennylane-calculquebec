@@ -24,7 +24,9 @@ class MonarqSim(BaseDevice):
     def name(self):
         return MonarqSim.short_name
     
-    def __init__(self, wires = None, shots = None, client = None, processing_config = None, use_benchmark = False):
+    def __init__(self, wires = None, shots = None, client = None, processing_config = None):
+        use_benchmark = client is not None
+        
         if processing_config is None:
             processing_config = MonarqDefaultConfig(self.machine_name, use_benchmark)
 
