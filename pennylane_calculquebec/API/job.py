@@ -22,9 +22,10 @@ class Job:
     - periodically checks if the job is done
     - returns results when it's done
 
-    Args : 
+    Args: 
         - circuit (QuantumTape) : the circuit you want to execute
-        - circuit_name (str) : the name of the circuit
+        - machine_name (str) : the name of the machine
+        - circuit_name (str) : the name of the circuit, defaults to "default"
     """
     
     def __init__(self, circuit : QuantumTape, machine_name : str, circuit_name = "default"):
@@ -33,14 +34,16 @@ class Job:
         self.circuit_name = circuit_name
         self.shots = circuit.shots.total_shots
 
-    def run(self, max_tries : int = -1) -> dict:
+    def run(self, max_tries : int = 2 ** 15) -> dict:
         """
         converts a quantum tape into a dictionary, readable by thunderhead
         creates a job on thunderhead
         fetches the result until the job is successfull, and returns the result
+
+        Args:
+            max_tries (int) : the number of tries before dropping a circuit. Defaults to 2 ^ 15
         """
 
-        if max_tries == -1: max_tries = 2 ** 15
         response = None
         try:
             response = ApiAdapter.create_job(self.circuit_dict, self.machine_name, self.circuit_name, self.shots)
@@ -72,6 +75,12 @@ class Job:
     def raise_api_error(self, response):
         """
         this raises an error by parsing the json body of the response, and using the response text as message
+
+        Args:
+            - response (Response) : the erroneous response
+        
+        Raises:
+            - JobException
         """
         error = json.loads(response.text)
         raise JobException("API ERROR : " + str(error["code"]) + ", " + error["error"])
