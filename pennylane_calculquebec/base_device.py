@@ -36,6 +36,10 @@ class BaseDevice(Device):
     
     _client : ApiClient
     _processing_config : ProcessingConfig
+
+    @property
+    def processing_config(self):
+        return self.processing_config
     
     def __init__(self, wires = None, shots = None, client = None, processing_config = None):
         super().__init__(wires, shots)
