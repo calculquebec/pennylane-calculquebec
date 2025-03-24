@@ -59,6 +59,12 @@ class ISMAGS(Placement):
         for source in missing:
             if source in mapping:
                 continue
+            
+            if circuit_topology.degree(source) <= 0:
+                mapping[source] = graph_util.find_best_wire(machine_topology, self.machine_name, list(mapping.values()), self.use_benchmark)
+                continue
+
+
             mapping[source] = graph_util.find_best_wire(machine_topology, self.machine_name, [machine_node for machine_node in mapping.values()], self.use_benchmark)
 
             for destination in missing:
