@@ -35,7 +35,7 @@ class PreProcessor:
             """
             wires = tape.wires if circuit_wires is None or len(tape.wires) > len(circuit_wires) else circuit_wires
             optimized_tape = PreProcessor.expand_full_measurements(tape, wires)
-            optimized_tape = PreProcessor.unroll_array_boxes(tape, wires)
+            optimized_tape = PreProcessor.unroll_array_boxes(optimized_tape, wires)
             with qml.QueuingManager.stop_recording():
                 prerpoc_steps = [step for step in behaviour_config.steps if isinstance(step, PreProcStep)]
                 for step in prerpoc_steps:
