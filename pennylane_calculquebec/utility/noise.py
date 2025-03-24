@@ -21,7 +21,7 @@ def phase_damping(t, t2):
 
 class TypicalBenchmark:
     """
-    typical errors represented as constants. last updated : febuary 2025
+    typical errors represented as constants. Last updated : febuary 2025
     """
     qubit = 0.99
     cz = 0.95
