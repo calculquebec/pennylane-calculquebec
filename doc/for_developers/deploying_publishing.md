@@ -10,7 +10,7 @@ In order to contribute to the dev branch, a developer should create a new featur
 
 # The deployment and publishing process
 
-The aim of this file is to give a checklist to deploying and publishing a version of Pennylane-Snowflurry on Pypi, starting from the ```dev``` branch.
+The aim of this file is to give a checklist to deploying and publishing a version of Pennylane-CalculQuebec on Pypi, starting from the ```dev``` branch.
 
 1. when you are ready to deploy and release, **bump the version** in the ```_version.py``` file, in the ```pennylane_calculquebec``` folder. The version number is composed of three distinct numbers. The logic goes as follows : 
 
