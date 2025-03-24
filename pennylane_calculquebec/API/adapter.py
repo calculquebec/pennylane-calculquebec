@@ -159,7 +159,7 @@ class ApiAdapter(object):
         """
         get connectivity of a machine (given its name)
         """
-        machines = ApiAdapter.instance().list_machines()
+        machines = ApiAdapter.list_machines()
         target = [m for m in machines if m[keys.NAME] == machine_name]
         if len(target) < 1:
             raise ApiException(f"No machine available with name {machine_name}")

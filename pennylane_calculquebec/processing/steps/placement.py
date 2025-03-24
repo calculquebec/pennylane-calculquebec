@@ -101,10 +101,16 @@ class VF2(Placement):
         missing = [node for node in circuit_topology.nodes if node not in mapping.keys()]
             
         for node in missing:
-            # 3. find the best neighbour (using cost function)
+            # 3. check if missing node has any neighbours
+            if circuit_topology.degree(node) <= 0:
+                # 3.a if not, just assign node to arbitrary qubit
+                mapping[node] = graph_util.find_best_wire(machine_topology, self.machine_name, list(mapping.values()), self.use_benchmark)
+                continue
+
+            # 4. find the best neighbour (using cost function)
             most_connected_node = graph_util.find_best_neighbour(node, circuit_topology, self.machine_name, self.use_benchmark)
 
-            # 4. find machine node with shortest path from already mapped machine node
+            # 5. find machine node with shortest path from already mapped machine node
             possibles = [possible for possible in machine_topology.nodes if possible not in mapping.values()]
             shortest_path_mapping = graph_util.node_with_shortest_path_from_selection(mapping[most_connected_node], possibles, machine_topology, self.use_benchmark)
                 

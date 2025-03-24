@@ -94,7 +94,7 @@ def machine_graph(machine_name, use_benchmark, q1Acceptance, q2Acceptance, exclu
                         if not any([broken_coupler[0] == coupler[0] and broken_coupler[1] == coupler[1] \
                         or broken_coupler[1]== coupler[0] and broken_coupler[0] == coupler[1] \
                         for broken_coupler in broken_couplers])]
-    links = [(coupler[0], coupler[1]) for coupler in get_connectivity(machine_name).values()]
+    links = [(coupler[0], coupler[1]) for coupler in get_connectivity(machine_name, use_benchmark).values()]
 
     return nx.Graph([link for link in links if link[0] not in broken_nodes and link[1] not in broken_nodes \
             and link not in broken_couplers and list(reversed(link)) not in broken_couplers])
