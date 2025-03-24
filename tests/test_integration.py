@@ -17,7 +17,7 @@ class Response:
 @pytest.fixture
 def mock_get_connectivity():
     with patch("pennylane_calculquebec.utility.graph.get_connectivity") as mock:
-        mock.side_effect = lambda a: data.cache._offline_connectivity["yamaska"]
+        mock.side_effect = lambda machine_name, use_benchmark: data.cache._offline_connectivity["yamaska"]
         yield mock
 
 def test_monarq_default(mock_get_connectivity):
@@ -37,8 +37,7 @@ def test_monarq_default(mock_get_connectivity):
 
 def test_monarq_sim(mock_get_connectivity):
     config = MonarqDefaultConfig("yamaska", False)
-    client = MonarqClient("test", "test", "test")
-    dev = qml.device("monarq.sim", wires=[0], client = client, shots = 1000, processing_config=config)
+    dev = qml.device("monarq.sim", wires=[0], shots = 1000, processing_config=config)
 
     qnode = qml.QNode(circuit, dev)
     results = qnode()
