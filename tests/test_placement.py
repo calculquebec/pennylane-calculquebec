@@ -22,7 +22,7 @@ def mock_broken_qubit_and_couplers():
 @pytest.fixture
 def mock_connectivity():
     with patch("pennylane_calculquebec.utility.graph.get_connectivity") as mock:
-        mock.side_effect = lambda machine_name: {
+        mock.side_effect = lambda machine_name, use_benchmark: {
                 "0":[4, 0],
                 "1":[0, 1],
                 "2":[1, 2],
@@ -313,3 +313,32 @@ def test_astar_impossible_excluded(mock_get_readout1_and_cz_fidelities, mock_con
 
     with pytest.raises(Exception):
         new_tape = step.execute(tape)
+
+# less qubits than total wires
+
+# vf2
+def test_vf2_impossible_excluded(mock_broken_qubit_and_couplers, mock_get_readout1_and_cz_fidelities, mock_connectivity):
+    step = VF2("yamaska", False)
+    tape = QuantumTape(ops=[qml.Hadamard(0), qml.CNOT([0, 1]), qml.CNOT([1, 2])], measurements=[qml.counts(wires = [0, 1, 2, 3])])
+
+    new_tape = step.execute(tape)
+    wires = np.array(sorted([w for w in new_tape.wires]))
+    assert np.array_equal(wires, [0, 1, 2, 4])
+
+# ismags
+def test_ismags_impossible_excluded(mock_connectivity):
+    step = ISMAGS("yamaska", False)
+    tape = QuantumTape(ops=[qml.Hadamard(0), qml.CNOT([0, 1]), qml.CNOT([1, 2])], measurements=[qml.counts(wires = [0, 1, 2, 3])])
+
+    new_tape = step.execute(tape)
+    wires = np.array(sorted([w for w in new_tape.wires]))
+    assert np.array_equal(wires, [0, 1, 2, 4])
+
+# astar
+def test_astar_impossible_excluded(mock_get_readout1_and_cz_fidelities, mock_connectivity):
+    step = ASTAR("yamaska", False)
+    tape = QuantumTape(ops=[qml.Hadamard(0), qml.CNOT([0, 1]), qml.CNOT([1, 2])], measurements=[qml.counts(wires = [0, 1, 2, 3])])
+
+    new_tape = step.execute(tape)
+    wires = np.array(sorted([w for w in new_tape.wires]))
+    assert np.array_equal(wires, [0, 1, 2, 4])
