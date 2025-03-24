@@ -44,7 +44,7 @@ class MonarqDecomposition(NativeDecomposition):
             "PauliX", "PauliY", "PauliZ", 
             "X90", "Y90", "Z90",
             "XM90", "YM90", "ZM90",
-            "PhaseShift", "CZ", "RZ"
+            "PhaseShift", "CZ", "RZ", "Identity"
         ]
     
     def execute(self, tape : QuantumTape):
