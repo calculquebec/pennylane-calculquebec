@@ -23,9 +23,9 @@ class Job:
     - returns results when it's done
 
     Args: 
-        - circuit (QuantumTape) : the circuit you want to execute
-        - machine_name (str) : the name of the machine
-        - circuit_name (str) : the name of the circuit, defaults to "default"
+        circuit (QuantumTape) : the circuit you want to execute
+        machine_name (str) : the name of the machine
+        circuit_name (str) : the name of the circuit, defaults to "default"
     """
     
     def __init__(self, circuit : QuantumTape, machine_name : str, circuit_name = "default"):
@@ -77,7 +77,7 @@ class Job:
         this raises an error by parsing the json body of the response, and using the response text as message
 
         Args:
-            - response (Response) : the erroneous response
+            response (Response) : the erroneous response
         
         Raises:
             - JobException

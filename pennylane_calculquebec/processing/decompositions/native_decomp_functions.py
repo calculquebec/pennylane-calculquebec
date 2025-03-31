@@ -29,7 +29,7 @@ def _custom_sx(wires):
         wires (list[int]) : Which wires does the operation act on?
 
     Returns:
-        list[Operation] : Which operations correspond to an adjoint t gate on MonarQ
+        list[Operation] : Which operations correspond to an sx gate on MonarQ
     """
     return [custom.X90(wires)]
 
@@ -41,7 +41,7 @@ def _custom_sxdag(wires):
         wires (list[int]) : Which wires does the operation act on?
     
     Returns:
-        list[Operation] : Which operations correspond to an adjoint t gate on MonarQ
+        list[Operation] : Which operations correspond to an adjoint sx gate on MonarQ
     """
     return [custom.XM90(wires)]
 
@@ -53,7 +53,7 @@ def _custom_s(wires):
         wires (list[int]) : Which wires does the operation act on?
     
     Returns:
-        list[Operation] : Which operations correspond to an adjoint t gate on MonarQ
+        list[Operation] : Which operations correspond to an s gate on MonarQ
     """
     return [custom.Z90(wires)]
 
@@ -65,7 +65,7 @@ def _custom_sdag(wires):
         wires (list[int]) : Which wires does the operation act on?
     
     Returns:
-        list[Operation] : Which operations correspond to an adjoint t gate on MonarQ
+        list[Operation] : Which operations correspond to an adjoint s gate on MonarQ
     """
     return [custom.ZM90(wires)]
 
@@ -77,7 +77,7 @@ def _custom_h(wires):
         wires (list[int]) : Which wires does the operation act on?
 
     Returns:
-        list[Operation] : Which operations correspond to an adjoint t gate on MonarQ
+        list[Operation] : Which operations correspond to an h gate on MonarQ
     """
     return [custom.Z90(wires), custom.X90(wires), custom.Z90(wires)]
 
@@ -89,7 +89,7 @@ def _custom_cnot(wires):
         wires (list[int]) : Which wires does the operation act on?
 
     Returns:
-        list[Operation] : Which operations correspond to an adjoint t gate on MonarQ
+        list[Operation] : Which operations correspond to a cnot gate on MonarQ
     """
     return _custom_h(wires[1]) + [qml.CZ(wires)] + _custom_h(wires[1])
 
@@ -101,7 +101,7 @@ def _custom_cy(wires):
         wires (list[int]) : Which wires does the operation act on?
 
     Returns:
-        list[Operation] : Which operations correspond to an adjoint t gate on MonarQ
+        list[Operation] : Which operations correspond to a cy gate on MonarQ
     """
     return [custom.Y90(wires[1])] \
         + _custom_cnot(wires) \
@@ -119,7 +119,7 @@ def _custom_rz(angle : float, wires, epsilon = 1E-8):
         epsilon : up to what precision should the angle be emulated?
 
     Returns:
-        list[Operation] : Which operations correspond to an adjoint t gate on MonarQ
+        list[Operation] : Which operations correspond to a ry gate on MonarQ
     """
     while angle < 0: 
         angle += np.pi * 2
@@ -149,7 +149,7 @@ def _custom_rx(angle : float, wires, epsilon = 1E-8):
         epsilon : up to what precision should the angle be emulated?
 
     Returns:
-        list[Operation] : Which operations correspond to an adjoint t gate on MonarQ
+        list[Operation] : Which operations correspond to a rx gate on MonarQ
     """
     while angle < 0: angle += np.pi * 2
     angle %= np.pi * 2
@@ -175,7 +175,7 @@ def _custom_ry(angle : float, wires, epsilon = 1E-8):
         epsilon : up to what precision should the angle be emulated?
 
     Returns:
-        list[Operation] : Which operations correspond to an adjoint t gate on MonarQ
+        list[Operation] : Which operations correspond to an ry gate on MonarQ
     """
     while angle < 0: angle += np.pi * 2
     angle %= np.pi * 2
@@ -201,6 +201,6 @@ def _custom_swap(wires):
         wires (list[int]) : Which wires does the operation act on?
 
     Returns:
-        list[Operation] : Which operations correspond to an adjoint t gate on MonarQ
+        list[Operation] : Which operations correspond to a swap gate on MonarQ
     """
     return _custom_cnot([wires[0], wires[1]]) + _custom_cnot([wires[1], wires[0]]) + _custom_cnot([wires[0], wires[1]])
