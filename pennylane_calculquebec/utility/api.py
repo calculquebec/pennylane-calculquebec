@@ -2,6 +2,7 @@
 Contains API utility functions and constants
 """
 
+from enum import Enum
 from pennylane.tape import QuantumTape
 from pennylane.operation import Operation
 from pennylane.measurements import MeasurementProcess
@@ -113,6 +114,13 @@ class ApiUtility:
             keys.CIRCUIT : circuit,
         }
         return body
+
+class JobStatus(Enum):
+    SUCCEEDED = "SUCCEEDED"
+    FAILED = "FAILED"
+    QUEUED = "QUEUED"
+    RUNNING = "RUNNING"
+    CANCELLED = "CANCELLED"
 
 class queries:
     MACHINE_NAME = "?machineName"
