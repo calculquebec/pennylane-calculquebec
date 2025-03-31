@@ -76,7 +76,7 @@ class Job:
                 if(status != "SUCCEEDED"): 
                     continue
                 
-                
+
                 return content["result"]["histogram"]
             raise JobException("Couldn't finish job. Stuck on status : " + str(current_status))
         else:
@@ -92,5 +92,18 @@ class Job:
         Raises:
             - JobException
         """
-        error = json.loads(response.text)
-        raise JobException("API ERROR : " + str(error["code"]) + ", " + error["error"])
+        message = response
+
+        # try to fetch the text from the response
+        if hasattr(message, "text"):
+            message = message.text
+        
+        # try to deserialize the text (it might not be deserializable)
+        try:
+            message = json.loads(message)
+            if "error" in message:
+                message = message["error"]  
+        except Exception:
+            pass
+        
+        raise JobException(message)
