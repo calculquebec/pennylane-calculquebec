@@ -8,7 +8,7 @@ import pennylane_calculquebec.processing.decompositions.native_decomp_functions 
 import numpy as np
 from pennylane.ops.op_math import SProd
 from pennylane_calculquebec.processing.interfaces import PreProcStep
-from monarq_data import monarq_native_gates
+from pennylane_calculquebec.monarq_data import monarq_native_gates
 
 class NativeDecomposition(PreProcStep):
     """
