@@ -11,9 +11,14 @@ import numpy as np
 import pennylane_calculquebec.processing.custom_gates as custom
 import random
 
-def compute_expval(probabilities):
-    """
-    Compute the expectation value using the parity of each outcome
+def compute_expval(probabilities : list[float]) -> float:
+    """Compute the expectation value using the parity of each outcome
+
+    Args:
+        probabilities (list[float]): the results of a circuit execution represented as probabilities
+
+    Returns:
+        float: the expectation value of a probability distribution
     """
 
     if isinstance(probabilities, dict):
@@ -26,22 +31,46 @@ def compute_expval(probabilities):
         expval += prob * parity
     return expval
 
-def probs_to_counts(probs : list, count : int):
+def probs_to_counts(probs : list, count : int) -> dict[str, int]:
+    """turns probabilities into counts
+
+    Args:
+        probs (list): the probability distribution
+        count (int): the amount of shots
+
+    Returns:
+        dict[str, int]: the counts
+    """
     return {label_from(i) : round(p * count) for i, p in enumerate(probs)}
         
 
-def counts_to_probs(counts : dict):
+def counts_to_probs(counts : dict) -> list[float]:
+    """converts counts into probabilities
+
+    Args:
+        counts (dict): the results of a circuit execution as counts
+
+    Returns:
+        list[float]: probabilities for a circuit
+    """
+
     max_count = sum(counts.values())
     all_labels = get_labels(2 ** len(list(counts.keys())[0]) - 1)
     return [(counts[label] if label in counts else 0) / max_count for label in all_labels]
 
 def are_tape_same_probs(tape1, tape2):
-    """
-    returns true if both tapes yield the same probabilities
+    """execute two tapes and check if they yield the same probabilities
+
+    Args:
+        tape1 (QuantumTape): a quantum tape with counts in it
+        tape2 (QuantumTape): a quantum tape with counts in it
+
+    Returns:
+        bool: do the two tapes have the same probabilities?
     """
     tolerance_place = 5
 
-    dev = qml.device("default.qubit")
+    dev = qml.device("default.qubit", shots=1000)
     results1 = qml.execute([tape1], dev)[0]
     results2 = qml.execute([tape2], dev)[0]
 
@@ -57,8 +86,13 @@ def are_tape_same_probs(tape1, tape2):
     return np.array_equal(results1, results2)
 
 def to_qasm(tape : QuantumTape) -> str:
-    """
-    turns a quantum tape into a qasm string
+    """turns a quantum tape into a qasm string
+
+    Args:
+        tape (QuantumTape): a quantum tape you want to turn into qasm2
+
+    Returns:
+        str: the resulting qasm2 string
     """
     eq = {
         "PauliX" : "x", "PauliY" : "y", "PauliZ" : "z", "Identity" : "id",
@@ -80,8 +114,17 @@ def to_qasm(tape : QuantumTape) -> str:
     return total_string
 
 def get_labels(up_to : int):
-    """
-    gets bitstrings from 0 to "up_to" value
+    """gets bitstrings from 0 to "up_to" value
+
+    Args:
+        up_to (int): the upper bound for the labels
+
+    Raises:
+        ValueError: upper bound must be an int
+        ValueError: upper bound must be greater than 0
+
+    Returns:
+        list[str]: bitstrings from 0 to the upper bounds
     """
     
     if not isinstance(up_to, int): 
@@ -93,10 +136,27 @@ def get_labels(up_to : int):
     return [format(i, f"0{num}b") for i in range(up_to + 1)]
 
 def get_measurement_wires(tape : QuantumTape):
+    """returns the wires that are used for measurement
+
+    Args:
+        tape (QuantumTape): the tape from which to find the measurement wires
+
+    Returns:
+        list[int]: the measurement wires
+    """
     measurement_wires = []
     for mp in tape.measurements:
         measurement_wires += list(mp.wires)
-    return measurement_wires
+    return set(measurement_wires)
     
 def label_from(number : int, binary_places : int):
+    """get a bitstring out of a number. ie 27 with binary place 8 would be 00011011
+
+    Args:
+        number (int): the number to turn into a bitstring
+        binary_places (int): the number of bits in the string
+
+    Returns:
+        str: the bitstring
+    """
     return format(number, f"0{binary_places}b")

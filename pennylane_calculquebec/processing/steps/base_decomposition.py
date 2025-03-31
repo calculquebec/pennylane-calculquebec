@@ -13,7 +13,11 @@ class BaseDecomposition(PreProcStep):
     """
     @property
     def base_gates(self):
-        """the base set of gates the circuit should be turned into
+        """
+        the base set of gates the circuit should be turned into
+
+        Returns:
+            list[str] : the named of gates to apply the decomposition with
         """
         return []
     

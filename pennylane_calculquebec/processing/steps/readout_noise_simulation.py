@@ -11,8 +11,7 @@ from pennylane_calculquebec.utility.debug import get_labels, get_measurement_wir
 from pennylane_calculquebec.utility.noise import readout_error, TypicalBenchmark
 
 class ReadoutNoiseSimulation(PostProcStep):
-    """
-    Adds readout noise on the results
+    """Adds readout noise on the results
     """
     def __init__(self, machine_name : str, use_benchmark = True):
         self.machine_name = machine_name

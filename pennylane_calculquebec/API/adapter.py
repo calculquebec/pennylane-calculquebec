@@ -66,7 +66,7 @@ class ApiAdapter(object):
         Create a unique ApiAdapter instance
 
         Args :
-            - client (ApiClient) : The client to initialize ApiAdapter with
+            client (ApiClient) : The client to initialize ApiAdapter with
         """
         cls._instance = cls.__new__(cls)
         cls._instance.headers = ApiUtility.headers(client.user, client.access_token, client.realm)
@@ -83,7 +83,7 @@ class ApiAdapter(object):
         Checks if the last update has been done more than 24 h ago
 
         Returns:
-            - (bool) : Was the last update more than 24 h ago?
+            bool : Was the last update more than 24 h ago?
         """
         return datetime.now() - ApiAdapter._last_update > timedelta(hours=24)
     
@@ -93,10 +93,10 @@ class ApiAdapter(object):
         Get the id of a machine by using the machine's name stored in the client
 
         Args:
-            - machine_name (str) : The name of the machine you want to fetch
+            machine_name (str) : The name of the machine you want to fetch
         
         Returns:
-            - (dict) : The machine information in a dictionary
+            dict : The machine information in a dictionary
         """
         # put machine in cache
         if ApiAdapter._machine is None:
@@ -114,10 +114,10 @@ class ApiAdapter(object):
         Get qubits and couplers informations from latest benchmark for given machine
 
         Args:
-            - machine_name (str) : The name of the machine you want to fetch
+            machine_name (str) : The name of the machine you want to fetch
         
         Return :
-            - (dict) : A dictionary with fidelity values (T1, T2, Q1 fidelities, Q2 fidelities, readout 1, readout 0)
+            dict : A dictionary with fidelity values (T1, T2, Q1 fidelities, Q2 fidelities, readout 1, readout 0)
         """
         
         benchmark = ApiAdapter.get_benchmark(machine_name)
@@ -129,10 +129,10 @@ class ApiAdapter(object):
         get latest benchmark for a given machine
 
         Args:
-            - machine_name (str) : the name of the machine you want to fetch
+            machine_name (str) : the name of the machine you want to fetch
         
         Return :
-            - (dict) : a dictionary all benchmark information for the machine
+            dict : a dictionary all benchmark information for the machine
         """
 
         # put benchmark in cache
@@ -158,13 +158,13 @@ class ApiAdapter(object):
         Post a new job for running a specific circuit a certain amount of times on given machine (machine name stored in client)
 
         Args:
-            - circuit (dict) : The dictionary representation of a circuit
-            - machine_name (str) : The machine on which to run the circuit
-            - circuit_name (str) : The circuit name. default is "default"
-            - shot_count (int) : The amout of shots. default is 1
+            circuit (dict) : The dictionary representation of a circuit
+            machine_name (str) : The machine on which to run the circuit
+            circuit_name (str) : The circuit name. default is "default"
+            shot_count (int) : The amout of shots. default is 1
         
         Returns:
-            - (Response) : The response of the /job post request
+            Response : The response of the /job post request
         """
         body = ApiUtility.job_body(circuit, circuit_name, ApiAdapter.instance().client.project_name, machine_name, shot_count)
         res = requests.post(ApiAdapter.instance().client.host + routes.JOBS, data=json.dumps(body), headers=ApiAdapter.instance().headers)
@@ -178,7 +178,7 @@ class ApiAdapter(object):
         get all jobs for a given user (user stored in client)
 
         Returns:
-            - (Response) : the response of the /jobs get request
+            Response : the response of the /jobs get request
         """
         res = requests.get(ApiAdapter.instance().client.host + routes.JOBS, headers=ApiAdapter.instance().headers)
         if res.status_code != 200:
@@ -191,10 +191,10 @@ class ApiAdapter(object):
         Get a job for a given user by providing its id (user stored in client)
 
         Args:
-            - id (str) : The id of the job you want to get
+            id (str) : The id of the job you want to get
         
         Returns:
-            - (Response) : The response of the /job/id get request
+            Response : The response of the /job/id get request
         """
         res = requests.get(ApiAdapter.instance().client.host + routes.JOBS + f"/{id}", headers=ApiAdapter.instance().headers)
         if res.status_code != 200:
@@ -207,10 +207,10 @@ class ApiAdapter(object):
         Get a list of available machines
 
         Args:
-            - online_only (bool) : Only return machines that are online. Defaults to False
+            online_only (bool) : Only return machines that are online. Defaults to False
         
         Returns:
-            - list[dict] : The list of dictionaries representing machines
+            list[dict] : The list of dictionaries representing machines
         """
         res = requests.get(ApiAdapter.instance().client.host + routes.MACHINES, headers=ApiAdapter.instance().headers)
         if res.status_code != 200:
@@ -222,10 +222,10 @@ class ApiAdapter(object):
         Get connectivity of a machine (given its name)
 
         Args:
-            - machine_name (str) : The name of the machine you want to fetch
+            machine_name (str) : The name of the machine you want to fetch
         
         Returns:
-            - (dict) : dictionary that represents the connectivity of the machine
+            dict : dictionary that represents the connectivity of the machine
         """
         machines = ApiAdapter.list_machines()
         target = [m for m in machines if m[keys.NAME] == machine_name]
