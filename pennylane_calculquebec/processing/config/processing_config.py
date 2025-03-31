@@ -170,11 +170,11 @@ def FakeMonarqConfig(machine_name : str, use_benchmark = False) -> ProcessingCon
     A configuration preset that does the same thing as the default config, but adds gate and readout noise at the end. This config is deprecated. Use MonarqDefaultConfig instead, or use no config at all.
 
     Args:
-        - machine_name (str) : the name of the machine
-        - use_benchmark (bool) : should benchmarks be used for placement, routing and mitigation?
+        machine_name (str) : the name of the machine
+        use_benchmark (bool) : should benchmarks be used for placement, routing and mitigation?
 
     Returns:
-        - (ProcessingConfig) : MonarqDefaultConfig with gate and readout error simulation
+        ProcessingConfig : MonarqDefaultConfig with gate and readout error simulation
     """
     import warnings
     warnings.warn("FakeMonarqConfig is deprecated. Use MonarqDefaultConfig instead, or use no config at all", DeprecationWarning, stacklevel=2)

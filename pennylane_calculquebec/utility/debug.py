@@ -41,7 +41,8 @@ def probs_to_counts(probs : list, count : int) -> dict[str, int]:
     Returns:
         dict[str, int]: the counts
     """
-    return {label_from(i) : round(p * count) for i, p in enumerate(probs)}
+    bit_length = np.log2(len(probs))
+    return {label_from(i, bit_length) : round(p * count) for i, p in enumerate(probs)}
         
 
 def counts_to_probs(counts : dict) -> list[float]:
@@ -53,7 +54,6 @@ def counts_to_probs(counts : dict) -> list[float]:
     Returns:
         list[float]: probabilities for a circuit
     """
-
     max_count = sum(counts.values())
     all_labels = get_labels(2 ** len(list(counts.keys())[0]) - 1)
     return [(counts[label] if label in counts else 0) / max_count for label in all_labels]
