@@ -28,10 +28,17 @@ class Job:
         circuit_name (str) : the name of the circuit, defaults to "default"
     """
     
-    def __init__(self, circuit : QuantumTape, machine_name : str, circuit_name = "default"):
+    def __init__(self, circuit : QuantumTape, machine_name : str, circuit_name : str, project_name : str):
+        if circuit_name is None:
+            raise JobException("you must provide a circuit name")
+        
+        if project_name is None:
+            raise JobException("you must provide a project name")
+
         self.circuit_dict = ApiUtility.convert_circuit(circuit)
         self.machine_name = machine_name
         self.circuit_name = circuit_name
+        self.project_name = project_name
         self.shots = circuit.shots.total_shots
 
     def run(self, max_tries : int = 2 ** 15) -> dict:
@@ -46,10 +53,11 @@ class Job:
 
         response = None
         try:
-            response = ApiAdapter.create_job(self.circuit_dict, self.machine_name, self.circuit_name, self.shots)
+            response = ApiAdapter.create_job(self.circuit_dict, self.machine_name, self.circuit_name, self.project_name, self.shots)
         except:
             raise
         if(response.status_code == 200):
+
             current_status = ""
             job_id = json.loads(response.text)["job"]["id"]
             for i in range(max_tries):
@@ -62,11 +70,13 @@ class Job:
                 content = json.loads(response.text)
                 status = content["job"]["status"]["type"]
                 if(current_status != status):
+
                     current_status = status
 
                 if(status != "SUCCEEDED"): 
                     continue
-
+                
+                
                 return content["result"]["histogram"]
             raise JobException("Couldn't finish job. Stuck on status : " + str(current_status))
         else:

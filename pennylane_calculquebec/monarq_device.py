@@ -72,7 +72,7 @@ class MonarqDevice(BaseDevice):
         if not any(meas == measurement for measurement in MonarqDevice.measurement_methods.keys()):
             raise DeviceException("Measurement not supported")
 
-        results = Job(tape, self.machine_name).run()
+        results = Job(tape, self.machine_name, self.circuit_name, self.project_name).run()
         results = PostProcessor.get_processor(self._processing_config, self.wires)(tape, results)
         measurement_method = MonarqDevice.measurement_methods[meas]
 

@@ -25,11 +25,14 @@ def test_monarq_default(mock_get_connectivity):
     client = MonarqClient("test", "test", "test")
     dev = qml.device("monarq.default", wires=[0], client = client, shots = 1000, processing_config=config)
 
+    dev.circuit_name = "test_name"
+    dev.project_name = "test_name"
+
     qnode = qml.QNode(circuit, dev)
     with patch("requests.post") as post:
         post.return_value = Response('{"job" : {"id" : 1}}')
         with patch("requests.get") as get:
-            get.return_value = Response('{"job" : {"status" : {"type" : "SUCCEEDED"}}, "result":{"histogram": {"0":500, "1":500}}}')
+            get.return_value = Response('{"items" : [{"id" : 0}], "job" : {"status" : {"type" : "SUCCEEDED"}}, "result":{"histogram": {"0":500, "1":500}}}')
             
             results = qnode()
             assert results is not None
