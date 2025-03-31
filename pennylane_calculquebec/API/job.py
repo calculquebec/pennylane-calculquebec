@@ -5,7 +5,7 @@ from pennylane.tape import QuantumTape
 import json
 import time
 from pennylane_calculquebec.API.adapter import ApiAdapter
-from pennylane_calculquebec.utility.api import ApiUtility
+from pennylane_calculquebec.utility.api import ApiUtility, JobStatus
 
 class JobException(Exception):
     def __init__(self, message : str):
@@ -73,7 +73,7 @@ class Job:
 
                     current_status = status
 
-                if(status != "SUCCEEDED"): 
+                if(status != JobStatus.SUCCEEDED.value): 
                     continue
                 
 
