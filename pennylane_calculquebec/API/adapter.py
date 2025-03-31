@@ -1,6 +1,6 @@
 """Contains the ApiAdapter singleton class, which wraps every API call necessary for communicating with MonarQ
 """
-from pennylane_calculquebec.utility.api import ApiUtility, routes, keys
+from pennylane_calculquebec.utility.api import ApiUtility, routes, keys, queries
 import requests
 import json
 from pennylane_calculquebec.API.client import ApiClient
@@ -88,6 +88,13 @@ class ApiAdapter(object):
         return datetime.now() - ApiAdapter._last_update > timedelta(hours=24)
     
     @staticmethod
+    def get_project_id_by_name(project_name : str) -> str:
+        res = requests.get(ApiAdapter.instance().client.host + routes.PROJECTS + queries.NAME + "=" + project_name, 
+                           headers=ApiAdapter.instance().headers)
+        converted = json.loads(res.text)
+        return converted[keys.ITEMS][0][keys.ID]
+
+    @staticmethod
     def get_machine_by_name(machine_name : str) -> dict:
         """
         Get the id of a machine by using the machine's name stored in the client
@@ -100,8 +107,12 @@ class ApiAdapter(object):
         """
         # put machine in cache
         if ApiAdapter._machine is None:
-            route = ApiAdapter.instance().client.host + routes.MACHINES + routes.MACHINE_NAME + "=" + machine_name
-            res = requests.get(route, headers=ApiAdapter.instance().headers)
+            route = ApiAdapter.instance().client.host + routes.MACHINES + queries.MACHINE_NAME + "=" + machine_name
+            try:
+                res = requests.get(route, headers=ApiAdapter.instance().headers)
+            except(requests.ConnectionError):
+                raise ApiException(404, f"Impossible to connect to given host {ApiAdapter.instance().client.host}")
+            
             if res.status_code != 200:
                 ApiAdapter.raise_exception(res)
             ApiAdapter._machine = json.loads(res.text)
@@ -152,7 +163,8 @@ class ApiAdapter(object):
     @staticmethod
     def create_job(circuit : dict, 
                    machine_name : str,
-                   circuit_name: str = "default",
+                   circuit_name: str,
+                   project_name: str,
                    shot_count : int = 1) -> requests.Response:
         """
         Post a new job for running a specific circuit a certain amount of times on given machine (machine name stored in client)
@@ -160,13 +172,15 @@ class ApiAdapter(object):
         Args:
             circuit (dict) : The dictionary representation of a circuit
             machine_name (str) : The machine on which to run the circuit
-            circuit_name (str) : The circuit name. default is "default"
+            circuit_name (str) : The circuit name
+            project_name (str) : The project name
             shot_count (int) : The amout of shots. default is 1
         
         Returns:
             Response : The response of the /job post request
         """
-        body = ApiUtility.job_body(circuit, circuit_name, ApiAdapter.instance().client.project_name, machine_name, shot_count)
+        project_id = ApiAdapter.get_project_id_by_name(project_name)
+        body = ApiUtility.job_body(circuit, circuit_name, project_id, machine_name, shot_count)
         res = requests.post(ApiAdapter.instance().client.host + routes.JOBS, data=json.dumps(body), headers=ApiAdapter.instance().headers)
         if res.status_code != 200:
             ApiAdapter.raise_exception(res)
@@ -236,4 +250,18 @@ class ApiAdapter(object):
 
     @staticmethod
     def raise_exception(res):
-        raise ApiException(res.status_code, res.text)
+        message = res
+
+        # try to fetch the text from the response
+        if hasattr(message, "text"):
+            message = message.text
+        
+        # try to deserialize the text (it might not be deserializable)
+        try:
+            message = json.loads(message)
+            if "error" in message:
+                message = message["error"]  
+        except Exception:
+            pass
+        
+        raise ApiException(res.status_code, message)

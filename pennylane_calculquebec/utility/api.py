@@ -114,12 +114,16 @@ class ApiUtility:
         }
         return body
 
+class queries:
+    MACHINE_NAME = "?machineName"
+    NAME = "?name"
+
 class routes:
     JOBS = "/jobs"
     PROJECTS = "/projects"
     MACHINES = "/machines"
     BENCHMARKING = "/benchmarking"
-    MACHINE_NAME = "?machineName"
+    
     
 class keys:
     NAME = "name"
