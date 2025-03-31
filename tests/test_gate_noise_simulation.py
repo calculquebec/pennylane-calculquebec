@@ -2,13 +2,13 @@ import pytest
 from unittest.mock import patch
 from pennylane_calculquebec.processing.steps import GateNoiseSimulation
 from pennylane_calculquebec.utility.noise import TypicalBenchmark
-from pennylane_calculquebec.monarq_data import connectivity
 from pennylane.tape import QuantumTape
 import pennylane as qml
 import pennylane_calculquebec.utility.noise as noise
 
 class FakeStep:
-    def __init__(self, use_benchmark):
+    def __init__(self, machine_name, use_benchmark):
+        self.machine_name = machine_name
         self.use_benchmark = use_benchmark
     
     @property
@@ -57,7 +57,7 @@ def test_execute(mock_get_qubit_noise,
     mock_get_phase_damping.return_value = [0.4 for _ in range(4)]
     
     tape = QuantumTape([qml.PauliX(0), qml.PauliZ(1), qml.CZ([2 ,3])], [], 1000)
-    tape = GateNoiseSimulation.execute(FakeStep(True), tape)
+    tape = GateNoiseSimulation.execute(FakeStep("yamaska", True), tape)
     
     assert qml.DepolarizingChannel(0.2, 2) in tape.operations
     assert qml.DepolarizingChannel(0.2, 3) in tape.operations
@@ -67,11 +67,11 @@ def test_execute(mock_get_qubit_noise,
     # invalid placement raises error
     tape = QuantumTape([qml.CZ([0, 10])])
     with pytest.raises(ValueError):
-        tape = GateNoiseSimulation.execute(FakeStep(True), tape)
+        tape = GateNoiseSimulation.execute(FakeStep("yamaska", True), tape)
     
     # dont use benchmark, noise should be reciprocal to benchmark
     tape = QuantumTape([qml.PauliX(0), qml.PauliZ(4), qml.CZ([8, 12])], [], 1000)
-    tape = GateNoiseSimulation.execute(FakeStep(False), tape)
+    tape = GateNoiseSimulation.execute(FakeStep("yamaska", False), tape)
     
     assert qml.DepolarizingChannel(noise.depolarizing_noise(TypicalBenchmark.cz), 8) in tape.operations
     assert qml.DepolarizingChannel(noise.depolarizing_noise(TypicalBenchmark.cz), 12) in tape.operations
@@ -81,5 +81,5 @@ def test_execute(mock_get_qubit_noise,
     # invalid gate raises error
     tape = QuantumTape([qml.CNOT([0, 1])])
     with pytest.raises(ValueError):
-        tape = GateNoiseSimulation.execute(FakeStep(False), tape)
+        tape = GateNoiseSimulation.execute(FakeStep("yamaska", False), tape)
     
