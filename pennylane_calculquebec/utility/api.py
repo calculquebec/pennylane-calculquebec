@@ -15,7 +15,6 @@ class ApiUtility:
 
         Args:
             instruction (Operation): a Pennylane operation (a gate)
-            actual_qubits (list[int]): the mapping from the wires in pennylane to the wires in the physical machine
 
         Returns:
             dict[str, any]: a dictionary representation of the operation that can be read by the Thunderhead API
@@ -98,7 +97,7 @@ class ApiUtility:
 
         Args:
             circuit (tape.QuantumScript): the script you want to convert
-            name (str): the name of your job
+            circuit_name (str): the name of your circuit
             project_id (str): the id for the project for which this job will be run
             machine_name (str): the name of the machine on which this job will be run
             shots (int, optional): the number of shots (-1 will use the circuit's shot number)

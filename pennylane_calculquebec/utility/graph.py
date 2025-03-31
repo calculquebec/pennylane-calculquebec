@@ -40,6 +40,9 @@ def is_directly_connected(operation : Operation, machine_topology : nx.Graph) ->
     Args:
         operation (Operation) : a two qubits operation
         machine_topology (Graph) : the machine's graph
+    
+    Returns:
+        bool: does the graph have a link that maps given operation?
     """
     if len(operation.wires) < 2:
         raise GraphException(f"{operation.name} is not a 2 qubit operation")
@@ -51,10 +54,12 @@ def is_directly_connected(operation : Operation, machine_topology : nx.Graph) ->
 def circuit_graph(tape : QuantumTape) -> nx.Graph:
     """
     builds a bidirectional graph from the two qubits gates in a circuit
-    Args : 
+
+    Args: 
         tape (QuantumTape) : QuantumTape, a tape representing the quantum circuit
 
-    returns (nx.Graph), a graph representing the connections between the wires in the circuit
+    Returns:
+        nx.Graph: a graph representing the connections between the wires in the circuit
     """
     links : list[Tuple[int, int]] = []
 
@@ -81,7 +86,8 @@ def machine_graph(machine_name, use_benchmark, q1Acceptance, q2Acceptance, exclu
         excluded_qubits (list[int]) : which qubits should we avoid?
         excluded_couplers (list[list[int]]) : which couplers should we avoid?
 
-    returns (nx.Graph), a graph representing the machine's topology
+    Returns: 
+        nx.Graph : a graph representing the machine's topology
     """
     broken_qubits_and_couplers = get_broken_qubits_and_couplers(q1Acceptance, q2Acceptance, machine_name) if use_benchmark else None
     broken_nodes = [qubit for qubit in broken_qubits_and_couplers[keys.QUBITS]] if use_benchmark else []
@@ -107,7 +113,8 @@ def _find_isomorphisms(circuit : nx.Graph, machine : nx.Graph) -> dict[int, int]
         circuit (Graph) : the graph of the circuit
         machine (Graph) : the graph of the machine
     
-    returns (dict[int, int]) : a mapping between the circuit's wires and the machines qubits
+    Returns:
+        dict[int, int] : a mapping between the circuit's wires and the machines qubits
     """
     vf2 = nx.isomorphism.GraphMatcher(machine, circuit)
     for mono in vf2.subgraph_monomorphisms_iter():
@@ -122,7 +129,8 @@ def find_largest_common_subgraph_vf2(circuit : nx.Graph, machine : nx.Graph):
         circuit (Graph) : the graph of the circuit
         machine (Graph) : the graph of the machine
     
-    returns (dict[int, int]) : a mapping between the circuit's wires and the machines qubits
+    Returns:
+        dict[int, int] : a mapping between the circuit's wires and the machines qubits
     """
     edges = [e for e in circuit.edges]
     if len(edges) <= 0:
@@ -141,7 +149,8 @@ def find_largest_common_subgraph_ismags(circuit : nx.Graph, machine : nx.Graph):
         circuit (Graph) : the graph of the circuit
         machine (Graph) : the graph of the machine
     
-    returns (dict[int, int]) : a mapping between the circuit's wires and the machines qubits
+    Returns:
+        dict[int, int] : a mapping between the circuit's wires and the machines qubits
     """
     ismags = ISMAGS(machine, circuit)
     for mapping in ismags.largest_common_subgraph():
@@ -150,16 +159,19 @@ def find_largest_common_subgraph_ismags(circuit : nx.Graph, machine : nx.Graph):
 def shortest_path(start : int, end : int, graph : nx.Graph, machine_name : str, excluding : list[int] = [], prioritized_nodes : list[int] = [], use_benchmark=True):
 
     """
-    find the shortest path between node a and b
+    find the shortest path between node start and end
 
     Args :
-        a : start node
-        b : end node
+        start : start node
+        end : end node
         graph : the graph to find a path in
         machine_name (str) : the quantum machine's name
         excluding : nodes we dont want to use
         prioritized_nodes : nodes we want to use if possible
         use_benchmark : should we consider fidelities in choosing the paths?
+    
+        Returns:
+            list[int] : the shortest path from start to end
     """
     r1_cz_fidelities = get_readout1_and_cz_fidelities(machine_name) if use_benchmark else {}
     g_copy = deepcopy(graph)
@@ -207,6 +219,9 @@ def find_best_neighbour(wire, topology : nx.Graph, machine_name : str, use_bench
         topology (Graph) : the graph on which we are searching for neighbours
         machine_name (str) : the quantum machine's name
         use_benchmark (bool) : should we use fidelities?
+
+    Returns:
+        int : the neighbour with best score
     """
     if wire not in topology:
         raise GraphException(f"node {wire} is not in graph")
@@ -217,8 +232,7 @@ def find_best_neighbour(wire, topology : nx.Graph, machine_name : str, use_bench
         raise GraphException(f"there are no neighbour to node {wire}")
 
     return max(neigh, key = lambda n : calculate_score(n, topology, machine_name, use_benchmark))
-
-        
+    
 def find_best_wire(graph : nx.Graph, machine_name : str, excluded : list[int] = [], use_benchmark = True):
     """
     find node with highest degree in graph
@@ -228,6 +242,9 @@ def find_best_wire(graph : nx.Graph, machine_name : str, excluded : list[int] = 
         machine_name (str) : the quantum machine's name
         excluded (list[int]) : wires we want to skip
         use_benchmark (bool) : should we use fidelities?
+    
+    Returns:
+        int : the wire with best score
     """
     graph_copy = deepcopy(graph)
     graph_copy.remove_nodes_from(excluded)
@@ -244,6 +261,9 @@ def find_closest_wire(source : int, machine_graph : nx.Graph, machine_name : str
         machine_name (str) : the quantum machine's name
         prioritized (list[int]) : nodes that should be in the path if possible
         use_benchmark (bool) : should we use qubit fidelities?
+    
+    Returns:
+        int : the wire that has the smallest path from source
     """
     if source not in machine_graph:
         raise GraphException(f"node {source} doesn't exist in the machine's graph")
@@ -261,9 +281,17 @@ def find_closest_wire(source : int, machine_graph : nx.Graph, machine_name : str
                                                      use_benchmark=use_benchmark)))
 
 def path_length(path):
-        if path is None:
-            return MAX_INT
-        return len(path)
+    """the length of a path
+
+    Args:
+        path (list[int]): the path to find the length of
+
+    Returns:
+        int: the length of a given path
+    """
+    if path is None:
+        return MAX_INT
+    return len(path)
     
 def node_with_shortest_path_from_selection(source : int, selection : list[int], graph : nx.Graph, machine_name : str, use_benchmark = True):
     """
@@ -271,6 +299,13 @@ def node_with_shortest_path_from_selection(source : int, selection : list[int], 
 
     Args:
         source (int) : the source node
+        selection (list[int]) : a selection of nodes to consider in operation
+        graph (Graph) : the graph to work on
+        machine_name (str) : the name of the machine. Usually yukon or yamaska
+        use_benchmark (bool) : should we use real benchmarks for this operation?
+    
+    Returns:
+        int : the closest node to source that was contained in selection
     """
     
     nodes_minus_source = [node for node in selection if node != source]
@@ -288,6 +323,7 @@ def calculate_score(source : int, graph : nx.Graph, machine_name : str, use_benc
         source (int): the node you want to define a cost for
         graph (nx.Graph): the graph in which the node you want to define a cost for is
         machine_name (str) : the quantum machine's name
+        use_benhmark (bool) : should we use real benchmark for this operation?
 
     Returns:
         float : a cost, where the highest cost is the best one.

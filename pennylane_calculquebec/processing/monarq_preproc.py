@@ -30,8 +30,8 @@ class PreProcessor:
             Args:
                 tape (QuantumTape) : the tape you want to transpile
             
-            Returns : 
-                A transform dispatcher object that can be used in the preprocess method of pennylane Devices
+            Returns: 
+                Tuple[list[QuantumTape]], Callable] : A transform dispatcher object that can be used in the preprocess method of pennylane Devices
             """
             wires = tape.wires if circuit_wires is None or len(tape.wires) > len(circuit_wires) else circuit_wires
             optimized_tape = PreProcessor.expand_full_measurements(tape, wires)
@@ -46,8 +46,14 @@ class PreProcessor:
         return transpile
 
     def unroll_array_boxes(tape : QuantumTape, wires):
-        """
-        sets array boxes to the value they're currently at
+        """sets array boxes to the value they're currently at
+
+        Args:
+            tape (QuantumTape): the tape to act on
+            wires (WireLike): the wires on which to act
+
+        Returns:
+            QuantumTape: the tape without variable values in it
         """
         tape = deepcopy(tape)
         operations = []

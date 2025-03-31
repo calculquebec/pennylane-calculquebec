@@ -100,17 +100,25 @@ def get_full_readout_matrix(machine_name, chosen_qubits):
 
 class IBUReadoutMitigation(PostProcStep):
     """a mitigation method that uses iterative bayesian unfolding to mitigate readout errors on a circuit's results
-    
-    Args:
-        * initial_guess (list[float]) : a probability distribution representing a starting point for the results (defaults to None)
     """
     def __init__(self, machine_name : str, initial_guess = None):
+        """Constructor for the readout mitigation step
+
+        Args:
+            machine_name (str): the name of a machine. Usually either yukon or yamaska
+            initial_guess (list[float], optional): an initial probability distribution. Defaults to None.
+        """
         self.machine_name = machine_name
         self._initial_guess = initial_guess
 
     def initial_guess(self, num_qubits):
-        """
-        returns a uniform probability vector if initial guess is not set. Returns initial guess otherwise
+        """returns a uniform probability vector if initial guess is not set. Returns initial guess otherwise
+
+        Args:
+            num_qubits (int): the number of qubits
+
+        Returns:
+            list[float]: an initial probability distribution for the algorithm
         """
         count_probabilities = 1 << num_qubits
         return [1/count_probabilities for _ in range(count_probabilities)]  \
@@ -158,6 +166,15 @@ class IBUReadoutMitigation(PostProcStep):
         return current_probs
 
     def execute(self, tape, results):
+        """applies iterative bayesian unfolding for readout mitigation
+
+        Args:
+            tape (QuantumTape): the quantum tape to act on
+            results (dict[str, int]): results from the circuit execution
+
+        Returns:
+            dict[str, int]: processed results
+        """
         chosen_qubits = get_measurement_wires(tape)
         num_qubits = len(chosen_qubits)
         shots = tape.shots.total_shots
@@ -182,11 +199,23 @@ class MatrixReadoutMitigation(PostProcStep):
     _readout_matrix_reduced_inverted = None
     
     def __init__(self, machine_name : str):
+        """constructor for the mitigation step
+
+        Args:
+            machine_name (str): the name of the machine. Usually yukon or yamaska
+        """
         self.machine_name = machine_name
 
     def _get_reduced_a_matrix(self, readout_matrix, observed_bit_strings, all_bit_strings):
-        """
-        keep only observe qubit lines and columns from A matrix
+        """keep only observe qubit lines and columns from A matrix
+
+        Args:
+            readout_matrix (list[int, int]): the matrix representation of the readout error
+            observed_bit_strings (list[str]): the bits which are observed by the readouts
+            all_bit_strings (list[str]): all bits
+
+        Returns:
+            list[int, int]: the readout matrix with only observed columns and rows
         """
         # Convert observed bit strings to their integer indices
         observed_indices = [all_bit_strings.index(bit_str) for bit_str in observed_bit_strings]
@@ -197,8 +226,14 @@ class MatrixReadoutMitigation(PostProcStep):
         return reduced_readout_matrix
 
     def _get_inverted_reduced_a_matrix(self, chosen_qubits : list, results : dict):
-        """
-        create iverted reduced A matrix and cache it
+        """create iverted reduced A matrix and cache it
+
+        Args:
+            chosen_qubits (list[int]): which qubits are observed
+            results (dict[str, int]): results from a circuit execution represented as counts
+
+        Returns:
+            list[int, int]: the matrix representation of readout errors, reduced and inverted
         """
         num_qubits = len(chosen_qubits)
         # Generate the full A-matrix
@@ -228,8 +263,14 @@ class MatrixReadoutMitigation(PostProcStep):
         return MatrixReadoutMitigation._readout_matrix_reduced_inverted
 
     def execute(self, tape : QuantumTape, results : dict[str, int]):
-        """
-        mitigates readout errors from results using state 0 and 1 readouts
+        """mitigates readout errors from results using state 0 and 1 readouts
+
+        Args:
+            tape (QuantumTape): the origin tape
+            results (dict[str, int]): the results of the executed tape represented as counts
+
+        Returns:
+            dict[str, int]: The resulting tape
         """
         wires = get_measurement_wires(tape)
         num_qubits = len(wires)

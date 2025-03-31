@@ -37,8 +37,15 @@ def expand(tape : QuantumTape, decomps : dict[str, Callable[[Wires], list[Operat
     return type(tape)(list_copy, tape.measurements, tape.shots)
 
 def find_previous_gate(index : int, wires : list[int], op_list : list[Operation]) -> int:
-    """
-    find first operation that shares a list of wires prior to an index in a list
+    """find first operation that shares a list of wires prior to an index in a list
+
+    Args:
+        index (int): the index from which to start
+        wires (list[int]): the wires on which to act
+        op_list (list[Operation]): the list of operation to consider
+
+    Returns:
+        int: the index of the previous operation. None if none were found
     """
     for i in reversed(range(0, index)):
         if any(w in op_list[i].wires for w in wires):
@@ -46,8 +53,15 @@ def find_previous_gate(index : int, wires : list[int], op_list : list[Operation]
     return None
 
 def find_next_gate(index : int, wires : list[int], op_list : list[Operation]) -> int:
-    """
-    find first operation that shares a list of wires after an index in a list
+    """find first operation that shares a list of wires after an index in a list
+
+    Args:
+        index (int): the index from which to start
+        wires (list[int]): the wires on which to act
+        op_list (list[Operation]): the list of operation to consider
+
+    Returns:
+        int: the index of the next operation. None if none were found
     """
     for i in range(index+1, len(op_list)):
         if any(w in op_list[i].wires for w in wires):
@@ -55,5 +69,14 @@ def find_next_gate(index : int, wires : list[int], op_list : list[Operation]) ->
     return None
 
 def is_single_axis_gate(op : Operation, axis : str):
+    """check if given operation is on given basis
+
+    Args:
+        op (Operation): the operation to check
+        axis (str): the basis to check
+
+    Returns:
+        bool: true if operation is on given basis. false otherwise
+    """
     if op.num_wires != 1: return False
     return op.basis == axis
