@@ -119,7 +119,7 @@ def _custom_rz(angle : float, wires, epsilon = 1E-8):
         epsilon : up to what precision should the angle be emulated?
 
     Returns:
-        list[Operation] : Which operations correspond to a ry gate on MonarQ
+        list[Operation] : Which operations correspond to a rz gate on MonarQ
     """
     while angle < 0: 
         angle += np.pi * 2
