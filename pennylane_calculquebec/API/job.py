@@ -6,6 +6,7 @@ import json
 import time
 from pennylane_calculquebec.API.adapter import ApiAdapter
 from pennylane_calculquebec.utility.api import ApiUtility, JobStatus
+from typing import Callable
 
 class JobException(Exception):
     def __init__(self, message : str):
@@ -27,7 +28,10 @@ class Job:
         machine_name (str) : the name of the machine
         circuit_name (str) : the name of the circuit, defaults to "default"
     """
-    
+    started : Callable[[int], None]
+    status_changed : Callable[[int, str], None]
+    completed : Callable[[int], None]
+
     def __init__(self, circuit : QuantumTape, machine_name : str, circuit_name : str, project_name : str):
         if circuit_name is None:
             raise JobException("you must provide a circuit name")
@@ -60,6 +64,7 @@ class Job:
 
             current_status = ""
             job_id = json.loads(response.text)["job"]["id"]
+            if self.started is not None: self.started(job_id)
             for i in range(max_tries):
                 time.sleep(0.2)
                 response = ApiAdapter.job_by_id(job_id)
@@ -72,10 +77,11 @@ class Job:
                 if(current_status != status):
 
                     current_status = status
+                    if self.status_changed is not None: self.status_changed(job_id, status)
 
                 if(status != JobStatus.SUCCEEDED.value): 
                     continue
-                
+                if self.completed is not None: self.completed(job_id)
 
                 return content["result"]["histogram"]
             raise JobException("Couldn't finish job. Stuck on status : " + str(current_status))
