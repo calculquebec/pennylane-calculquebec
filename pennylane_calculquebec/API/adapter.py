@@ -5,6 +5,7 @@ import requests
 import json
 from pennylane_calculquebec.API.client import ApiClient
 from datetime import datetime, timedelta
+from pennylane_calculquebec.API.retry_decorator import retry
 
 class ApiException(Exception):
     """
@@ -88,6 +89,7 @@ class ApiAdapter(object):
         return datetime.now() - ApiAdapter._last_update > timedelta(hours=24)
     
     @staticmethod
+    @retry(3)
     def get_project_id_by_name(project_name : str) -> str:
         res = requests.get(ApiAdapter.instance().client.host + routes.PROJECTS + queries.NAME + "=" + project_name, 
                            headers=ApiAdapter.instance().headers)
@@ -95,6 +97,7 @@ class ApiAdapter(object):
         return converted[keys.ITEMS][0][keys.ID]
 
     @staticmethod
+    @retry(3)
     def get_machine_by_name(machine_name : str) -> dict:
         """
         Get the id of a machine by using the machine's name stored in the client
@@ -120,6 +123,7 @@ class ApiAdapter(object):
         return ApiAdapter._machine
     
     @staticmethod
+    @retry(3)
     def get_qubits_and_couplers(machine_name : str) -> dict:
         """
         Get qubits and couplers informations from latest benchmark for given machine
@@ -135,6 +139,7 @@ class ApiAdapter(object):
         return benchmark[keys.RESULTS_PER_DEVICE]
 
     @staticmethod
+    @retry(3)
     def get_benchmark(machine_name):
         """
         get latest benchmark for a given machine
@@ -160,12 +165,15 @@ class ApiAdapter(object):
             
         return ApiAdapter._benchmark
     
+    
     @staticmethod
+    @retry(3)
     def create_job(circuit : dict, 
                    machine_name : str,
                    circuit_name: str,
                    project_name: str,
-                   shot_count : int = 1) -> requests.Response:
+                   shot_count : int = 1,
+                   max_retries = 10) -> requests.Response:
         """
         Post a new job for running a specific circuit a certain amount of times on given machine (machine name stored in client)
 
@@ -187,6 +195,7 @@ class ApiAdapter(object):
         return res
 
     @staticmethod
+    @retry(3)
     def list_jobs() -> requests.Response:
         """
         get all jobs for a given user (user stored in client)
@@ -200,6 +209,7 @@ class ApiAdapter(object):
         return res
 
     @staticmethod
+    @retry(3)
     def job_by_id(id : str) -> requests.Response:
         """
         Get a job for a given user by providing its id (user stored in client)
@@ -216,6 +226,7 @@ class ApiAdapter(object):
         return res
 
     @staticmethod
+    @retry(3)
     def list_machines(online_only : bool = False) -> list[dict]:
         """
         Get a list of available machines
