@@ -33,6 +33,9 @@ class Job:
     completed : Callable[[int], None]
 
     def __init__(self, circuit : QuantumTape, machine_name : str, circuit_name : str, project_name : str):
+        self.started = None
+        self.status_changed = None
+        self.completed = None
         if circuit_name is None:
             raise JobException("you must provide a circuit name")
         

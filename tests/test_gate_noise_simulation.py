@@ -21,7 +21,14 @@ class FakeStep:
             "XM90", "YM90", "ZM90",
             "PhaseShift", "CZ", "RZ"
         ]
-    
+
+@pytest.fixture
+def mock_get_connectivity():
+    with patch("pennylane_calculquebec.monarq_data.get_connectivity") as mock:
+        import pennylane_calculquebec.monarq_data as data
+
+        mock.return_value = data.cache["yamaska"][data.Cache.OFFLINE_CONNECTIVITY]
+        yield mock
         
 @pytest.fixture
 def mock_get_qubit_noise():
@@ -46,7 +53,8 @@ def mock_get_phase_damping():
 def test_execute(mock_get_qubit_noise, 
                  mock_get_coupler_noise, 
                  mock_get_amplitude_damping,
-                 mock_get_phase_damping):
+                 mock_get_phase_damping,
+                 mock_get_connectivity):
     
     # use benchmark, noise should be reciprocal to given benchmark
     mock_get_qubit_noise.return_value = [0.1 for _ in range(4)]

@@ -23,9 +23,19 @@ import numpy as np
 #          23
 """
 
-class cache:
-    _offline_connectivity = {
-        "yamaska" : {
+class Cache:
+    READOUT1_CZ = "readout1_cz"
+    RELAXATION = "relaxation"
+    DECOHERENCE = "decoherence"
+    QUBIT_NOISE = "qubit_noise"
+    COUPLER_NOISE = "coupler_noise"
+    READOUT_NOISE = "readout_noise"
+    CONNECTIVITY = "connectivity"
+    OFFLINE_CONNECTIVITY = "offline_connectivity"
+
+cache = {
+    "yamaska" : {
+        Cache.OFFLINE_CONNECTIVITY : {
             "0": [0, 4],
             "1": [4, 1],
             "2": [1, 5],
@@ -61,8 +71,10 @@ class cache:
             "32": [18, 22],
             "33": [22, 19],
             "34": [19, 23]
-        },
-        "yukon" : {
+        }
+    },
+    "yukon" : {
+        Cache.OFFLINE_CONNECTIVITY : {
             "0" : [0, 1],
             "1" : [1, 2],
             "2" : [2, 3],
@@ -70,13 +82,11 @@ class cache:
             "4" : [4, 5],
         }
     }
-    _readout1_cz_fidelities : dict = None
-    _relaxation : list = None
-    _decoherence : list = None
-    _qubit_noise : list = None
-    _coupler_noise : list = None
-    _readout_noise : list = None
-    _connectivity : dict = None
+}
+def is_cache_out_of_date(machine_name : str, cache_element : str):
+    return ApiAdapter.is_last_update_expired() \
+        or machine_name not in cache \
+        or cache_element not in cache[machine_name]
 
 def monarq_native_gates():
     """the names of all gates in the MonarQ native gate set
@@ -103,10 +113,11 @@ def get_connectivity(machine_name, use_benchmark = True):
         dict: the couplers in a given machine
     """
     if not use_benchmark:
-        return cache._offline_connectivity[machine_name]
-    if cache._connectivity is None:
-        cache._connectivity = ApiAdapter.get_connectivity_for_machine(machine_name)
-    return cache._connectivity
+        return cache[machine_name][Cache.OFFLINE_CONNECTIVITY]
+    
+    if is_cache_out_of_date(machine_name, Cache.CONNECTIVITY):
+        cache[machine_name][Cache.CONNECTIVITY] = ApiAdapter.get_connectivity_for_machine(machine_name)
+    return cache[machine_name][Cache.CONNECTIVITY]
     
 def get_broken_qubits_and_couplers(q1Acceptance, q2Acceptance, machine_name):
     """
@@ -155,20 +166,20 @@ def get_readout1_and_cz_fidelities(machine_name):
     Returns:
         dict[str, dict[str, float] | dict[tuple[int], float]] : fidelity values for readout1 and couplers
     """
-    if cache._readout1_cz_fidelities is None or ApiAdapter.is_last_update_expired():
-        cache._readout1_cz_fidelities = {keys.READOUT_STATE_1_FIDELITY:{}, keys.CZ_GATE_FIDELITY:{}}
+    if is_cache_out_of_date(machine_name, Cache.READOUT1_CZ):
+        cache[machine_name][Cache.READOUT1_CZ] = {keys.READOUT_STATE_1_FIDELITY:{}, keys.CZ_GATE_FIDELITY:{}}
         benchmark = ApiAdapter.get_qubits_and_couplers(machine_name)
     
         # build state 1 fidelity
         for key in benchmark[keys.QUBITS]:
-            cache._readout1_cz_fidelities[keys.READOUT_STATE_1_FIDELITY][key] = benchmark[keys.QUBITS][key][keys.READOUT_STATE_1_FIDELITY]
+            cache[machine_name][Cache.READOUT1_CZ][keys.READOUT_STATE_1_FIDELITY][key] = benchmark[keys.QUBITS][key][keys.READOUT_STATE_1_FIDELITY]
         
         # build cz fidelity
         for key in benchmark[keys.COUPLERS]:
             link = get_connectivity(machine_name)[key]
-            cache._readout1_cz_fidelities[keys.CZ_GATE_FIDELITY][(link[0], link[1])] = benchmark[keys.COUPLERS][key][keys.CZ_GATE_FIDELITY]
+            cache[machine_name][Cache.READOUT1_CZ][keys.CZ_GATE_FIDELITY][(link[0], link[1])] = benchmark[keys.COUPLERS][key][keys.CZ_GATE_FIDELITY]
         
-    return cache._readout1_cz_fidelities
+    return cache[machine_name][Cache.READOUT1_CZ]
 
 def get_coupler_noise(machine_name) -> dict:
     """
@@ -180,7 +191,7 @@ def get_coupler_noise(machine_name) -> dict:
     Returns :
         dict[Tuple[int, int], float] : a dictionary of links and values representing cz gate errors
     """
-    if cache._coupler_noise is None or ApiAdapter.is_last_update_expired():
+    if is_cache_out_of_date(machine_name, Cache.COUPLER_NOISE):
         benchmark = ApiAdapter.get_qubits_and_couplers(machine_name)
     
         cz_gate_fidelity = {}
@@ -194,13 +205,13 @@ def get_coupler_noise(machine_name) -> dict:
             depolarizing_noise(fidelity) if fidelity > 0 else None 
             for fidelity in cz_gate_fidelity
         ]
-        cache._coupler_noise = { }
+        cache[machine_name][Cache.COUPLER_NOISE] = { }
         for i, noise in enumerate(coupler_noise_array):
             link = get_connectivity(machine_name)[str(i)]
-            cache._coupler_noise[(link[0], link[1])] = noise
+            cache[machine_name][Cache.COUPLER_NOISE][(link[0], link[1])] = noise
             
             
-    return cache._coupler_noise
+    return cache[machine_name][Cache.COUPLER_NOISE]
 
 def get_qubit_noise(machine_name):
     """
@@ -212,7 +223,7 @@ def get_qubit_noise(machine_name):
     Returns :
         list[float] : a list of values representing single qubit gate errors
     """
-    if cache._qubit_noise is None or ApiAdapter.is_last_update_expired():
+    if is_cache_out_of_date(machine_name, Cache.QUBIT_NOISE):
         benchmark = ApiAdapter.get_qubits_and_couplers(machine_name)
     
         single_qubit_gate_fidelity = {} 
@@ -223,12 +234,12 @@ def get_qubit_noise(machine_name):
             single_qubit_gate_fidelity[i] = benchmark[keys.QUBITS][str(i)][keys.SINGLE_QUBIT_GATE_FIDELITY]
         single_qubit_gate_fidelity = list(single_qubit_gate_fidelity.values())   
 
-        cache._qubit_noise = [
+        cache[machine_name][Cache.QUBIT_NOISE] = [
             depolarizing_noise(fidelity) if fidelity > 0 else None 
             for fidelity in single_qubit_gate_fidelity
         ]
             
-    return cache._qubit_noise
+    return cache[machine_name][Cache.QUBIT_NOISE]
 
 def get_phase_damping(machine_name):
     """
@@ -240,7 +251,7 @@ def get_phase_damping(machine_name):
     Returns:
         list[float] : decoherence values for each qubit
     """
-    if cache._decoherence is None or ApiAdapter.is_last_update_expired():
+    if is_cache_out_of_date(machine_name, Cache.DECOHERENCE):
         benchmark = ApiAdapter.get_qubits_and_couplers(machine_name)
         time_step = 1e-6 # microsecond
         num_qubits = len(benchmark[keys.QUBITS])
@@ -250,10 +261,10 @@ def get_phase_damping(machine_name):
             t2_values[i] = benchmark[keys.QUBITS][str(i)][keys.T2_RAMSEY]
         t2_values = list(t2_values.values())  
 
-        cache._decoherence = [
+        cache[machine_name][Cache.DECOHERENCE] = [
             phase_damping(time_step, t2) for t2 in t2_values
         ]
-    return cache._decoherence
+    return cache[machine_name][Cache.DECOHERENCE]
 
 def get_amplitude_damping(machine_name):
     """
@@ -265,7 +276,7 @@ def get_amplitude_damping(machine_name):
     Returns:
         list[float] : relaxation values for each qubit
     """
-    if cache._relaxation is None or ApiAdapter.is_last_update_expired():
+    if is_cache_out_of_date(machine_name, Cache.RELAXATION):
         benchmark = ApiAdapter.get_qubits_and_couplers(machine_name)
         time_step = 1e-6 # microsecond
         num_qubits = len(benchmark[keys.QUBITS])
@@ -275,11 +286,11 @@ def get_amplitude_damping(machine_name):
             t1_values[i] = benchmark[keys.QUBITS][str(i)][keys.T1]
         t1_values = list(t1_values.values())  
 
-        cache._relaxation = [
+        cache[machine_name][Cache.RELAXATION] = [
             amplitude_damping(time_step, t1) for t1 in t1_values
         ]
 
-    return cache._relaxation
+    return cache[machine_name][Cache.RELAXATION]
 
 def get_readout_noise_matrices(machine_name):
     """
@@ -291,7 +302,7 @@ def get_readout_noise_matrices(machine_name):
     Returns:
         np.ndarray : an array of 2x2 matrices built from state 0 / 1 fidelities
     """
-    if cache._readout_noise is None or ApiAdapter.is_last_update_expired():
+    if is_cache_out_of_date(machine_name, Cache.READOUT_NOISE):
         benchmark = ApiAdapter.get_qubits_and_couplers(machine_name)
         num_qubits = len(benchmark[keys.QUBITS])
 
@@ -302,12 +313,12 @@ def get_readout_noise_matrices(machine_name):
             readout_state_0_fidelity.append(benchmark[keys.QUBITS][str(i)][keys.READOUT_STATE_0_FIDELITY])
             readout_state_1_fidelity.append(benchmark[keys.QUBITS][str(i)][keys.READOUT_STATE_1_FIDELITY])
 
-        cache._readout_noise = []
+        cache[machine_name][Cache.READOUT_NOISE] = []
 
         for f0, f1 in zip(readout_state_0_fidelity, readout_state_1_fidelity):
             R = np.array([
                 [f0, 1 - f1],
                 [1 - f0, f1]
             ])
-            cache._readout_noise.append(R)
-    return cache._readout_noise
+            cache[machine_name][Cache.READOUT_NOISE].append(R)
+    return cache[machine_name][Cache.READOUT_NOISE]
