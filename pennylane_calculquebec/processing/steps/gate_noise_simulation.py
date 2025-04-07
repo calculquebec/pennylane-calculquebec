@@ -28,8 +28,9 @@ class GateNoiseSimulation(PreProcStep):
     
     def execute(self, tape):
         # build qubit noise from readout 1 fidelity using typical value if benchmark should not be used
-        qubit_count = len(set([a for b in data.cache._offline_connectivity[self.machine_name].values() for a in b]))
-        coupler_count = len(data.cache._offline_connectivity[self.machine_name])
+        connectivity = data.get_connectivity(self.machine_name, self.use_benchmark)
+        qubit_count = len(set([a for b in connectivity.values() for a in b]))
+        coupler_count = len(connectivity)
 
         qubit_noise = data.get_qubit_noise(self.machine_name) \
             if self.use_benchmark \

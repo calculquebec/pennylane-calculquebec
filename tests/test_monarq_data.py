@@ -9,7 +9,7 @@ epsilon = 1e-8
 @pytest.fixture
 def mock_get_connectivity():
     with patch("pennylane_calculquebec.monarq_data.get_connectivity") as mock:
-        mock.return_value = data.cache._offline_connectivity["yamaska"]
+        mock.return_value = data.cache["yamaska"][data.Cache.OFFLINE_CONNECTIVITY]
         yield mock
 
 @pytest.fixture
@@ -33,7 +33,7 @@ def mock_amplitude_damping():
 @pytest.fixture
 def mock_get_qubits_and_couplers():
     with patch("pennylane_calculquebec.API.adapter.ApiAdapter.get_qubits_and_couplers") as get_qubits_and_couplers:
-        connectivity = data.cache._offline_connectivity["yamaska"]
+        connectivity = data.cache["yamaska"][data.Cache.OFFLINE_CONNECTIVITY]
         get_qubits_and_couplers.return_value = {keys.QUBITS : {}, keys.COUPLERS : {}}
         for qubit in set([q for link in connectivity.values() for q in link]):
             get_qubits_and_couplers.return_value[keys.QUBITS][str(qubit)] = {keys.READOUT_STATE_1_FIDELITY : 0.8, keys.READOUT_STATE_0_FIDELITY : 0.8, keys.SINGLE_QUBIT_GATE_FIDELITY : 0.8, keys.T1 : 1e-5, keys.T2_RAMSEY : 1e-5}

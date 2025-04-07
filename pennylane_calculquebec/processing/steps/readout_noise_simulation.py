@@ -28,9 +28,9 @@ class ReadoutNoiseSimulation(PostProcStep):
             dict[str, int]: results with readout noise added to it
         """
         qubit_count = len(set([a 
-                               for b in data.cache._offline_connectivity[self.machine_name].values() 
+                               for b in data.get_connectivity(self.machine_name, False).values() 
                                for a in b]))
-        coupler_count = len(data.cache._offline_connectivity[self.machine_name])
+        coupler_count = len(data.get_connectivity(self.machine_name, False))
 
         results = results[0] if not isinstance(results, dict) else results
         

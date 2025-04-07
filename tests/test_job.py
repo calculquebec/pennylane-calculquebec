@@ -50,7 +50,6 @@ def mock_job_by_id():
     with patch("pennylane_calculquebec.API.adapter.ApiAdapter.job_by_id") as job_by_id:
         yield job_by_id
 
-
 def test_run(mock_convert_circuit, mock_create_job, mock_job_by_id):    
     test_job_str = '{"job" : {"id" : 3}}'
     test_error_str = '{"code" : 400, "error" : "this is an error"}'
