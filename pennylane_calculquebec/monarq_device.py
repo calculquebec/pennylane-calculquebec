@@ -39,7 +39,10 @@ class MonarqDevice(BaseDevice):
                  shots = None,  
                  client : ApiClient = None,
                  processing_config : ProcessingConfig = None) -> None:
-
+        self.job_started = None
+        self.job_status_changed = None
+        self.job_completed = None
+        
         if processing_config is None:
             processing_config = MonarqDefaultConfig(self.machine_name)
         

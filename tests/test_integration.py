@@ -17,7 +17,7 @@ class Response:
 @pytest.fixture
 def mock_get_connectivity():
     with patch("pennylane_calculquebec.utility.graph.get_connectivity") as mock:
-        mock.side_effect = lambda machine_name, use_benchmark: data.cache._offline_connectivity["yamaska"]
+        mock.side_effect = lambda machine_name, use_benchmark: data.cache["yamaska"][data.Cache.OFFLINE_CONNECTIVITY]
         yield mock
 
 def test_monarq_default(mock_get_connectivity):
