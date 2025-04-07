@@ -9,7 +9,6 @@ from pennylane_calculquebec.API.client import ApiClient
 from pennylane_calculquebec.API.job import Job
 from pennylane_calculquebec.device_exception import DeviceException
 from pennylane_calculquebec.base_device import BaseDevice
-# from pennylane_calculquebec.utility.api import JobStatus
 from typing import Callable
 
 class MonarqDevice(BaseDevice):
