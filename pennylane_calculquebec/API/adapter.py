@@ -17,12 +17,6 @@ class ApiException(Exception):
     """
     def __init__(self, code : int, message : str):
         self.message = f"API ERROR : {code}, {message}"
-    
-    def __str__(self):
-        return self.message
-
-    def __repr__(self):
-        return self.message
 
 class ApiAdapter(object):
     _qubits_and_couplers = None
@@ -93,6 +87,10 @@ class ApiAdapter(object):
     def get_project_id_by_name(project_name : str) -> str:
         res = requests.get(ApiAdapter.instance().client.host + routes.PROJECTS + queries.NAME + "=" + project_name, 
                            headers=ApiAdapter.instance().headers)
+        
+        if res.status_code != 200:
+                ApiAdapter.raise_exception(res)
+        
         converted = json.loads(res.text)
         return converted[keys.ITEMS][0][keys.ID]
 
@@ -111,11 +109,9 @@ class ApiAdapter(object):
         # put machine in cache
         if ApiAdapter._machine is None:
             route = ApiAdapter.instance().client.host + routes.MACHINES + queries.MACHINE_NAME + "=" + machine_name
-            try:
-                res = requests.get(route, headers=ApiAdapter.instance().headers)
-            except(requests.ConnectionError):
-                raise ApiException(404, f"Impossible to connect to given host {ApiAdapter.instance().client.host}")
             
+            res = requests.get(route, headers=ApiAdapter.instance().headers)
+
             if res.status_code != 200:
                 ApiAdapter.raise_exception(res)
             ApiAdapter._machine = json.loads(res.text)

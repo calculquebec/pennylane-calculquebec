@@ -12,7 +12,7 @@ def retry(retries = 10):
                     
                     return func(*args, **kwargs)
                 except Exception as e:
-                    warnings.warn(f"The request failed. Retrying in {delay} seconds...", stacklevel=2)
+                    warnings.warn(f"The request failed. \nThis was caused by inner exception: \n{e}\nRetrying in {delay} seconds...", stacklevel=2)
                     sleep(delay)
                     delay *= 2
             raise Exception("max retries exceeded for request " + func.__name__)
