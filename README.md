@@ -1,5 +1,7 @@
 # pennylane-calculquebec
 
+Pour la version en français, visitez [cette page](https://github.com/calculquebec/pennylane-calculquebec/blob/main/doc/FR/README_FR.md)
+
 ## Table of content
 
 - [Definitions](#definitions)
@@ -55,7 +57,7 @@ The plugin will also take care of installing Julia and the required Julia packag
 
 ## Usage
 
-If you need more information about how to use the plugin, you may read the [getting-started](https://github.com/calculquebec/pennylane-calculquebec/blob/main/doc/getting_started.ipynb) jupyter notebook.
+If you need more information about how to use the plugin, you may read the [getting-started](https://github.com/calculquebec/pennylane-calculquebec/blob/main/doc/EN/getting_started.ipynb) jupyter notebook.
 
 ### Running files
 
