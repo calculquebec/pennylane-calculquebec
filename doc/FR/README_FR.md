@@ -25,11 +25,11 @@ Le plugin offre aussi des fonctionnalités de simulation et de pré/post traitem
 
 [Calcul Quebec](https://www.calculquebec.ca/) est un organisme sans but lucratif qui regroupe les universités de la province de Québec et fournit de la puissance de calcul aux milieux académique et de la recherche.  
 
-[Snowflurry](https://snowflurry.org/) est un cadriciel de calcul quantique développé en Julia par Anyon Systems qui a pour objectif de donner accès à du matériel et des simulateurs quantique.
+[Snowflurry](https://snowflurry.org/) est un cadriciel de calcul quantique développé en Julia par Anyon Systems qui a pour objectif de donner accès à du matériel et des simulateurs quantiques.
 
 ## Structure du projet
 
-Comme présenté dans le diagramme ci-dessous, ce plugin contient un [device](https://pennylane.ai/plugins/) PennyLane appelé `monarq.default`. Ce device est définit par une classe `MonarqDevice`. Le device applique tout d'abord au circuit une série d'étapes de pré-traitement pour le simplifier et le rendre exécutable sur MonarQ. Le device crée et soumet en suite une Job en utilisant des appels à une API, et récupère les résultats quand ils sont prêts. Une série d'étape de post-traitement est alors appliquée et le résultat traité est retourné à l'utilisateur. 
+Comme présenté dans le diagramme ci-dessous, ce plugin contient un [device](https://pennylane.ai/plugins/) PennyLane appelé `monarq.default`. Ce device est définit par une classe `MonarqDevice`. Le device applique tout d'abord au circuit une série d'étapes de pré-traitement pour le simplifier et le rendre exécutable sur MonarQ. Le device crée et soumet ensuite une Job en utilisant des appels à une API, et récupère les résultats quand ils sont prêts. Une série d'étape de post-traitement est alors appliquée et le résultat traité est retourné à l'utilisateur. 
 
 Un autre device appelé `snowflurry.qubit` cohabite dans ce progiciel. Ce dernier fonctionne en convertissant le circuit PennyLane en circuit Snowflurry grâce à des outils comme JuliaCall qui permet la communication entre les environnements Python et Julia. Le circuit Snowflurry peut alors être utilisé avec les services disponibles, soit un simulateur, soit un ordinateur quantique réel. Le résultat est alors retourné dans PennyLane et formatté pour le retour à l'utilisateur. 
 
@@ -91,7 +91,7 @@ Ces modules sont installés automatiquement durant le processus d'installation d
 
 ## Etat du projet et problemes connus
 
-Le plugin est présentement en phase béta et fournit un accès à MonarQ directement à travers des appels d'API. Il contient aussi des fonctionnalité permettant d'obtenir des métriques et des information sur la machine. Le plugin contient aussi des fonctionnalités permettant aux utilisateurs avancés de changer les étapes de pré/post traitement et de créer des étapes personnalisées. Le plugin contient un simulateur pouvant être accédé avec le nom `monarq.sim`, mais certains ajustements au niveau du modèle de bruit sont nécessaires pour mimiquer le plus fidèlement possible le modèle de bruit de MonarQ. Les étapes de placement et de routage permettent théoriquement de trouver des qubits et coupleurs de qualité en fonction des fidélités de ces derniers, mais le modèle de bruit n'étant pas encore complet, les résultats ne sont pas encore optimaux. Des étapes de post-traitement ont été ajoutées pour améliorer la fidélité de mesure. La couverture de test est présentement de plus de 90 % (14-04-2025). 
+Le plugin est présentement en phase béta et fournit un accès à MonarQ directement à travers des appels d'API. Il contient aussi des fonctionnalités permettant d'obtenir des métriques et des informations sur la machine. Le plugin contient aussi des fonctionnalités permettant aux utilisateurs avancés de changer les étapes de pré/post traitement et de créer des étapes personnalisées. Le plugin contient un simulateur pouvant être accédé avec le nom `monarq.sim`, mais certains ajustements au niveau du modèle de bruit sont nécessaires pour mimiquer le plus fidèlement possible le modèle de bruit de MonarQ. Les étapes de placement et de routage permettent théoriquement de trouver des qubits et coupleurs de qualité en fonction des fidélités de ces derniers, mais le modèle de bruit n'étant pas encore complet, les résultats ne sont pas encore optimaux. Des étapes de post-traitement ont été ajoutées pour améliorer la fidélité de mesure. La couverture de test est présentement de plus de 90 % (14-04-2025). 
 
 ### Plans futurs
 
