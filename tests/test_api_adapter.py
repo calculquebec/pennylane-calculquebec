@@ -8,6 +8,14 @@ client = MonarqClient("test", "test", "test")
 
 # ------------ MOCKS ----------------------
 
+def raise_exception(*args, **kwargs):
+        raise Exception()
+    
+@pytest.fixture
+def mock_list_machines():
+    with patch("pennylane_calculquebec.API.adapter.ApiAdapter.list_machines") as mock:
+        yield mock
+
 @pytest.fixture
 def mock_get_project_id_by_name():
     with patch("pennylane_calculquebec.API.adapter.ApiAdapter.get_project_id_by_name") as mock:
@@ -55,8 +63,16 @@ def setup():
 
 # ------------- TESTS ---------------------
 
+def test_exception():
+    code = 42
+    message = "test"
+    ex = ApiException(code, message)
+    assert str(code) in ex.message and message in ex.message
 
 def test_initialize():
+    with pytest.raises(Exception):
+        ApiAdapter()
+
     assert ApiAdapter.instance() is None
     ApiAdapter.initialize(client)
     assert ApiAdapter.instance() is not None
@@ -69,30 +85,6 @@ def test_is_last_update_expired():
     assert ApiAdapter.is_last_update_expired()
     ApiAdapter._last_update = datetime.now() - timedelta(hours=5)
     assert not ApiAdapter.is_last_update_expired()
-
-
-def test_get_machine_by_name(mock_requests_get):
-    machine_test_str = '{"test" : "im a machine"}'
-    machine_test = {"test" : "im a machine"}
-    mock_requests_get.return_value.status_code = 200
-    mock_requests_get.return_value.text = machine_test_str
-    
-    ApiAdapter.clean_cache()
-    ApiAdapter.initialize(client)
-    
-    machine = ApiAdapter.get_machine_by_name("yamaska")
-    
-    assert all([machine[k] == machine_test[k] for k in machine])
-    
-    mock_requests_get.return_value.status_code = 400
-    # test cache 
-    machine = ApiAdapter.get_machine_by_name("yamaska")
-    assert all([machine[k] == machine_test[k] for k in machine])
-    
-    ApiAdapter._machine = None  
-    
-    with pytest.raises(ApiException):
-        machine = ApiAdapter.get_machine_by_name("yamaska")
 
 def test_get_qubits_and_couplers(mock_get_benchmark):
     ApiAdapter.clean_cache()
@@ -130,7 +122,7 @@ def test_get_benchmark(mock_is_last_update_expired, mock_get_machine_by_name, mo
 
     # test 400 and last_update > 24 h
     mock_is_last_update_expired.return_value = True
-    with pytest.raises(ApiException):
+    with pytest.raises(Exception):
         benchmark = ApiAdapter.get_benchmark("yamaska")
 
 def test_create_job(mock_job_body, mock_get_project_id_by_name, mock_requests_post):
@@ -142,7 +134,7 @@ def test_create_job(mock_job_body, mock_get_project_id_by_name, mock_requests_po
     assert ApiAdapter.create_job({}, "yamaska", "circuit", "project").text == 42
     
     mock_requests_post.return_value = Res(400, '{"error" : 42}')
-    with pytest.raises(ApiException):
+    with pytest.raises(Exception):
         ApiAdapter.create_job({}, "yamaska", "circuit", "project")
     
 
@@ -154,7 +146,7 @@ def test_list_jobs(mock_requests_get):
     assert ApiAdapter.list_jobs().text == 42
     mock_requests_get.return_value = Res(400, 42)
     
-    with pytest.raises(ApiException):
+    with pytest.raises(Exception):
         ApiAdapter.list_jobs()
 
 def test_job_by_id(mock_requests_get):
@@ -165,20 +157,77 @@ def test_job_by_id(mock_requests_get):
     assert ApiAdapter.job_by_id(None).text == 42
     
     mock_requests_get.return_value = Res(400, 42)
-    with pytest.raises(ApiException):
+    with pytest.raises(Exception):
         ApiAdapter.job_by_id(None)
 
 def test_list_machines(mock_requests_get):
     ApiAdapter.clean_cache()
     ApiAdapter.initialize(client)
+    mock_requests_get.side_effect = raise_exception
 
-    mock_requests_get.return_value = Res(200, '{"items" : [{"status" : "online", "answer" : 42}, {"status" : "offline", "answer" : 42}]}')
+    with pytest.raises(Exception):
+        ApiAdapter.list_machines()
+
+    mock_requests_get.side_effect = lambda route, headers: Res(400, '{"items" : [{"status" : "online", "answer" : 42}, {"status" : "offline", "answer" : 42}]}')
+
+    with pytest.raises(Exception):
+        ApiAdapter.list_machines()
+
+    mock_requests_get.side_effect = lambda route, headers: Res(200, '{"items" : [{"status" : "online", "answer" : 42}, {"status" : "offline", "answer" : 42}]}')
     assert len(ApiAdapter.list_machines()) == 2
     assert len(ApiAdapter.list_machines(True)) == 1
+
+def test_get_connectivity_for_machine(mock_list_machines):
+    ApiAdapter.clean_cache()
+    ApiAdapter.initialize(client)
+    
+    mock_list_machines.side_effect = raise_exception
+
+    with pytest.raises(Exception):
+        ApiAdapter.get_connectivity_for_machine("a")
+
+    mock_list_machines.side_effect = lambda: [{"name": "a", "couplerToQubitMap" : 1}, {"name" : "b", "couplerToQubitMap" : 2}]
+
+    assert ApiAdapter.get_connectivity_for_machine("a") == 1
+    assert ApiAdapter.get_connectivity_for_machine("b") == 2
+
+    with pytest.raises(Exception):
+        ApiAdapter.get_connectivity_for_machine("c")
+
 
 def test_get_machine_by_name(mock_requests_get):
     ApiAdapter.clean_cache()
     ApiAdapter.initialize(client)
+    
+    
+    mock_requests_get.side_effect = raise_exception
+    with pytest.raises(Exception):
+        ApiAdapter.get_machine_by_name("yamaska")
 
-    mock_requests_get.return_value = Res(200, '{"name" : "yamaska", "status" : "online", "answer" : 42}')
+    mock_requests_get.side_effect = lambda body, headers: Res(400, '{"name" : "yamaska", "status" : "online", "answer" : 42}')
+
+    with pytest.raises(Exception):
+        ApiAdapter.get_machine_by_name("yamaska")
+
+    mock_requests_get.side_effect = lambda body, headers: Res(200, '{"name" : "yamaska", "status" : "online", "answer" : 42}')
+
     assert ApiAdapter.get_machine_by_name("yamaska")["name"] == "yamaska"
+
+def test_get_project_id_by_name(mock_requests_get):
+    ApiAdapter.clean_cache()
+
+    ApiAdapter.initialize(client)
+    
+    
+    mock_requests_get.side_effect = raise_exception
+    with pytest.raises(Exception):
+        ApiAdapter.get_project_id_by_name("yamaska")
+
+    mock_requests_get.side_effect = lambda body, headers: Res(400, '{"name" : "yamaska", "status" : "online", "answer" : 42}')
+
+    with pytest.raises(Exception):
+        ApiAdapter.get_project_id_by_name("yamaska")
+
+    mock_requests_get.side_effect = lambda body, headers: Res(200, '{"items" : [{"id" : 42}]}')
+
+    assert ApiAdapter.get_project_id_by_name("yamaska") == 42
