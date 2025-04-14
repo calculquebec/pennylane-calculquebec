@@ -18,19 +18,19 @@ class GateNoiseSimulation(PreProcStep):
     
     @property
     def native_gates(self):
-        """the set of monarq-native gates"""
-        return  [
-            "T", "TDagger",
-            "PauliX", "PauliY", "PauliZ", 
-            "X90", "Y90", "Z90",
-            "XM90", "YM90", "ZM90",
-            "PhaseShift", "CZ", "RZ"
-        ]
+        """
+        the set of monarq-native gates
+
+        Returns:
+            list[str] : the name of gates that are native to MonarQ
+        """
+        return  data.monarq_native_gates()
     
     def execute(self, tape):
         # build qubit noise from readout 1 fidelity using typical value if benchmark should not be used
-        qubit_count = len(set([a for b in data.cache._offline_connectivity[self.machine_name].values() for a in b]))
-        coupler_count = len(data.cache._offline_connectivity[self.machine_name])
+        connectivity = data.get_connectivity(self.machine_name, self.use_benchmark)
+        qubit_count = len(set([a for b in connectivity.values() for a in b]))
+        coupler_count = len(connectivity)
 
         qubit_noise = data.get_qubit_noise(self.machine_name) \
             if self.use_benchmark \

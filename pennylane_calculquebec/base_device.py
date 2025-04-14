@@ -22,8 +22,6 @@ class BaseDevice(Device):
     author = "CalculQuebec"
     
     realm = "calculqc"
-    circuit_name = "test circuit"
-    project_id = ""
 
     observables = {
         "PauliZ"
@@ -38,11 +36,29 @@ class BaseDevice(Device):
     _processing_config : ProcessingConfig
 
     @property
+    def circuit_name(self):
+        return self._circuit_name
+    
+    @circuit_name.setter
+    def circuit_name(self, value):
+        self._circuit_name = value
+
+    @property
+    def project_name(self):
+        return self._project_name
+    
+    @project_name.setter
+    def project_name(self, value):
+        self._project_name = value
+
+    @property
     def processing_config(self):
         return self.processing_config
     
     def __init__(self, wires = None, shots = None, client = None, processing_config = None):
         super().__init__(wires, shots)
+        self._circuit_name = None
+        self._project_name = None
         self._processing_config = processing_config
 
         if client is not None:

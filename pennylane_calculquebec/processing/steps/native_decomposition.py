@@ -8,6 +8,7 @@ import pennylane_calculquebec.processing.decompositions.native_decomp_functions 
 import numpy as np
 from pennylane.ops.op_math import SProd
 from pennylane_calculquebec.processing.interfaces import PreProcStep
+from pennylane_calculquebec.monarq_data import monarq_native_gates
 
 class NativeDecomposition(PreProcStep):
     """
@@ -22,6 +23,7 @@ class MonarqDecomposition(NativeDecomposition):
     Raises:
         ValueError: will be raised if an operation is not supported
     """
+
     _decomp_map = {
         "Adjoint(T)" : decomp_funcs._custom_tdag,
         "S" : decomp_funcs._custom_s,
@@ -38,18 +40,25 @@ class MonarqDecomposition(NativeDecomposition):
     }
     
     def native_gates(self):
-        """the set of monarq-native gates"""
-        return  [
-            "T", "TDagger",
-            "PauliX", "PauliY", "PauliZ", 
-            "X90", "Y90", "Z90",
-            "XM90", "YM90", "ZM90",
-            "PhaseShift", "CZ", "RZ"
-        ]
-    
-    def execute(self, tape : QuantumTape):
         """
-        decomposes all non-native gate to an equivalent set of native gates
+        the set of monarq-native gates
+
+        Returns:
+            list[str] : the name of the gates that MonarQ can execute
+        """
+        return monarq_native_gates()
+    
+    def execute(self, tape : QuantumTape) -> QuantumTape:
+        """Turns all gates in a tape to native gates
+
+        Args:
+            tape (QuantumTape): the tape to act on
+
+        Raises:
+            ValueError: Raised if the gate is not decomposable
+
+        Returns:
+            QuantumTape: The processed quantum tape
         """
         new_operations = []
 

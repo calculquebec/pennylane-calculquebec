@@ -99,8 +99,13 @@ def test_measure(mock_PostProcessor_get_processor):
     class MockDevice:
         def __init__(self):
             self.machine_name = "yamaska"
+            self.circuit_name = "circuit"
+            self.project_name = "project"
             self._processing_config = EmptyConfig()
             self.wires = [0]
+            self.job_started = None
+            self.job_status_changed = None
+            self.job_completed = None
     
     dev = MockDevice()
     expected_counts = Job().run()

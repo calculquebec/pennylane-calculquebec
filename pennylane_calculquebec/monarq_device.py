@@ -9,6 +9,7 @@ from pennylane_calculquebec.API.client import ApiClient
 from pennylane_calculquebec.API.job import Job
 from pennylane_calculquebec.device_exception import DeviceException
 from pennylane_calculquebec.base_device import BaseDevice
+from typing import Callable
 
 class MonarqDevice(BaseDevice):
     """PennyLane device for interfacing with Anyon's quantum Hardware.
@@ -29,12 +30,19 @@ class MonarqDevice(BaseDevice):
     name = "MonarqDevice"
     short_name = "monarq.default"
 
+    job_started : Callable[[int], None]
+    job_status_changed : Callable[[int, str], None]
+    job_completed : Callable[[int], None]
+
     def __init__(self, 
                  wires = None, 
                  shots = None,  
                  client : ApiClient = None,
                  processing_config : ProcessingConfig = None) -> None:
-
+        self.job_started = None
+        self.job_status_changed = None
+        self.job_completed = None
+        
         if processing_config is None:
             processing_config = MonarqDefaultConfig(self.machine_name)
         
@@ -72,7 +80,12 @@ class MonarqDevice(BaseDevice):
         if not any(meas == measurement for measurement in MonarqDevice.measurement_methods.keys()):
             raise DeviceException("Measurement not supported")
 
-        results = Job(tape, self.machine_name).run()
+        job = Job(tape, self.machine_name, self.circuit_name, self.project_name)
+        job.started = self.job_started
+        job.status_changed = self.job_status_changed
+        job.completed = self.job_completed
+        results = job.run()
+
         results = PostProcessor.get_processor(self._processing_config, self.wires)(tape, results)
         measurement_method = MonarqDevice.measurement_methods[meas]
 

@@ -28,8 +28,8 @@ class PostProcessor:
                 tape (QuantumTape) : the tape for which the results were calculated
                 results (dict[str, int]) : the results you want to process
             
-            Returns : 
-                The processed results
+            Returns: 
+                QuantumTape : The processed results
             """
             wires = tape.wires if circuit_wires is None or len(tape.wires) > len(circuit_wires) else circuit_wires
             expanded_tape = PostProcessor.expand_full_measurements(tape, wires)

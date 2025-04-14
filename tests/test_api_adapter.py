@@ -9,6 +9,11 @@ client = MonarqClient("test", "test", "test")
 # ------------ MOCKS ----------------------
 
 @pytest.fixture
+def mock_get_project_id_by_name():
+    with patch("pennylane_calculquebec.API.adapter.ApiAdapter.get_project_id_by_name") as mock:
+        yield mock
+
+@pytest.fixture
 def mock_requests_get():
     with patch("requests.get") as requests_get:
         yield requests_get
@@ -64,6 +69,7 @@ def test_is_last_update_expired():
     assert ApiAdapter.is_last_update_expired()
     ApiAdapter._last_update = datetime.now() - timedelta(hours=5)
     assert not ApiAdapter.is_last_update_expired()
+
 
 def test_get_machine_by_name(mock_requests_get):
     machine_test_str = '{"test" : "im a machine"}'
@@ -127,15 +133,17 @@ def test_get_benchmark(mock_is_last_update_expired, mock_get_machine_by_name, mo
     with pytest.raises(ApiException):
         benchmark = ApiAdapter.get_benchmark("yamaska")
 
-def test_create_job(mock_job_body, mock_requests_post):
+def test_create_job(mock_job_body, mock_get_project_id_by_name, mock_requests_post):
     ApiAdapter.initialize(client)
     
+    mock_get_project_id_by_name.return_value = 0
+
     mock_requests_post.return_value = Res(200, 42)
-    assert ApiAdapter.create_job(None, "yamaska").text == 42
+    assert ApiAdapter.create_job({}, "yamaska", "circuit", "project").text == 42
     
-    mock_requests_post.return_value = Res(400, 42)
+    mock_requests_post.return_value = Res(400, '{"error" : 42}')
     with pytest.raises(ApiException):
-        ApiAdapter.create_job(None, "yamaska")
+        ApiAdapter.create_job({}, "yamaska", "circuit", "project")
     
 
 def test_list_jobs(mock_requests_get):
@@ -145,6 +153,7 @@ def test_list_jobs(mock_requests_get):
     mock_requests_get.return_value = Res(200, 42)
     assert ApiAdapter.list_jobs().text == 42
     mock_requests_get.return_value = Res(400, 42)
+    
     with pytest.raises(ApiException):
         ApiAdapter.list_jobs()
 

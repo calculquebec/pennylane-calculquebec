@@ -5,7 +5,8 @@ from pennylane.tape import QuantumTape
 import json
 import time
 from pennylane_calculquebec.API.adapter import ApiAdapter
-from pennylane_calculquebec.utility.api import ApiUtility
+from pennylane_calculquebec.utility.api import ApiUtility, JobStatus
+from typing import Callable
 
 class JobException(Exception):
     def __init__(self, message : str):
@@ -22,33 +23,51 @@ class Job:
     - periodically checks if the job is done
     - returns results when it's done
 
-    Args : 
-        - circuit (QuantumTape) : the circuit you want to execute
-        - circuit_name (str) : the name of the circuit
+    Args: 
+        circuit (QuantumTape) : the circuit you want to execute
+        machine_name (str) : the name of the machine
+        circuit_name (str) : the name of the circuit, defaults to "default"
     """
-    
-    def __init__(self, circuit : QuantumTape, machine_name : str, circuit_name = "default"):
+    started : Callable[[int], None]
+    status_changed : Callable[[int, str], None]
+    completed : Callable[[int], None]
+
+    def __init__(self, circuit : QuantumTape, machine_name : str, circuit_name : str, project_name : str):
+        self.started = None
+        self.status_changed = None
+        self.completed = None
+        if circuit_name is None:
+            raise JobException("you must provide a circuit name")
+        
+        if project_name is None:
+            raise JobException("you must provide a project name")
+
         self.circuit_dict = ApiUtility.convert_circuit(circuit)
         self.machine_name = machine_name
         self.circuit_name = circuit_name
+        self.project_name = project_name
         self.shots = circuit.shots.total_shots
 
-    def run(self, max_tries : int = -1) -> dict:
+    def run(self, max_tries : int = 2 ** 15) -> dict:
         """
         converts a quantum tape into a dictionary, readable by thunderhead
         creates a job on thunderhead
         fetches the result until the job is successfull, and returns the result
+
+        Args:
+            max_tries (int) : the number of tries before dropping a circuit. Defaults to 2 ^ 15
         """
 
-        if max_tries == -1: max_tries = 2 ** 15
         response = None
         try:
-            response = ApiAdapter.create_job(self.circuit_dict, self.machine_name, self.circuit_name, self.shots)
+            response = ApiAdapter.create_job(self.circuit_dict, self.machine_name, self.circuit_name, self.project_name, self.shots)
         except:
             raise
         if(response.status_code == 200):
+
             current_status = ""
             job_id = json.loads(response.text)["job"]["id"]
+            if self.started is not None: self.started(job_id)
             for i in range(max_tries):
                 time.sleep(0.2)
                 response = ApiAdapter.job_by_id(job_id)
@@ -59,10 +78,13 @@ class Job:
                 content = json.loads(response.text)
                 status = content["job"]["status"]["type"]
                 if(current_status != status):
-                    current_status = status
 
-                if(status != "SUCCEEDED"): 
+                    current_status = status
+                    if self.status_changed is not None: self.status_changed(job_id, status)
+
+                if(status != JobStatus.SUCCEEDED.value): 
                     continue
+                if self.completed is not None: self.completed(job_id)
 
                 return content["result"]["histogram"]
             raise JobException("Couldn't finish job. Stuck on status : " + str(current_status))
@@ -72,6 +94,25 @@ class Job:
     def raise_api_error(self, response):
         """
         this raises an error by parsing the json body of the response, and using the response text as message
+
+        Args:
+            response (Response) : the erroneous response
+        
+        Raises:
+            - JobException
         """
-        error = json.loads(response.text)
-        raise JobException("API ERROR : " + str(error["code"]) + ", " + error["error"])
+        message = response
+
+        # try to fetch the text from the response
+        if hasattr(message, "text"):
+            message = message.text
+        
+        # try to deserialize the text (it might not be deserializable)
+        try:
+            message = json.loads(message)
+            if "error" in message:
+                message = message["error"]  
+        except Exception:
+            pass
+        
+        raise JobException(message)
