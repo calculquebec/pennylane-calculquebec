@@ -53,7 +53,7 @@ class BaseDevice(Device):
 
     @property
     def processing_config(self):
-        return self.processing_config
+        return self._processing_config
     
     def __init__(self, wires = None, shots = None, client = None, processing_config = None):
         super().__init__(wires, shots)
