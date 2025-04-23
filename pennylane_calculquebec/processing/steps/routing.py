@@ -37,12 +37,20 @@ class Swaps(Routing):
     a routing algorithm that uses swaps
     """
     def execute(self, tape):
-        """
-        uses swap to permute wires when 2 qubits operation appear which are not directly mapped to a coupler in the machine
+        """uses swap to permute wires when 2 qubits operation appear which are not directly mapped to a coupler in the machine
         
         ie. cnot(0, 1), qubit 0 and 1 are not directly connected in the machine's graph. 
         the shortest path from 0 to 1 is [0, 4, 1]
         the new circuit will be : swap(4, 1), cnot(0, 4), swap(4, 1)
+
+        Args:
+            tape (QuantumTape): the tape to transform
+
+        Raises:
+            RoutingException: raised when there is no solution for the routing problem
+
+        Returns:
+            QuantumTape: the transformed tape
         """
         circuit_topology = circuit_graph(tape)
         machine_topology = machine_graph(self.machine_name, self.use_benchmark, self.q1_acceptance, self.q2_acceptance, self.excluded_qubits, self.excluded_couplers)

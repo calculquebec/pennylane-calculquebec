@@ -12,48 +12,96 @@ def is_close_enough_to(angle, other_angle, epsilon = 1E-7):
 def _custom_tdag(wires):
     """
     a MonarQ native implementation of the adjoint(T) operation
+    
+    Args:
+        wires (list[int]) : Which wires does the operation act on?
+
+    Returns:
+        list[Operation] : Which operations correspond to an adjoint t gate on MonarQ
     """
     return [custom.TDagger(wires)]
 
 def _custom_sx(wires):
     """
     a MonarQ native implementation of the SX operation
+
+    Args:
+        wires (list[int]) : Which wires does the operation act on?
+
+    Returns:
+        list[Operation] : Which operations correspond to an sx gate on MonarQ
     """
     return [custom.X90(wires)]
 
 def _custom_sxdag(wires):
     """
     a MonarQ native implementation of the adjoint(SX) operation 
+
+    Args:
+        wires (list[int]) : Which wires does the operation act on?
+    
+    Returns:
+        list[Operation] : Which operations correspond to an adjoint sx gate on MonarQ
     """
     return [custom.XM90(wires)]
 
 def _custom_s(wires):
     """
     a MonarQ native implementation of the S operation
+
+    Args:
+        wires (list[int]) : Which wires does the operation act on?
+    
+    Returns:
+        list[Operation] : Which operations correspond to an s gate on MonarQ
     """
     return [custom.Z90(wires)]
 
 def _custom_sdag(wires):
     """
     a MonarQ native implementation of the adjoint(S) operation
+
+    Args:
+        wires (list[int]) : Which wires does the operation act on?
+    
+    Returns:
+        list[Operation] : Which operations correspond to an adjoint s gate on MonarQ
     """
     return [custom.ZM90(wires)]
 
 def _custom_h(wires):
     """
     a MonarQ native implementation of the Hadamard operation
+
+    Args:
+        wires (list[int]) : Which wires does the operation act on?
+
+    Returns:
+        list[Operation] : Which operations correspond to an h gate on MonarQ
     """
     return [custom.Z90(wires), custom.X90(wires), custom.Z90(wires)]
 
 def _custom_cnot(wires):
     """
     a MonarQ native implementation of the CNOT operation
+
+    Args:
+        wires (list[int]) : Which wires does the operation act on?
+
+    Returns:
+        list[Operation] : Which operations correspond to a cnot gate on MonarQ
     """
     return _custom_h(wires[1]) + [qml.CZ(wires)] + _custom_h(wires[1])
 
 def _custom_cy(wires):
     """
     a MonarQ native implementation of the CY operation
+
+    Args:
+        wires (list[int]) : Which wires does the operation act on?
+
+    Returns:
+        list[Operation] : Which operations correspond to a cy gate on MonarQ
     """
     return [custom.Y90(wires[1])] \
         + _custom_cnot(wires) \
@@ -64,6 +112,14 @@ def _custom_cy(wires):
 def _custom_rz(angle : float, wires, epsilon = 1E-8):
     """
     a MonarQ native implementation of the RZ operation
+
+    Args:
+        angle : float : What angle should we emulate?
+        wires (list[int]) : Which wires does the operation act on?
+        epsilon : up to what precision should the angle be emulated?
+
+    Returns:
+        list[Operation] : Which operations correspond to a rz gate on MonarQ
     """
     while angle < 0: 
         angle += np.pi * 2
@@ -86,6 +142,14 @@ def _custom_rz(angle : float, wires, epsilon = 1E-8):
 def _custom_rx(angle : float, wires, epsilon = 1E-8):
     """
     a MonarQ native implementation of the RX operation
+
+    Args:
+        angle : float : What angle should we emulate?
+        wires (list[int]) : Which wires does the operation act on?
+        epsilon : up to what precision should the angle be emulated?
+
+    Returns:
+        list[Operation] : Which operations correspond to a rx gate on MonarQ
     """
     while angle < 0: angle += np.pi * 2
     angle %= np.pi * 2
@@ -104,6 +168,14 @@ def _custom_rx(angle : float, wires, epsilon = 1E-8):
 def _custom_ry(angle : float, wires, epsilon = 1E-8):
     """
     a MonarQ native implementation of the RY operation
+
+    Args:
+        angle : float : What angle should we emulate?
+        wires (list[int]) : Which wires does the operation act on?
+        epsilon : up to what precision should the angle be emulated?
+
+    Returns:
+        list[Operation] : Which operations correspond to an ry gate on MonarQ
     """
     while angle < 0: angle += np.pi * 2
     angle %= np.pi * 2
@@ -124,5 +196,11 @@ def _custom_ry(angle : float, wires, epsilon = 1E-8):
 def _custom_swap(wires):
     """
     a MonarQ native implementation of the SWAP operation
+
+    Args:
+        wires (list[int]) : Which wires does the operation act on?
+
+    Returns:
+        list[Operation] : Which operations correspond to a swap gate on MonarQ
     """
     return _custom_cnot([wires[0], wires[1]]) + _custom_cnot([wires[1], wires[0]]) + _custom_cnot([wires[0], wires[1]])

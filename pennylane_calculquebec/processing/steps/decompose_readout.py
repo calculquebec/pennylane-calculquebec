@@ -24,7 +24,7 @@ class DecomposeReadout(PreProcStep):
             ValueError: risen if an observable is not supported
 
         Returns:
-            _type_: a readout with only computational basis observables
+            QuantumTape: a readout with only computational basis observables
         """
         operations = tape.operations.copy()
 

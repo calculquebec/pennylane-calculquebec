@@ -51,7 +51,14 @@ class IterativeCommuteAndMerge(Optimize):
     
     @staticmethod
     def swap_cnot(wires):
-        """turns swaps into cnots
+        """
+        turns swaps into cnots
+
+        Args:
+            wires (WireLike): which wires do the swap act on
+        
+        Returns:
+            list[Operation] : cnot(a, b) cnot(b, a) cnot(a, b)
         """
         if len(wires) != 2:
             raise ValueError("SWAPs must be given two wires")
@@ -64,7 +71,16 @@ class IterativeCommuteAndMerge(Optimize):
             
     @staticmethod
     def HCZH_cnot(wires):
-        """turns cnots into H - CZ - H
+        """Decomposition for a cnot using CZ and H
+
+        Args:
+            wires (WireLike): Which wires should we decompose with?
+
+        Raises:
+            ValueError: There should be exactly two wires
+
+        Returns:
+            list[Operation]: the list of operations corresponding to a CNOT using CZ and H
         """
         if len(wires) != 2:
             raise ValueError("cnots must be given two wires")
@@ -77,7 +93,16 @@ class IterativeCommuteAndMerge(Optimize):
 
     @staticmethod
     def ZXZ_Hadamard(wires):
-        """turns H into S - SX - S
+        """Turns H into a combination of S, SX and S
+
+        Args:
+            wires (WireLike): What wires should we decompose with?
+
+        Raises:
+            ValueError: There should be exactly one wire
+
+        Returns:
+            list[Operation]: a list of operations corresponding to H
         """
         
         if len(wires) != 1:
@@ -91,7 +116,18 @@ class IterativeCommuteAndMerge(Optimize):
 
     @staticmethod
     def Y_to_ZXZ(operation):
-        """turns RY into RZ - RX - RZ"""
+        """Turn RY into RZ, RX and RZ
+
+        Args:
+            operation (Operation): a RY gate with arbitrary angle
+
+        Raises:
+            ValueError: There should be exactly one wire
+            ValueError: The gate should be in the Y basis
+
+        Returns:
+            list[Operation]: The equivalent sequence of X/Z gates for an arbitrary Y rotation
+        """
         if len(operation.wires) != 1:
             raise ValueError("Single qubit rotations must be given one wire")
         
@@ -102,7 +138,14 @@ class IterativeCommuteAndMerge(Optimize):
 
     @staticmethod
     def get_rid_of_y_rotations(tape : QuantumTape):
-        """removes all Y rotations"""
+        """Transforms all Y rotations in a tape to X and Z rotations
+
+        Args:
+            tape (QuantumTape): the tape to act on
+
+        Returns:
+            QuantumTape: the processed tape
+        """
         list_copy = tape.operations.copy()
         new_operations = []
         for operation in list_copy:

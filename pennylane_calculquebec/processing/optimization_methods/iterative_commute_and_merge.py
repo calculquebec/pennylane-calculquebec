@@ -12,6 +12,13 @@ from pennylane.ops.op_math.adjoint import adjoint, Adjoint
 def remove_root_zs(tape : QuantumTape, iterations = 3) -> QuantumTape:
     """
     removes all heading z operations (the ones on the first layer of a tape)
+
+    Args: 
+        - tape (QuantumTape) : the tape to act on
+        - iteration (int) : the maximum number of times to repeat the operation
+    
+    Returns :
+        - (QuantumTape) : the resulting quantum tape
     """
     new_operations = tape.operations.copy()
     for _ in range(iterations):
@@ -30,6 +37,13 @@ def remove_root_zs(tape : QuantumTape, iterations = 3) -> QuantumTape:
 def remove_leaf_zs(tape : QuantumTape, iterations = 3) -> QuantumTape:
     """
     removes all tailing z operations (the ones just before a measure with observable Z)
+
+    Args: 
+        - tape (QuantumTape) : the tape to act on
+        - iteration (int) : the maximum number of times to repeat the operation
+    
+    Returns :
+        - (QuantumTape) : the resulting quantum tape
     """
     new_operations = tape.operations.copy()
     for _ in range(iterations):
@@ -49,6 +63,16 @@ def remove_leaf_zs(tape : QuantumTape, iterations = 3) -> QuantumTape:
 
 
 def _get_adjoint_base(op):
+    """
+    returns the base of an Adjoint operation
+
+    Args: 
+        - op (Operation) : a quantum operation
+    
+    Returns:
+        - Tuple[Operation, bool] : the base operation, and a bool telling us if it was an adjoint or not
+    """
+
     isAdjoint = False
     while(isinstance(op, Adjoint)):
         isAdjoint = not isAdjoint
@@ -56,9 +80,17 @@ def _get_adjoint_base(op):
     return op, isAdjoint
 
 
-def _remove_trivials(tape : QuantumTape, iteration = 3, epsilon = 1E-8):
+def _remove_trivials(tape : QuantumTape, iteration = 3, epsilon = 1E-8) -> QuantumTape:
     """
     removes 0rad rotations and identities
+
+    Args: 
+        - tape (QuantumTape) : the tape to act on
+        - iteration (int) : the maximum number of times to repeat the operation
+        - epsilon (float) : up to which precision do we wish to detect 0 rad rotations
+    
+    Returns :
+        - (QuantumTape) : the resulting quantum tape
     """
     new_operations = []
     for op in tape.operations:
@@ -80,6 +112,12 @@ def _remove_trivials(tape : QuantumTape, iteration = 3, epsilon = 1E-8):
 def commute_and_merge(tape : QuantumTape) -> QuantumTape:
     """
     applies commutations, rotation merges and inverses/trivial gates cancellations
+
+    Args: 
+        tape (QuantumTape) : the tape to act on
+    
+    Returns :
+        QuantumTape : the resulting quantum tape
     """
     iterations = 3
 

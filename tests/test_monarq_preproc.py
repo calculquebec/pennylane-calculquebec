@@ -2,10 +2,17 @@ import pytest
 from unittest.mock import patch
 from pennylane_calculquebec.processing import PreProcessor
 from pennylane_calculquebec.processing.interfaces import PreProcStep, PostProcStep
+from autograd.numpy.numpy_boxes import ArrayBox
+import numpy as np
 
 @pytest.fixture
 def mock_expand_full_measurements():
     with patch("pennylane_calculquebec.processing.PreProcessor.expand_full_measurements") as mock:
+        yield mock
+
+@pytest.fixture
+def mock_unroll_array_boxes():
+    with patch("pennylane_calculquebec.processing.PreProcessor.unroll_array_boxes") as mock:
         yield mock
 
 class step_call_counter:
@@ -13,8 +20,13 @@ class step_call_counter:
         self.i = 0
         
 class op:
-    def __init__(self, wires):
+    def __init__(self, wires, data=[]):
         self.wires = wires
+        self.data = data
+    
+    @property
+    def num_params(self):
+        return len(self.data)
         
 class Tape:
     def __init__(self, ops = [], mps = [], wires = [], shots = None):
@@ -39,7 +51,10 @@ class step(PreProcStep):
         return tape
         
 
-def test_get_processor(mock_expand_full_measurements):
+def test_get_processor(mock_expand_full_measurements, mock_unroll_array_boxes):
+    mock_expand_full_measurements.side_effect = lambda a, b : a
+    mock_unroll_array_boxes.side_effect = lambda a, b : a
+
     call_counter = step_call_counter()
     conf = config(step("a", call_counter), 
                   step("b", call_counter), 
@@ -75,4 +90,15 @@ def test_expand_full_measurements():
     solution = [1, 2]
     for i, w in enumerate(solution):
         assert w == result.measurements[i].wires[0]
-        
+
+def test_unroll_array_boxes():
+    op1 = op([0])
+    op2 = op([1], [0.5])
+    op3 = op([2], [ArrayBox(np.array([1.5]), None, None)])
+
+    tape = Tape(ops=[op1, op2, op3])
+    tape = PreProcessor.unroll_array_boxes(tape, [0, 1])
+
+    assert tape.operations[0].num_params == 0
+    assert tape.operations[1].data[0] == 0.5
+    assert tape.operations[2].data[0] == 1.5

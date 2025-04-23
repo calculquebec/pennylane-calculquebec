@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from pennylane_calculquebec.monarq_device import MonarqDevice, DeviceException
+from pennylane_calculquebec.monarq_backup import MonarqBackup, DeviceException
 from pennylane_calculquebec.API.client import MonarqClient
 from pennylane_calculquebec.processing.config import MonarqDefaultConfig, NoPlaceNoRouteConfig, EmptyConfig
 from pennylane_calculquebec.processing import PreProcessor
@@ -15,7 +15,7 @@ client = MonarqClient("host", "user", "token")
 
 @pytest.fixture
 def mock_measure():
-    with patch("pennylane_calculquebec.monarq_device.MonarqDevice._measure") as meas:
+    with patch("pennylane_calculquebec.monarq_backup.MonarqBackup._measure") as meas:
         yield meas
 
 @pytest.fixture
@@ -41,39 +41,39 @@ def mock_PreProcessor_get_processor():
 def test_constructor(mock_api_initialize):
     # no shots given, should raise DeviceException
     with pytest.raises(DeviceException):
-        dev = MonarqDevice()
+        dev = MonarqBackup()
     
     mock_api_initialize.assert_not_called()
     
     # no client given, should raise DeviceException
     with pytest.raises(DeviceException):
-        dev = MonarqDevice(shots=1000)
+        dev = MonarqBackup(shots=1000)
     
     mock_api_initialize.assert_not_called()
     
     # client given, no config given, should set default config
-    dev = MonarqDevice(client = client, shots=1000)
+    dev = MonarqBackup(client = client, shots=1000)
     mock_api_initialize.assert_called_once()
     assert dev.shots.total_shots == 1000
-    assert dev._processing_config == MonarqDefaultConfig("yamaska")
+    assert dev._processing_config == MonarqDefaultConfig("yukon")
     
     # config given, should set given config
     mock_api_initialize.reset_mock()
     config = NoPlaceNoRouteConfig()
-    dev = MonarqDevice(client = client, processing_config=config, shots=1000)
+    dev = MonarqBackup(client = client, processing_config=config, shots=1000)
     mock_api_initialize.assert_called_once()
     assert dev._processing_config is config
 
 def test_preprocess(mock_PreProcessor_get_processor, mock_api_initialize):
     mock_PreProcessor_get_processor.return_value = transform(lambda tape : tape)
-    dev = MonarqDevice(client = client, shots = 1000)
+    dev = MonarqBackup(client = client, shots = 1000)
     result = dev.preprocess()[0]
     assert len(result) == 1
     mock_PreProcessor_get_processor.assert_called_once()
       
 def test_execute(mock_measure):
     mock_measure.return_value = ["a", "b", "c"]
-    dev = MonarqDevice(client=client, shots=1000)
+    dev = MonarqBackup(client=client, shots=1000)
     
     # ran 1 time
     quantum_tape = QuantumTape([], [], 1000)
@@ -98,7 +98,7 @@ def test_measure(mock_PostProcessor_get_processor):
 
     class MockDevice:
         def __init__(self):
-            self.machine_name = "yamaska"
+            self.machine_name = "yukon"
             self.circuit_name = "circuit"
             self.project_name = "project"
             self._processing_config = EmptyConfig()
@@ -119,19 +119,19 @@ def test_measure(mock_PostProcessor_get_processor):
         
         # measurement != 1, DeviceException
         with pytest.raises(DeviceException):
-            MonarqDevice._measure(dev, quantum_tape)
+            MonarqBackup._measure(dev, quantum_tape)
         
         job.assert_not_called()
         
         # invalid measurement
         quantum_tape.measurements.append(qml.sample())
         with pytest.raises(DeviceException):
-            _ = MonarqDevice._measure(dev, quantum_tape)
+            _ = MonarqBackup._measure(dev, quantum_tape)
         job.assert_not_called()
 
         # measurement is probs
         quantum_tape.measurements[0] = qml.probs()
-        probs = MonarqDevice._measure(dev, quantum_tape)
+        probs = MonarqBackup._measure(dev, quantum_tape)
         tolerance = 1E-5
         assert all(abs(a - b) < tolerance for a, b in zip(probs, expected_probs))
         
@@ -139,7 +139,7 @@ def test_measure(mock_PostProcessor_get_processor):
 
         # measurement is counts
         quantum_tape.measurements[0] = qml.counts()
-        counts = MonarqDevice._measure(dev, quantum_tape)
+        counts = MonarqBackup._measure(dev, quantum_tape)
         assert counts == expected_counts
         
         # since the method has been called one time before, the call count is incremented to 2
@@ -147,7 +147,7 @@ def test_measure(mock_PostProcessor_get_processor):
         
         # measurement is expval
         quantum_tape.measurements[0] = qml.expval(qml.PauliZ(0))
-        expval = MonarqDevice._measure(dev, quantum_tape)
+        expval = MonarqBackup._measure(dev, quantum_tape)
         assert expval == expected_expectation
         
         # since the method has been called one time before, the call count is incremented to 2
@@ -156,4 +156,4 @@ def test_measure(mock_PostProcessor_get_processor):
         # too many measurements
         quantum_tape.measurements.append(qml.counts())
         with pytest.raises(DeviceException):
-            _ = MonarqDevice._measure(dev, quantum_tape)
+            _ = MonarqBackup._measure(dev, quantum_tape)

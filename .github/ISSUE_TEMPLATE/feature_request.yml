@@ -1,0 +1,52 @@
+name: Demande de fonctionnalité
+description: Proposer une amélioration ou une nouvelle fonctionnalité
+title: "En tant que [Rôle], je veux [À terminer]"
+projects: "github/10"
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Votre version
+      placeholder: v0.5.10
+    validations:
+      required: true
+
+  - type: textarea
+    id: need
+    attributes:
+      label: Description de la fonctionnalité
+      description: Décrivez ce que vous souhaitez.
+      placeholder: Je veux pouvoir...
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Test d'acceptation
+      description: Décrivez le ou les comportements attendus afin que la tâche soit considérée comme complétée.
+      placeholder: La fonctionnalité doit répondre à...
+    validations:
+      required: true
+
+  - type: textarea
+    id: other_info
+    attributes:
+      label: Autres informations
+      description: Ajoutez les autres informations utiles (problèmes actuels, idées, etc.)
+      placeholder: Optionnel
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priorité
+      description: Importance de cette demande
+      options:
+        - 🔴 Critique (bloquant)
+        - 🟠 Haute
+        - 🟡 Moyenne
+        - 🟢 Basse
+    validations:
+      required: false
