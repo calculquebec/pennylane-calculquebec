@@ -1,0 +1,39 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+hide empty members
+skinparam backgroundColor transparent
+left to right direction
+
+class BaseDevice
+
+class MonarqDevice
+
+
+package "API utilities" <<rectangle>>{
+    class ApiClient{
+    }
+
+    class Job{
+    }
+
+    class ApiAdapter <<singleton>>{
+    }
+}
+
+package Thunderhead <<cloud>>{
+}
+package Transpiler <<rectangle>>{
+}
+
+BaseDevice *-- ApiClient
+
+BaseDevice --> Transpiler
+Transpiler -left-> ApiAdapter
+
+MonarqDevice --> Job
+
+Job --> ApiAdapter
+ApiAdapter --> Thunderhead
+
+@enduml
