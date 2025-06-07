@@ -6,6 +6,7 @@ from pennylane.tape import QuantumTape
 from pennylane.operation import Operation
 from pennylane_calculquebec.processing.interfaces import PreProcStep
 import pennylane.transforms as transforms
+from pennylane_calculquebec.logger import logger
 
 
 class BaseDecomposition(PreProcStep):
@@ -22,14 +23,18 @@ class BaseDecomposition(PreProcStep):
         return []
     
     def execute(self, tape : QuantumTape) -> QuantumTape:
-        def stop_at(operation : Operation):
-            # TODO : voir quelles portes on veut stop at
-            return operation.name in self.base_gates
+        try:
+            def stop_at(operation : Operation):
+                # TODO : voir quelles portes on veut stop at
+                return operation.name in self.base_gates
 
-        # pennylane create_expand_fn does the job for us 
-        custom_expand_fn = transforms.create_expand_fn(depth=9, stop_at=stop_at)
-        tape = custom_expand_fn(tape)
-        return tape
+            # pennylane create_expand_fn does the job for us 
+            custom_expand_fn = transforms.create_expand_fn(depth=9, stop_at=stop_at)
+            tape = custom_expand_fn(tape)
+            return tape
+        except Exception as e:
+            logger.error("Error %s in execute located in BaseDecomposition: %s", type(e).__name__, e)
+            return tape
 
 class CliffordTDecomposition(BaseDecomposition):
     """A decompostition that should be done first in the transpiling process. \n
@@ -40,4 +45,3 @@ class CliffordTDecomposition(BaseDecomposition):
         return ["Adjoint(T)", "Adjoint(S)", "SX", "Adjoint(SX)", 
                   "T", "PauliX", "PauliY", "PauliZ", "S", "Hadamard", 
                   "CZ", "CNOT", "RZ", "RX", "RY"]
-        

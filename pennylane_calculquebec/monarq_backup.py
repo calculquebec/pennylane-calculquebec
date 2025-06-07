@@ -9,7 +9,6 @@ from pennylane_calculquebec.API.client import ApiClient
 from pennylane_calculquebec.API.job import Job
 from pennylane_calculquebec.device_exception import DeviceException
 from pennylane_calculquebec.monarq_device import MonarqDevice
-
 class MonarqBackup(MonarqDevice):
     """Backup device for interfacing with Anyon's quantum Hardware.
 

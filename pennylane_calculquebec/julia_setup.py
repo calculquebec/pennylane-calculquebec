@@ -2,6 +2,7 @@ import juliapkg
 from juliapkg import PkgSpec
 import json
 import os
+from pennylane_calculquebec.logger import logger
 
 # Required packages for the Julia environment
 REQUIRED_PACKAGES = [
@@ -36,10 +37,13 @@ class JuliaEnv:
     """
 
     def __init__(self):
-        self.julia_env_path = juliapkg.project()
-        self.json_path = self.julia_env_path + "/pyjuliapkg/juliapkg.json"
-        self.json_pkg_list = self.get_json_pkg_list()
-        self.required_packages = REQUIRED_PACKAGES
+        try:
+            self.julia_env_path = juliapkg.project()
+            self.json_path = self.julia_env_path + "/pyjuliapkg/juliapkg.json"
+            self.json_pkg_list = self.get_json_pkg_list()
+            self.required_packages = REQUIRED_PACKAGES
+        except Exception as e:
+            logger.error("Error in __init__ (initializing JuliaEnv): %s", e)
 
     def update(self):
         """
@@ -47,17 +51,20 @@ class JuliaEnv:
         the environment's dependencies.
         Setting the IS_USER_CONFIGURED variable to True will deactivate the update.
         """
-        if IS_USER_CONFIGURED:
-            return
+        try:
+            if IS_USER_CONFIGURED:
+                return
 
-        for required_pkg in self.required_packages:
-            if required_pkg.name in self.json_pkg_list:
-                if self.parse_version(required_pkg):
-                    continue
-            self.new_json_pkg_list()
-            self.write_json()
-            juliapkg.resolve(force=True)
-            break
+            for required_pkg in self.required_packages:
+                if required_pkg.name in self.json_pkg_list:
+                    if self.parse_version(required_pkg):
+                        continue
+                self.new_json_pkg_list()
+                self.write_json()
+                juliapkg.resolve(force=True)
+                break
+        except Exception as e:
+            logger.error("Error in update (updating Julia environment): %s", e)
 
     def get_json_pkg_list(self) -> dict:
         """
@@ -67,12 +74,16 @@ class JuliaEnv:
         Returns: dict
 
         """
-        if not os.path.exists(self.json_path):
-            return {}
-        with open(self.json_path, "r") as f:
-            juliapkg_data = json.load(f)
+        try:
+            if not os.path.exists(self.json_path):
+                return {}
+            with open(self.json_path, "r") as f:
+                juliapkg_data = json.load(f)
 
-        return juliapkg_data.get("packages", [])
+            return juliapkg_data.get("packages", [])
+        except Exception as e:
+            logger.error("Error in get_json_pkg_list (reading/parsing juliapkg.json): %s", e)
+            return {}
 
     def parse_version(self, required_pkg) -> bool:
         """
@@ -87,26 +98,32 @@ class JuliaEnv:
                     if package_info.get("version", []) == required_pkg.version:
                         return True
                     return False
-        except:
-            LookupError("Package not found")
+        except Exception as e:
+            logger.error("Error in parse_version (comparing package versions): %s", e)
+        return False
 
     def write_json(self):
         """
         This function writes the updated list of packages to the JSON file
         It also creates the JSON file if it does not exist.
         """
-        if "packages" not in self.json_pkg_list:
-            self.json_pkg_list = {"packages": self.json_pkg_list}
-        with open(self.json_path, "w") as f:
-            json.dump(self.json_pkg_list, f)
+        try:
+            if "packages" not in self.json_pkg_list:
+                self.json_pkg_list = {"packages": self.json_pkg_list}
+            with open(self.json_path, "w") as f:
+                json.dump(self.json_pkg_list, f)
+        except Exception as e:
+            logger.error("Error in write_json (writing to juliapkg.json): %s", e)
 
     def new_json_pkg_list(self):
         """
         This function updates the list of packages with the required packages
         """
-
-        for required_pkg in self.required_packages:
-            self.json_pkg_list[required_pkg.name] = {
-                "uuid": required_pkg.uuid,
-                "version": required_pkg.version,
-            }
+        try:
+            for required_pkg in self.required_packages:
+                self.json_pkg_list[required_pkg.name] = {
+                    "uuid": required_pkg.uuid,
+                    "version": required_pkg.version,
+                }
+        except Exception as e:
+            logger.error("Error in new_json_pkg_list (updating package list): %s", e)
