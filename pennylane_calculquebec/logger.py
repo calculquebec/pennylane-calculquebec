@@ -10,7 +10,7 @@ logger.setLevel(logging.INFO)
 
 handler = logging.FileHandler(LOG_PATH, mode="a", encoding="utf-8")
 formatter = logging.Formatter(
-    f'The plugin version is {__version__} | %(asctime)s | Incident: %(message)s',
+    f'%(asctime)s - The plugin version is {__version__} | Incident: %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 ) 
 handler.setFormatter(formatter)
