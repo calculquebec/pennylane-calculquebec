@@ -1,14 +1,14 @@
 @startuml monarq.default sequence
 participant user
 participant MonarqDevice as dev
-participant Transpiler as trans
+participant PreProcessor as trans <<transpiler>>
 participant PostProcessor as post
 participant PreProcStep as preproc
 participant PostProcStep as postproc
 participant ApiJob as job
 participant ApiAdapter as adapter
 
-user -> dev : run job
+user -> dev : calls qnode
 dev -> trans : transpile
 loop all preprocessing steps
     trans -> preproc : execute
