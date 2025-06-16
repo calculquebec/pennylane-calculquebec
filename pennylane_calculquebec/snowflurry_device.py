@@ -18,6 +18,7 @@ from pennylane.devices import (
 from pennylane.typing import Result, ResultBatch
 from ._version import __version__
 import importlib.util
+from pennylane_calculquebec.logger import logger
 
 if importlib.util.find_spec("juliacall") is None:
     raise Exception("""
@@ -198,41 +199,45 @@ class SnowflurryQubitDevice(Device):
             Result (tuple): a single result if a single circuit is executed, or a tuple of results if a batch of
             circuits is executed.
         """
-        is_single_circuit = False
-        if isinstance(circuits, QuantumScript):
-            is_single_circuit = True
-            circuits = [circuits]
+        try:
+            is_single_circuit = False
+            if isinstance(circuits, QuantumScript):
+                is_single_circuit = True
+                circuits = [circuits]
 
-        if self.tracker.active:
-            for c in circuits:
-                self.tracker.update(resources=c.specs["resources"])
-            self.tracker.update(batches=1, executions=len(circuits))
-            self.tracker.record()
+            if self.tracker.active:
+                for c in circuits:
+                    self.tracker.update(resources=c.specs["resources"])
+                self.tracker.update(batches=1, executions=len(circuits))
+                self.tracker.record()
 
-        # Check if execution_config is an instance of ExecutionConfig
-        if isinstance(execution_config, ExecutionConfig):
-            interface = (
-                execution_config.interface
-                if execution_config.gradient_method in {"backprop", None}
-                else None
+            # Check if execution_config is an instance of ExecutionConfig
+            if isinstance(execution_config, ExecutionConfig):
+                interface = (
+                    execution_config.interface
+                    if execution_config.gradient_method in {"backprop", None}
+                    else None
+                )
+            else:
+                # Fallback or default behavior if execution_config is not an instance of ExecutionConfig
+                interface = None
+
+            results = tuple(
+                PennylaneConverter(
+                    circuit,
+                    debugger=self._debugger,
+                    interface=interface,
+                    host=self.host,
+                    user=self.user,
+                    access_token=self.access_token,
+                    project_id=self.project_id,
+                    realm=self.realm,
+                    wires=self.num_wires,
+                ).simulate()
+                for circuit in circuits
             )
-        else:
-            # Fallback or default behavior if execution_config is not an instance of ExecutionConfig
-            interface = None
 
-        results = tuple(
-            PennylaneConverter(
-                circuit,
-                debugger=self._debugger,
-                interface=interface,
-                host=self.host,
-                user=self.user,
-                access_token=self.access_token,
-                project_id=self.project_id,
-                realm=self.realm,
-                wires=self.num_wires,
-            ).simulate()
-            for circuit in circuits
-        )
-
-        return results[0] if is_single_circuit else results
+            return results[0] if is_single_circuit else results
+        except Exception as e:
+            logger.error("Error %s in execute located in SnowflurryQubitDevice: %s", type(e).__name__, e)
+            return None

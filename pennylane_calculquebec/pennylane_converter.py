@@ -24,6 +24,7 @@ from pennylane_calculquebec.measurements import (
     ExpectationValue,
     State
 )
+from pennylane_calculquebec.logger import logger
 
 
 if importlib.util.find_spec("juliacall") is None:
@@ -114,287 +115,203 @@ class PennylaneConverter:
         realm="",
         wires=None
     ):
+        try:
+            # Instance attributes related to PennyLane
+            self.pennylane_circuit = pennylane_circuit
+            self.debugger = debugger
+            self.interface = interface
+            self.wires = wires
 
-        # Instance attributes related to PennyLane
-        self.pennylane_circuit = pennylane_circuit
-        self.debugger = debugger
-        self.interface = interface
-        self.wires = wires
+            # Instance attributes related to Snowflurry
+            self.snowflurry_namespace = define_snowflurry_namespace()
+            self.snowflurry_py_circuit = None
+            if (
+                len(host) != 0
+                and len(user) != 0
+                and len(access_token) != 0
+                and len(realm) != 0
+            ):
+                self.snowflurry_namespace.currentClient = self.snowflurry_namespace.Client(
+                    host=host, user=user, access_token=access_token, realm=realm
+                )
+                self.snowflurry_namespace.seval('project_id="' + project_id + '"')
+            else:
+                self.snowflurry_namespace.currentClient = None
 
-        # Instance attributes related to Snowflurry
-        self.snowflurry_namespace = define_snowflurry_namespace()
-        self.snowflurry_py_circuit = None
-        if (
-            len(host) != 0
-            and len(user) != 0
-            and len(access_token) != 0
-            and len(realm) != 0
-        ):
-            self.snowflurry_namespace.currentClient = self.snowflurry_namespace.Client(
-                host=host, user=user, access_token=access_token, realm=realm
-            )
-            self.snowflurry_namespace.seval('project_id="' + project_id + '"')
-        else:
-            self.snowflurry_namespace.currentClient = None
-
-        self.measurementStrategy = None
+            self.measurementStrategy = None
+        except Exception as e:
+            logger.error("Error %s in __init__ located in PennylaneConverter: %s", type(e).__name__, e)
 
     def simulate(self):
-        self.snowflurry_py_circuit = self.convert_circuit(
-            self.pennylane_circuit
-        )
-        return self.measure_final_state()
+        try:
+            self.snowflurry_py_circuit = self.convert_circuit(
+                self.pennylane_circuit
+            )
+            return self.measure_final_state()
+        except Exception as e:
+            logger.error("Error %s in simulate located in PennylaneConverter: %s", type(e).__name__, e)
+            return None
 
     def convert_circuit(
         self, pennylane_circuit: QuantumTape,
     ):
-        """
-        Convert the received pennylane circuit into a snowflurry device in julia.
-        It is then store into self.snowflurry_namespace.sf_circuit
+        try:
+            wires_nb = self.wires  # default number of wires in the circuit
+            self.snowflurry_namespace.sf_circuit = self.snowflurry_namespace.QuantumCircuit(qubit_count=wires_nb)
 
-        Args:
-            pennylane_circuit (QuantumTape): The circuit to simulate.
+            prep = None
+            if len(pennylane_circuit) > 0 and isinstance(
+                pennylane_circuit[0], qml.operation.StatePrepBase
+            ):
+                prep = pennylane_circuit[0]
 
-        Returns:
-            Tuple[TensorLike, bool]: A tuple containing the final state of the quantum script and
-                a boolean indicating if the state has a batch dimension.
-        """
+            # Add gates to Snowflurry circuit
+            for op in pennylane_circuit.operations[bool(prep):]:
+                if op.name in SNOWFLURRY_OPERATION_MAP:
+                    if SNOWFLURRY_OPERATION_MAP[op.name] == NotImplementedError:
+                        logger.warning("%s is not implemented yet, skipping...", op.name)
+                        continue
+                    parameters = op.parameters + [i + 1 for i in op.wires.tolist()]
+                    gate = SNOWFLURRY_OPERATION_MAP[op.name].format(*parameters)
+                    self.snowflurry_namespace.seval(f"push!(sf_circuit,{gate})")
+                else:
+                    logger.warning("%s is not supported by this device. skipping...", op.name)
 
-        wires_nb = self.wires  # default number of wires in the circuit
-        self.snowflurry_namespace.sf_circuit = self.snowflurry_namespace.QuantumCircuit(qubit_count=wires_nb)
-
-        prep = None
-        if len(pennylane_circuit) > 0 and isinstance(
-            pennylane_circuit[0], qml.operation.StatePrepBase
-        ):
-            prep = pennylane_circuit[0]
-
-        # Add gates to Snowflurry circuit
-        for op in pennylane_circuit.operations[bool(prep):]:
-            if op.name in SNOWFLURRY_OPERATION_MAP:
-                if SNOWFLURRY_OPERATION_MAP[op.name] == NotImplementedError:
-                    print(f"{op.name} is not implemented yet, skipping...")
-                    continue
-                parameters = op.parameters + [i + 1 for i in op.wires.tolist()]
-                gate = SNOWFLURRY_OPERATION_MAP[op.name].format(*parameters)
-                self.snowflurry_namespace.seval(f"push!(sf_circuit,{gate})")
-            else:
-                print(f"{op.name} is not supported by this device. skipping...")
-
-        return self.snowflurry_namespace.sf_circuit
+            return self.snowflurry_namespace.sf_circuit
+        except Exception as e:
+            logger.error("Error %s in convert_circuit located in PennylaneConverter: %s", type(e).__name__, e)
+            return None
 
     def apply_readouts(self, obs):
-        """
-        Apply readouts to all wires in the snowflurry circuit.
+        try:
+            if obs is None:  # if no observable is given, we apply readouts to all wires
+                for wire in range(self.wires):
+                    self.snowflurry_namespace.seval(f"push!(sf_circuit, readout({wire + 1}, {wire + 1}))")
+            else:
+                # if an observable is given, we apply readouts to the wires mentioned in the observable,
+                # TODO : could add Pauli rotations to get the correct observable
+                self.apply_single_readout(obs.wires[0])
+        except Exception as e:
+            logger.error("Error %s in apply_readouts located in PennylaneConverter: %s", type(e).__name__, e)
 
-        Args:
-            obs (Optional[Observable]): The observable mentioned in the measurement process. If None,
-                readouts are applied to all wires because we assume the user wants to measure all wires.
-        """
-
-        if obs is None:  # if no observable is given, we apply readouts to all wires
-            for wire in range(self.wires):
-                self.snowflurry_namespace.seval(f"push!(sf_circuit, readout({wire + 1}, {wire + 1}))")
-
-        else:
-            # if an observable is given, we apply readouts to the wires mentioned in the observable,
-            # TODO : could add Pauli rotations to get the correct observable
-            self.apply_single_readout(obs.wires[0])
-    
     def get_circuit_as_dictionary(self):
-        """
-        Take the snowflurry QuantumCircuit.instructions and convert it to an array of operations.
-        When instruction is called from Snowflurry, PyCall returns a jlwrap object which is not easily
-        iterable. This function is used to convert the jlwrap object to a Python dictionary.
+        try:
+            ops = []
+            instructions = (
+                self.snowflurry_namespace.namespace.sf_circuit.instructions
+            )  # instructions is a jlwrap object
+            gate_str = ""
+            gate_name = ""
 
-        Returns:
-            Dict [str, [int]]: A dictionary containing the operations and an array of the wires they are
-                applied to.
+            for inst in instructions:
 
-        Example:
-            >>> self.snowflurry_namespace.sf_circuit.instructions
-            [<PyCall.jlwrap Gate Object: Snowflurry.Hadamard
-            Connected_qubits        : [1]
-            Operator:
-            (2, 2)-element Snowflurry.DenseOperator:
-            Underlying data ComplexF64:
-            0.7071067811865475 + 0.0im    0.7071067811865475 + 0.0im
-            0.7071067811865475 + 0.0im    -0.7071067811865475 + 0.0im
-            >, <PyCall.jlwrap Gate Object: Snowflurry.ControlX
-            Connected_qubits        : [2, 1]
-            Operator:
-            (4, 4)-element Snowflurry.DenseOperator:
-            Underlying data ComplexF64:
-            1.0 + 0.0im    0.0 + 0.0im    0.0 + 0.0im    0.0 + 0.0im
-            0.0 + 0.0im    1.0 + 0.0im    0.0 + 0.0im    0.0 + 0.0im
-            0.0 + 0.0im    0.0 + 0.0im    0.0 + 0.0im    1.0 + 0.0im
-            0.0 + 0.0im    0.0 + 0.0im    1.0 + 0.0im    0.0 + 0.0im
-            >, <PyCall.jlwrap Explicit Readout object:
-            connected_qubit: 1
-            destination_bit: 1
-            >]
+                gate_str = str(inst)  # convert the jlwrap object to a string
 
-            Becomes:
-            [{'gate': 'Snowflurry.Hadamard', 'connected_qubits': [1]},
-            {'gate': 'Snowflurry.ControlX', 'connected_qubits': [1, 2]},
-            {'gate': 'Readout', 'connected_qubits': [1]}]
+                try:
+                    if self.snowflurry_gate_object_name in gate_str:
+                        # if the gate is a Gate object, we extract the name and the connected qubits
+                        # from the string with a regex
+                        gate_name = re.search(
+                            self.snowflurry_str_search_pattern, gate_str
+                        ).group(1)
+                        op_data = {
+                            "gate": gate_name,
+                            "connected_qubits": list(inst.connected_qubits),
+                        }
+                    if self.snowflurry_readout_name in gate_str:
+                        # if the gate is a Readout object, we extract the connected qubit from the string
+                        gate_name = self.snowflurry_readout_name
+                        op_data = {
+                            "gate": gate_name,
+                            "connected_qubits": [inst.connected_qubit],
+                        }
+                except Exception as e_inner:
+                    logger.error("Error %s in get_circuit_as_dictionary (parsing %s) located in PennylaneConverter: %s", type(e_inner).__name__, gate_str, e_inner)
+                    raise ValueError(f"Error while parsing {gate_str}: {e_inner}")
 
+                ops.append(op_data)
 
-        """
-        ops = []
-        instructions = (
-            self.snowflurry_namespace.namespace.sf_circuit.instructions
-        )  # instructions is a jlwrap object
-        gate_str = ""
-        gate_name = ""
-
-        for inst in instructions:
-
-            gate_str = str(inst)  # convert the jlwrap object to a string
-
-            try:
-                if self.snowflurry_gate_object_name in gate_str:
-                    # if the gate is a Gate object, we extract the name and the connected qubits
-                    # from the string with a regex
-                    gate_name = re.search(
-                        self.snowflurry_str_search_pattern, gate_str
-                    ).group(1)
-                    op_data = {
-                        "gate": gate_name,
-                        "connected_qubits": list(inst.connected_qubits),
-                    }
-                if self.snowflurry_readout_name in gate_str:
-                    # if the gate is a Readout object, we extract the connected qubit from the string
-                    gate_name = self.snowflurry_readout_name
-                    op_data = {
-                        "gate": gate_name,
-                        "connected_qubits": [inst.connected_qubit],
-                    }
-                # NOTE : attribute for the Gate object is connected_qubits (plural)
-                # while the attribute for the Readout object is connected_qubit (singular)
-
-            except:
-                raise ValueError(f"Error while parsing {gate_str}")
-
-            ops.append(op_data)
-
-        return ops
+            return ops
+        except Exception as e:
+            logger.error("Error %s in get_circuit_as_dictionary located in PennylaneConverter: %s", type(e).__name__, e)
+            return []
 
     def has_readout(self) -> bool:
-        """
-        Check if a readout is applied on any of the wires in the snowflurry circuit.
-
-        Returns:
-            bool: True if a readout is applied, False otherwise.
-        """
-        ops = self.get_circuit_as_dictionary()
-        for op in ops:
-            if op["gate"] == self.snowflurry_readout_name:
-                return True
-        return False
+        try:
+            ops = self.get_circuit_as_dictionary()
+            for op in ops:
+                if op["gate"] == self.snowflurry_readout_name:
+                    return True
+            return False
+        except Exception as e:
+            logger.error("Error %s in has_readout located in PennylaneConverter: %s", type(e).__name__, e)
+            return False
 
     def remove_readouts(self):
-        """
-        Remove all readouts from the snowflurry circuit with pop!() function.
-
-        """
-        # RFE : eventually, removing the readouts could be done by making a copy
-        # of the instructions vector and removing the readouts from it before
-        # contructing a new QuantumCircuit with that vector.
-        while self.has_readout():
-            self.snowflurry_namespace.namespace.seval("pop!(sf_circuit)")
+        try:
+            while self.has_readout():
+                self.snowflurry_namespace.namespace.seval("pop!(sf_circuit)")
+        except Exception as e:
+            logger.error("Error %s in remove_readouts located in PennylaneConverter: %s", type(e).__name__, e)
 
     def apply_single_readout(self, wire):
-        """
-        Apply a readout to a single wire in the snowflurry circuit.
+        try:
+            ops = self.get_circuit_as_dictionary()
 
-        Args:
-            wire (int): The wire to apply the readout to.
-        """
-        ops = self.get_circuit_as_dictionary()
+            for op in ops:
+                if op["gate"] == self.snowflurry_readout_name:
+                    if op["connected_qubits"] == wire - 1:  # wire is 1-indexed in Julia
+                        return
 
-        for op in ops:
-            # if a readout is already applied to the wire, we don't apply another one
-            if op["gate"] == self.snowflurry_readout_name:
-                if op["connected_qubits"] == wire - 1:  # wire is 1-indexed in Julia
-                    return
-
-        # if no readout is applied to the wire, we apply one while taking into account that
-        # the wire number is 1-indexed in Julia
-        self.snowflurry_namespace.namespace.seval(f"push!(sf_circuit, readout({wire+1}, {wire+1}))")
+            self.snowflurry_namespace.namespace.seval(f"push!(sf_circuit, readout({wire+1}, {wire+1}))")
+        except Exception as e:
+            logger.error("Error %s in apply_single_readout located in PennylaneConverter: %s", type(e).__name__, e)
 
     def measure_final_state(self):
-        """
-        Perform the measurements required by the circuit on the provided state.
+        try:
+            circuit = self.pennylane_circuit.map_to_standard_wires()
+            shots = circuit.shots.total_shots
+            if shots is None:
+                shots = 1
 
-        This is an internal function that will be called by the successor to ``default.qubit``.
+            if len(circuit.measurements) == 1:
+                results = self.measure(
+                    circuit.measurements[0], shots
+                )
+            else:
+                results = tuple(
+                    self.measure(mp, shots)
+                    for mp in circuit.measurements
+                )
 
-        Returns:
-            Tuple[TensorLike]: The measurement results
-        """
-        # circuit.shots can return the total number of shots with .total_shots or
-        # it can return ShotCopies with .shot_vector
-        # the case with ShotCopies is not handled as of now
-
-        circuit = self.pennylane_circuit.map_to_standard_wires()
-        shots = circuit.shots.total_shots
-        if shots is None:
-            shots = 1
-
-        if len(circuit.measurements) == 1:
-            results = self.measure(
-                circuit.measurements[0], shots
-            )
-        else:
-            results = tuple(
-                self.measure(mp, shots)
-                for mp in circuit.measurements
-            )
-
-        return results
+            return results
+        except Exception as e:
+            logger.error("Error %s in measure_final_state located in PennylaneConverter: %s", type(e).__name__, e)
+            return None
 
     def measure(self, mp: MeasurementProcess, shots):
-        """
-        Measure the quantum state using the provided measurement process.
-
-        Args:
-            mp (MeasurementProcess): The measurement process to perform
-            shots (int): The number of shots
-
-        Returns:
-            result: The measurement result TODO : type needs to be unified
-
-        Currently supported measurements :
-            - counts(works with Snowflurry.simulate_shots)
-            - sample(works with Snowflurry.simulate_shots)
-            - probs(works with Snowflurry.get_measurement_probabilities)
-            - expval(works with Snowflurry.simulate and Snowflurry.expected_value)
-            - state(works with Snowflurry.simulate and Snowflurry.result_state)
-
-        """
-        self.measurementStrategy = self.get_strategy(mp)
-        result = self.measurementStrategy.measure(self, mp, shots)
-        return result
+        try:
+            self.measurementStrategy = self.get_strategy(mp)
+            result = self.measurementStrategy.measure(self, mp, shots)
+            return result
+        except Exception as e:
+            logger.error("Error %s in measure located in PennylaneConverter: %s", type(e).__name__, e)
+            return None
 
     def get_strategy(self, mp: MeasurementProcess):
-        """
-        Get the strategy to use for the measurement process.
-
-        Args:
-            mp (MeasurementProcess): The measurement process to perform
-
-        Returns:
-            MeasurementStrategy: The strategy to use for the measurement process
-        """
-        if isinstance(mp, CountsMP):
-            return Counts()
-        elif isinstance(mp, SampleMP):
-            return Sample()
-        elif isinstance(mp, ProbabilityMP):
-            return Probabilities()
-        elif isinstance(mp, ExpectationMP):
-            return ExpectationValue()
-        elif isinstance(mp, StateMP):
-            return State()
-        else:
-            raise ValueError(f"Measurement process {mp} is not supported by this device.")
+        try:
+            if isinstance(mp, CountsMP):
+                return Counts()
+            elif isinstance(mp, SampleMP):
+                return Sample()
+            elif isinstance(mp, ProbabilityMP):
+                return Probabilities()
+            elif isinstance(mp, ExpectationMP):
+                return ExpectationValue()
+            elif isinstance(mp, StateMP):
+                return State()
+            else:
+                raise ValueError(f"Measurement process {mp} is not supported by this device.")
+        except Exception as e:
+            logger.error("Error %s in get_strategy located in PennylaneConverter: %s", type(e).__name__, e)
+            raise
