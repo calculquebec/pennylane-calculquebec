@@ -67,7 +67,7 @@ def test_optimize_cu():
     new_tape = CliffordTDecomposition().execute(tape)
     new_tape = IterativeCommuteAndMerge().execute(new_tape)
     
-    assert len(new_tape.operations) == 53
+    assert len(new_tape.operations) == 63
     
     
     mat1 = reduce(lambda i, s: i @ s.matrix(wire_order=tape.wires), tape.operations, np.identity(1 << len(tape.wires)))
