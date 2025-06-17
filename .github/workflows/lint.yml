@@ -24,4 +24,4 @@ jobs:
             There appear to be some python formatting errors in ${{ github.sha }}. This pull request
             uses the [psf/black](https://github.com/psf/black) formatter to fix these issues.
           base: ${{ github.head_ref }}
-          branch: actions/black
+          branch: reformat/${{ github.ref_name }}
