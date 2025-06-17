@@ -1,5 +1,5 @@
-"""this is the top level module for the Pennylane Snowflurry plugin. It is used for communicating with MonarQ.
-"""
+"""this is the top level module for the Pennylane Snowflurry plugin. It is used for communicating with MonarQ."""
+
 import importlib.util
 
 

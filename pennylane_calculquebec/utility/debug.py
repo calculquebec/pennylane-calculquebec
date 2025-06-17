@@ -11,7 +11,8 @@ import numpy as np
 import pennylane_calculquebec.processing.custom_gates as custom
 import random
 
-def compute_expval(probabilities : list[float]) -> float:
+
+def compute_expval(probabilities: list[float]) -> float:
     """Compute the expectation value using the parity of each outcome
 
     Args:
@@ -26,12 +27,13 @@ def compute_expval(probabilities : list[float]) -> float:
 
     expval = 0
     for i, prob in enumerate(probabilities):
-        hamming_weight = bin(i).count('1')  # Count the 1s in the binary representation
+        hamming_weight = bin(i).count("1")  # Count the 1s in the binary representation
         parity = (-1) ** hamming_weight  # +1 for even parity, -1 for odd parity
         expval += prob * parity
     return expval
 
-def probs_to_counts(probs : list, count : int) -> dict[str, int]:
+
+def probs_to_counts(probs: list, count: int) -> dict[str, int]:
     """turns probabilities into counts
 
     Args:
@@ -42,10 +44,10 @@ def probs_to_counts(probs : list, count : int) -> dict[str, int]:
         dict[str, int]: the counts
     """
     bit_length = np.log2(len(probs))
-    return {label_from(i, bit_length) : round(p * count) for i, p in enumerate(probs)}
-        
+    return {label_from(i, bit_length): round(p * count) for i, p in enumerate(probs)}
 
-def counts_to_probs(counts : dict) -> list[float]:
+
+def counts_to_probs(counts: dict) -> list[float]:
     """converts counts into probabilities
 
     Args:
@@ -56,7 +58,10 @@ def counts_to_probs(counts : dict) -> list[float]:
     """
     max_count = sum(counts.values())
     all_labels = get_labels(2 ** len(list(counts.keys())[0]) - 1)
-    return [(counts[label] if label in counts else 0) / max_count for label in all_labels]
+    return [
+        (counts[label] if label in counts else 0) / max_count for label in all_labels
+    ]
+
 
 def are_tape_same_probs(tape1, tape2):
     """execute two tapes and check if they yield the same probabilities
@@ -79,13 +84,14 @@ def are_tape_same_probs(tape1, tape2):
 
     if isinstance(results2, dict):
         results2 = counts_to_probs(results2)
-    
+
     results1 = np.round(results1, tolerance_place)
     results2 = np.round(results2, tolerance_place)
 
     return np.array_equal(results1, results2)
 
-def to_qasm(tape : QuantumTape) -> str:
+
+def to_qasm(tape: QuantumTape) -> str:
     """turns a quantum tape into a qasm string
 
     Args:
@@ -95,25 +101,47 @@ def to_qasm(tape : QuantumTape) -> str:
         str: the resulting qasm2 string
     """
     eq = {
-        "PauliX" : "x", "PauliY" : "y", "PauliZ" : "z", "Identity" : "id",
-        "RX" : "rx", "RY" : "ry", "RZ" : "rz", "PhaseShift" : "p", "Hadamard" : "h",
-        "S" : "s", "Adjoint(S)" : "sdg", "SX" : "sx", "Adjoint(SX)" : "sxdg", "T" : "t", "Adjoint(T)" : "tdg", 
-        "CNOT" : "cx", "CY" : "cy", "CZ" : "cz", "SWAP" : "swap",
-        "Z90" : "s", "ZM90" : "sdg", "X90" : "sx", "XM90" : "sxdg", "Y90" : "ry(pi/2)", "YM90" : "ry(3*pi/2)",
-        "TDagger" : "tdg", "CRY" : "cry"
+        "PauliX": "x",
+        "PauliY": "y",
+        "PauliZ": "z",
+        "Identity": "id",
+        "RX": "rx",
+        "RY": "ry",
+        "RZ": "rz",
+        "PhaseShift": "p",
+        "Hadamard": "h",
+        "S": "s",
+        "Adjoint(S)": "sdg",
+        "SX": "sx",
+        "Adjoint(SX)": "sxdg",
+        "T": "t",
+        "Adjoint(T)": "tdg",
+        "CNOT": "cx",
+        "CY": "cy",
+        "CZ": "cz",
+        "SWAP": "swap",
+        "Z90": "s",
+        "ZM90": "sdg",
+        "X90": "sx",
+        "XM90": "sxdg",
+        "Y90": "ry(pi/2)",
+        "YM90": "ry(3*pi/2)",
+        "TDagger": "tdg",
+        "CRY": "cry",
     }
     total_string = ""
     for op in tape.operations:
         string = eq[op.name]
-        if len(op.parameters) > 0:            
-            string += "(" + str(op.parameters[0]) + ")" 
+        if len(op.parameters) > 0:
+            string += "(" + str(op.parameters[0]) + ")"
         string += " "
         string += ", ".join([f"q[{w}]" for w in op.wires])
         string += ";"
         total_string += string + "\n"
     return total_string
 
-def get_labels(up_to : int):
+
+def get_labels(up_to: int):
     """gets bitstrings from 0 to "up_to" value
 
     Args:
@@ -126,16 +154,17 @@ def get_labels(up_to : int):
     Returns:
         list[str]: bitstrings from 0 to the upper bounds
     """
-    
-    if not isinstance(up_to, int): 
+
+    if not isinstance(up_to, int):
         raise ValueError("up_to must be an int")
     if up_to < 0:
         raise ValueError("up_to must be >= 0")
-    
+
     num = int(np.log2(up_to)) + 1
     return [format(i, f"0{num}b") for i in range(up_to + 1)]
 
-def get_measurement_wires(tape : QuantumTape):
+
+def get_measurement_wires(tape: QuantumTape):
     """returns the wires that are used for measurement
 
     Args:
@@ -148,8 +177,9 @@ def get_measurement_wires(tape : QuantumTape):
     for mp in tape.measurements:
         measurement_wires += list(mp.wires)
     return set(measurement_wires)
-    
-def label_from(number : int, binary_places : int):
+
+
+def label_from(number: int, binary_places: int):
     """get a bitstring out of a number. ie 27 with binary place 8 would be 00011011
 
     Args:

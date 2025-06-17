@@ -11,7 +11,7 @@ from pennylane.ops import Prod
 def test_execute():
     obs = [qml.Z(0), qml.X(0), qml.Y(0), qml.Hadamard(0), qml.X(0) @ qml.Y(1), None]
     step = DecomposeReadout()
-    
+
     # X, Y, Z and H
     for observable in obs:
         tape = QuantumTape([], [qml.counts(observable)])
@@ -20,7 +20,7 @@ def test_execute():
         assert len(tape.operations) == len(diag) and len(tape.measurements) == 1
         for i, op in enumerate(tape.operations):
             assert op == diag[i]
-    
+
     obs = [qml.S(0), qml.PauliX(0) @ qml.PauliZ(0)]
 
     # unsupported observable

@@ -10,8 +10,8 @@ from pennylane_calculquebec.logger import logger
 
 
 class BaseDecomposition(PreProcStep):
-    """The purpose of this transpiler step is to turn the gates in a circuit to a simpler, more easily usable set of gates
-    """
+    """The purpose of this transpiler step is to turn the gates in a circuit to a simpler, more easily usable set of gates"""
+
     @property
     def base_gates(self):
         """
@@ -21,27 +21,48 @@ class BaseDecomposition(PreProcStep):
             list[str] : the named of gates to apply the decomposition with
         """
         return []
-    
-    def execute(self, tape : QuantumTape) -> QuantumTape:
+
+    def execute(self, tape: QuantumTape) -> QuantumTape:
         try:
-            def stop_at(operation : Operation):
+
+            def stop_at(operation: Operation):
                 # TODO : voir quelles portes on veut stop at
                 return operation.name in self.base_gates
 
-            # pennylane create_expand_fn does the job for us 
+            # pennylane create_expand_fn does the job for us
             custom_expand_fn = transforms.create_expand_fn(depth=9, stop_at=stop_at)
             tape = custom_expand_fn(tape)
             return tape
         except Exception as e:
-            logger.error("Error %s in execute located in BaseDecomposition: %s", type(e).__name__, e)
+            logger.error(
+                "Error %s in execute located in BaseDecomposition: %s",
+                type(e).__name__,
+                e,
+            )
             return tape
+
 
 class CliffordTDecomposition(BaseDecomposition):
     """A decompostition that should be done first in the transpiling process. \n
-    It expands gates to equivalent sets of gates, until all gates are part of the clifford + t + rz gate set. 
+    It expands gates to equivalent sets of gates, until all gates are part of the clifford + t + rz gate set.
     """
+
     @property
     def base_gates(self):
-        return ["Adjoint(T)", "Adjoint(S)", "SX", "Adjoint(SX)", 
-                  "T", "PauliX", "PauliY", "PauliZ", "S", "Hadamard", 
-                  "CZ", "CNOT", "RZ", "RX", "RY"]
+        return [
+            "Adjoint(T)",
+            "Adjoint(S)",
+            "SX",
+            "Adjoint(SX)",
+            "T",
+            "PauliX",
+            "PauliY",
+            "PauliZ",
+            "S",
+            "Hadamard",
+            "CZ",
+            "CNOT",
+            "RZ",
+            "RX",
+            "RY",
+        ]

@@ -1,16 +1,17 @@
 """
 Contains an experiment function for generating documentation using pydoc\n
-this is a WIP and should probably not be used   
+this is a WIP and should probably not be used
 """
 
 import os
 import pydoc
 
+
 def generate_pydoc(directory, output_dir):
     """
     Generates pydoc documentation for all Python modules in the specified directory and its subdirectories.
-    
-    Args:   
+
+    Args:
         directory (str): The root directory to search for Python files.
         output_dir (str): The directory to save the generated HTML documentation.
     """
@@ -24,7 +25,7 @@ def generate_pydoc(directory, output_dir):
                 file_path = os.path.join(root, file)
                 relative_path = os.path.relpath(file_path, directory)
                 module_name = relative_path.replace(os.sep, ".").replace(".py", "")
-                
+
                 try:
                     # Generate the HTML documentation
                     print(f"Generating documentation for module: {module_name}")
@@ -34,8 +35,9 @@ def generate_pydoc(directory, output_dir):
                 except Exception as e:
                     print(f"Failed to generate documentation for {module_name}: {e}")
 
+
 # Example usage
 if __name__ == "__main__":
     source_dir = "."  # Replace with the directory containing your Python files
-    output_dir = "./doc_output"        # Replace with the desired output directory
+    output_dir = "./doc_output"  # Replace with the desired output directory
     generate_pydoc(source_dir, output_dir)
