@@ -4,11 +4,16 @@ Contains the Device implementation of monarq.default
 
 from pennylane.tape import QuantumTape
 from pennylane_calculquebec.processing import PostProcessor
-from pennylane_calculquebec.processing.config import ProcessingConfig, MonarqDefaultConfig
+from pennylane_calculquebec.processing.config import (
+    ProcessingConfig,
+    MonarqDefaultConfig,
+)
 from pennylane_calculquebec.API.client import ApiClient
 from pennylane_calculquebec.API.job import Job
 from pennylane_calculquebec.device_exception import DeviceException
 from pennylane_calculquebec.monarq_device import MonarqDevice
+
+
 class MonarqBackup(MonarqDevice):
     """Backup device for interfacing with Anyon's quantum Hardware.
 
@@ -28,9 +33,9 @@ class MonarqBackup(MonarqDevice):
     name = "MonarqBackup"
     short_name = "monarq.backup"
 
-    def __init__(self, wires=None, shots=None, client = None, processing_config = None):
+    def __init__(self, wires=None, shots=None, client=None, processing_config=None):
         super().__init__(wires, shots, client, processing_config)
-    
+
     @property
     def machine_name(self):
         return "yukon"

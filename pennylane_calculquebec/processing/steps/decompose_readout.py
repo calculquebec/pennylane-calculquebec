@@ -8,13 +8,15 @@ from pennylane.tape import QuantumTape
 import pennylane as qml
 import pennylane.math as math
 from pennylane_calculquebec.processing.processing_exception import ProcessingException
+
+
 class DecomposeReadout(PreProcStep):
 
-    def execute(self, tape : QuantumTape):
+    def execute(self, tape: QuantumTape):
         """
         implementation of the execution method from pre-processing steps. \n
         for each observable, if it is a product, decompose it. \n
-        if it is a single observable, add the right rotation before the readout, 
+        if it is a single observable, add the right rotation before the readout,
         and change the observable to computational basis
 
         Args:
@@ -32,16 +34,18 @@ class DecomposeReadout(PreProcStep):
         matrices = []
 
         for measurement in tape.measurements:
-            if(measurement.obs is None):
+            if measurement.obs is None:
                 measurements.append(measurement)
                 continue
-            
+
             mat = qml.matrix(measurement.obs)
-            
+
             if not math.allclose(mat.conj().T, mat):
-                raise ProcessingException(f"The observable {measurement.obs} is not supported")
-            
+                raise ProcessingException(
+                    f"The observable {measurement.obs} is not supported"
+                )
+
             operations += measurement.obs.diagonalizing_gates()
             measurements.append(type(measurement)(wires=measurement.wires))
-            
+
         return type(tape)(operations, measurements, shots=tape.shots)

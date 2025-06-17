@@ -9,9 +9,10 @@ from pennylane.measurements import MeasurementProcess
 import numpy as np
 from base64 import b64encode
 
+
 class ApiUtility:
     @staticmethod
-    def convert_instruction(instruction : Operation) -> dict[str, any]:
+    def convert_instruction(instruction: Operation) -> dict[str, any]:
         """converts a Pennylane operation to a dictionary that can be read by the Thunderhead API
 
         Args:
@@ -22,19 +23,23 @@ class ApiUtility:
         """
         if instruction.name not in instructions:
             raise ValueError("This instruction is not supported")
-        
+
         operation = {
-            keys.QUBITS : [wire for wire in instruction.wires],
-            keys.TYPE : instructions[instruction.name]
+            keys.QUBITS: [wire for wire in instruction.wires],
+            keys.TYPE: instructions[instruction.name],
         }
-        if instruction.name in parametered_ops: 
-            value = instruction.parameters[0][0] if isinstance(instruction.parameters[0], np.ndarray) else instruction.parameters[0]
-            operation[keys.PARAMETERS] = {"lambda" : value}
-            
+        if instruction.name in parametered_ops:
+            value = (
+                instruction.parameters[0][0]
+                if isinstance(instruction.parameters[0], np.ndarray)
+                else instruction.parameters[0]
+            )
+            operation[keys.PARAMETERS] = {"lambda": value}
+
         return operation
-    
+
     @staticmethod
-    def convert_circuit(circuit : QuantumTape) -> dict[str, any]:
+    def convert_circuit(circuit: QuantumTape) -> dict[str, any]:
         """converts a pennylane quantum script to a dictionary that can be read by the Thunderhead API
 
         Args:
@@ -45,23 +50,24 @@ class ApiUtility:
         """
 
         circuit_dict = {
-            keys.TYPE : keys.CIRCUIT,
-            keys.BIT_COUNT : 24,
-            keys.OPERATIONS : [ApiUtility.convert_instruction(operation) for operation in circuit.operations],
-            keys.QUBIT_COUNT : 24
+            keys.TYPE: keys.CIRCUIT,
+            keys.BIT_COUNT: 24,
+            keys.OPERATIONS: [
+                ApiUtility.convert_instruction(operation)
+                for operation in circuit.operations
+            ],
+            keys.QUBIT_COUNT: 24,
         }
         wires = [wire for wire in circuit.wires]
         for measurement in circuit.measurements:
             for bit, qubit in enumerate(measurement.wires):
-                circuit_dict[keys.OPERATIONS].append({
-                    keys.QUBITS : [qubit],
-                    keys.BITS : [bit],
-                    keys.TYPE : "readout"
-                })
+                circuit_dict[keys.OPERATIONS].append(
+                    {keys.QUBITS: [qubit], keys.BITS: [bit], keys.TYPE: "readout"}
+                )
         return circuit_dict
-    
+
     @staticmethod
-    def basic_auth(username : str, password : str) -> str:
+    def basic_auth(username: str, password: str) -> str:
         """create a basic authentication token from a Thunderhead username and access token
 
         Args:
@@ -71,11 +77,11 @@ class ApiUtility:
         Returns:
             str: the basic authentification string that will authenticate you with the API
         """
-        token = b64encode(f"{username}:{password}".encode('ascii')).decode("ascii")
-        return f'Basic {token}'
-    
+        token = b64encode(f"{username}:{password}".encode("ascii")).decode("ascii")
+        return f"Basic {token}"
+
     @staticmethod
-    def headers(username : str, password : str, realm : str) -> dict[str, str]:
+    def headers(username: str, password: str, realm: str) -> dict[str, str]:
         """the Thunderhead API headers
 
         Args:
@@ -87,13 +93,19 @@ class ApiUtility:
             dict[str, any]: a dictionary representing the request headers
         """
         return {
-            "Authorization" : ApiUtility.basic_auth(username, password),
-            "Content-Type" : "application/json",
-            "X-Realm" : realm
+            "Authorization": ApiUtility.basic_auth(username, password),
+            "Content-Type": "application/json",
+            "X-Realm": realm,
         }
-    
+
     @staticmethod
-    def job_body(circuit : dict[str, any], circuit_name : str, project_id : str, machine_name : str, shots) -> dict[str, any]:
+    def job_body(
+        circuit: dict[str, any],
+        circuit_name: str,
+        project_id: str,
+        machine_name: str,
+        shots,
+    ) -> dict[str, any]:
         """the body for the job creation request
 
         Args:
@@ -107,13 +119,14 @@ class ApiUtility:
             dict[str, any]: the body for the job creation request
         """
         body = {
-            keys.NAME : circuit_name,
-            keys.PROJECT_ID : project_id,
-            keys.MACHINE_NAME : machine_name,
-            keys.SHOT_COUNT : shots,
-            keys.CIRCUIT : circuit,
+            keys.NAME: circuit_name,
+            keys.PROJECT_ID: project_id,
+            keys.MACHINE_NAME: machine_name,
+            keys.SHOT_COUNT: shots,
+            keys.CIRCUIT: circuit,
         }
         return body
+
 
 class JobStatus(Enum):
     SUCCEEDED = "SUCCEEDED"
@@ -122,17 +135,19 @@ class JobStatus(Enum):
     RUNNING = "RUNNING"
     CANCELLED = "CANCELLED"
 
+
 class queries:
     MACHINE_NAME = "?machineName"
     NAME = "?name"
+
 
 class routes:
     JOBS = "/jobs"
     PROJECTS = "/projects"
     MACHINES = "/machines"
     BENCHMARKING = "/benchmarking"
-    
-    
+
+
 class keys:
     NAME = "name"
     STATUS = "status"
@@ -162,25 +177,23 @@ class keys:
     ITEMS = "items"
     ID = "id"
 
-instructions : dict[str, str] = {
-    "Identity" : "i",
-    "PauliX" : "x",
-    "X90" : "x_90",
-    "XM90" : "x_minus_90",
-    "PauliY" : "y",
-    "Y90" : "y_90",
-    "YM90" : "y_minus_90",
-    "PauliZ" : "z",
-    "Z90" : "z_90",
-    "ZM90" : "z_minus_90",
-    "T" : "t",
-    "TDagger" : "t_dag",
-    "CZ" : "cz",
-    "PhaseShift" : "p",
-    "RZ" : "rz"
+
+instructions: dict[str, str] = {
+    "Identity": "i",
+    "PauliX": "x",
+    "X90": "x_90",
+    "XM90": "x_minus_90",
+    "PauliY": "y",
+    "Y90": "y_90",
+    "YM90": "y_minus_90",
+    "PauliZ": "z",
+    "Z90": "z_90",
+    "ZM90": "z_minus_90",
+    "T": "t",
+    "TDagger": "t_dag",
+    "CZ": "cz",
+    "PhaseShift": "p",
+    "RZ": "rz",
 }
 
-parametered_ops : list[str] = [
-    "RZ", 
-    "PhaseShift"
-]
+parametered_ops: list[str] = ["RZ", "PhaseShift"]
