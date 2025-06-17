@@ -3,6 +3,7 @@ import tempfile
 import logging
 from pennylane_calculquebec.logger import logger  # Replace with actual import
 
+
 def test_logger_creates_virtual_folder_and_logs_message(monkeypatch):
     with tempfile.TemporaryDirectory() as tmp_dir:
         log_path = os.path.join(tmp_dir, "virtual", "pennylane_calculquebec.log")
