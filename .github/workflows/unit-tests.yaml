@@ -1,0 +1,29 @@
+name: Unit tests
+
+on: pull_request
+# TODO Need to make it trigger on 1. All PRs 2. Pushes on main and dev
+
+jobs:
+  unit-tests:
+    name: Run unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+# TODO Need to look into the installation of dependencies from the pyproject.toml
+
+      - name: Run unit tests with pytest
+        run: |
+          python -m pytest tests/
