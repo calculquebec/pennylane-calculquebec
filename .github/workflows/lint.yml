@@ -1,0 +1,27 @@
+name: Lint
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Format code with Black
+        uses: psf/black@stable
+        with:
+          options: "--verbose"
+          jupyter: 'true'
+          src: "./doc ./pennylane_calculquebec ./tests"
+
+      - name: Create PR with changes
+        uses: peter-evans/create-pull-request@v7
+        with:
+          title: "Format Python code with psf/black"
+          body: |
+            There appear to be some python formatting errors in ${{ github.sha }}. This pull request
+            uses the [psf/black](https://github.com/psf/black) formatter to fix these issues.
+          base: ${{ github.head_ref }}
+          branch: actions/black
