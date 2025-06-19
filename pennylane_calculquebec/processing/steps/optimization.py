@@ -7,19 +7,26 @@ import pennylane as qml
 from pennylane.tape import QuantumTape
 from pennylane_calculquebec.utility.optimization import expand, is_single_axis_gate
 import pennylane.transforms as transforms
-from pennylane_calculquebec.processing.optimization_methods.iterative_commute_and_merge import commute_and_merge
+from pennylane_calculquebec.processing.optimization_methods.iterative_commute_and_merge import (
+    commute_and_merge,
+)
 from pennylane_calculquebec.processing.interfaces import PreProcStep
+from pennylane_calculquebec.logger import logger
+
 
 class Optimize(PreProcStep):
     """
     Optimization step base class.
     """
+
     pass
+
 
 class IterativeCommuteAndMerge(Optimize):
     """
     Decomposes iteratively until the circuit contains only rotations. For each decomposition step, applies commutations, merges and cancellations
     """
+
     def execute(self, tape):
         """
         decomposes swaps, cnots and hadamards iteratively. Then turns everything to Z and X rotations. \n
@@ -31,24 +38,35 @@ class IterativeCommuteAndMerge(Optimize):
         Returns:
             QuantumTape: an optimized QuantumTape
         """
-        tape = commute_and_merge(tape)
+        try:
+            tape = commute_and_merge(tape)
 
-        tape = expand(tape, { "SWAP" : IterativeCommuteAndMerge.swap_cnot})
-        tape = commute_and_merge(tape)
-        
-        tape = expand(tape, { "CNOT" : IterativeCommuteAndMerge.HCZH_cnot })
-        tape = commute_and_merge(tape)
-        
-        tape = expand(tape, { "Hadamard" : IterativeCommuteAndMerge.ZXZ_Hadamard })
-        tape = commute_and_merge(tape)
-        
-        tape = transforms.create_expand_fn(depth=3, stop_at=lambda operation: operation.name in ["RZ", "RX", "RY", "CZ"])(tape)
-        tape = commute_and_merge(tape)
-        
-        tape = IterativeCommuteAndMerge.get_rid_of_y_rotations(tape)
-        tape = commute_and_merge(tape)
-        return tape    
-    
+            tape = expand(tape, {"SWAP": IterativeCommuteAndMerge.swap_cnot})
+            tape = commute_and_merge(tape)
+
+            tape = expand(tape, {"CNOT": IterativeCommuteAndMerge.HCZH_cnot})
+            tape = commute_and_merge(tape)
+
+            tape = expand(tape, {"Hadamard": IterativeCommuteAndMerge.ZXZ_Hadamard})
+            tape = commute_and_merge(tape)
+
+            tape = transforms.create_expand_fn(
+                depth=3,
+                stop_at=lambda operation: operation.name in ["RZ", "RX", "RY", "CZ"],
+            )(tape)
+            tape = commute_and_merge(tape)
+
+            tape = IterativeCommuteAndMerge.get_rid_of_y_rotations(tape)
+            tape = commute_and_merge(tape)
+            return tape
+        except Exception as e:
+            logger.error(
+                "Error %s in execute located in IterativeCommuteAndMerge: %s",
+                type(e).__name__,
+                e,
+            )
+            return tape
+
     @staticmethod
     def swap_cnot(wires):
         """
@@ -56,19 +74,27 @@ class IterativeCommuteAndMerge(Optimize):
 
         Args:
             wires (WireLike): which wires do the swap act on
-        
+
         Returns:
             list[Operation] : cnot(a, b) cnot(b, a) cnot(a, b)
         """
-        if len(wires) != 2:
-            raise ValueError("SWAPs must be given two wires")
-        
-        return [ 
-            qml.CNOT([wires[0], wires[1]]),
-            qml.CNOT([wires[1], wires[0]]),
-            qml.CNOT([wires[0], wires[1]])
-        ]
-            
+        try:
+            if len(wires) != 2:
+                raise ValueError("SWAPs must be given two wires")
+
+            return [
+                qml.CNOT([wires[0], wires[1]]),
+                qml.CNOT([wires[1], wires[0]]),
+                qml.CNOT([wires[0], wires[1]]),
+            ]
+        except Exception as e:
+            logger.error(
+                "Error %s in swap_cnot located in IterativeCommuteAndMerge: %s",
+                type(e).__name__,
+                e,
+            )
+            return []
+
     @staticmethod
     def HCZH_cnot(wires):
         """Decomposition for a cnot using CZ and H
@@ -82,14 +108,18 @@ class IterativeCommuteAndMerge(Optimize):
         Returns:
             list[Operation]: the list of operations corresponding to a CNOT using CZ and H
         """
-        if len(wires) != 2:
-            raise ValueError("cnots must be given two wires")
-        
-        return [
-            qml.Hadamard(wires[1]),
-            qml.CZ(wires),
-            qml.Hadamard(wires[1])
-        ]
+        try:
+            if len(wires) != 2:
+                raise ValueError("cnots must be given two wires")
+
+            return [qml.Hadamard(wires[1]), qml.CZ(wires), qml.Hadamard(wires[1])]
+        except Exception as e:
+            logger.error(
+                "Error %s in HCZH_cnot located in IterativeCommuteAndMerge: %s",
+                type(e).__name__,
+                e,
+            )
+            return []
 
     @staticmethod
     def ZXZ_Hadamard(wires):
@@ -104,15 +134,18 @@ class IterativeCommuteAndMerge(Optimize):
         Returns:
             list[Operation]: a list of operations corresponding to H
         """
-        
-        if len(wires) != 1:
-            raise ValueError("Hadamards must be given one wire")
-        
-        return [
-            qml.S(wires),
-            qml.SX(wires),
-            qml.S(wires)
-        ]
+        try:
+            if len(wires) != 1:
+                raise ValueError("Hadamards must be given one wire")
+
+            return [qml.S(wires), qml.SX(wires), qml.S(wires)]
+        except Exception as e:
+            logger.error(
+                "Error %s in ZXZ_Hadamard located in IterativeCommuteAndMerge: %s",
+                type(e).__name__,
+                e,
+            )
+            return []
 
     @staticmethod
     def Y_to_ZXZ(operation):
@@ -128,16 +161,28 @@ class IterativeCommuteAndMerge(Optimize):
         Returns:
             list[Operation]: The equivalent sequence of X/Z gates for an arbitrary Y rotation
         """
-        if len(operation.wires) != 1:
-            raise ValueError("Single qubit rotations must be given one wire")
-        
-        if operation.basis != "Y":
-            raise ValueError("Operation must be in the Y basis")
-        rot_angles = operation.single_qubit_rot_angles()
-        return [qml.RZ(-np.pi/2, operation.wires), qml.RX(rot_angles[1], operation.wires), qml.RZ(np.pi/2, operation.wires)]
+        try:
+            if len(operation.wires) != 1:
+                raise ValueError("Single qubit rotations must be given one wire")
+
+            if operation.basis != "Y":
+                raise ValueError("Operation must be in the Y basis")
+            rot_angles = operation.single_qubit_rot_angles()
+            return [
+                qml.RZ(-np.pi / 2, operation.wires),
+                qml.RX(rot_angles[1], operation.wires),
+                qml.RZ(np.pi / 2, operation.wires),
+            ]
+        except Exception as e:
+            logger.error(
+                "Error %s in Y_to_ZXZ located in IterativeCommuteAndMerge: %s",
+                type(e).__name__,
+                e,
+            )
+            return []
 
     @staticmethod
-    def get_rid_of_y_rotations(tape : QuantumTape):
+    def get_rid_of_y_rotations(tape: QuantumTape):
         """Transforms all Y rotations in a tape to X and Z rotations
 
         Args:
@@ -146,11 +191,19 @@ class IterativeCommuteAndMerge(Optimize):
         Returns:
             QuantumTape: the processed tape
         """
-        list_copy = tape.operations.copy()
-        new_operations = []
-        for operation in list_copy:
-            if not is_single_axis_gate(operation, "Y"): 
-                new_operations += [operation]
-            else:
-                new_operations += IterativeCommuteAndMerge.Y_to_ZXZ(operation)
-        return type(tape)(new_operations, tape.measurements, tape.shots)
+        try:
+            list_copy = tape.operations.copy()
+            new_operations = []
+            for operation in list_copy:
+                if not is_single_axis_gate(operation, "Y"):
+                    new_operations += [operation]
+                else:
+                    new_operations += IterativeCommuteAndMerge.Y_to_ZXZ(operation)
+            return type(tape)(new_operations, tape.measurements, tape.shots)
+        except Exception as e:
+            logger.error(
+                "Error %s in get_rid_of_y_rotations located in IterativeCommuteAndMerge: %s",
+                type(e).__name__,
+                e,
+            )
+            return tape

@@ -11,7 +11,9 @@ class Counts(MeasurementStrategy):
         if self.Snowflurry.currentClient is None:
             converter.remove_readouts()
             converter.apply_readouts(mp.obs)
-            shots_results = self.Snowflurry.simulate_shots(self.Snowflurry.sf_circuit, shots)
+            shots_results = self.Snowflurry.simulate_shots(
+                self.Snowflurry.sf_circuit, shots
+            )
             result = dict(Counter(shots_results))
             return result
         else:  # if we have a client, we use the real machine

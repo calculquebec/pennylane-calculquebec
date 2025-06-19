@@ -1,0 +1,58 @@
+@startuml
+'https://plantuml.com/class-diagram
+set separator ::
+
+skinparam backgroundColor transparent
+
+abstract class pennylane::Device{
+shots : Shots
+wires : Wires
+preprocess()
+{abstract} execute()
+}
+
+class pennylane-calculquebec::BaseDevice{
+machine_name
+preprocess()
+execute()
+{abstract} measure()
+}
+
+note right of BaseDevice::machine_name
+this is used to retrieve
+benchmarks before transpiling
+end note
+
+note right of BaseDevice::preprocess
+where transpilation is done
+end note
+
+note right of BaseDevice::execute
+where experiments are run
+end note
+
+note right of BaseDevice::measure
+specificities of execution are
+defined here
+end note
+
+class pennylane-calculquebec::MonarqDevice{
+machine_name = "yamaska"
+measure()
+}
+
+class pennylane-calculquebec::MonarqSim{
+machine_name = "yamaska"
+measure()
+}
+
+class pennylane-calculquebec::MonarqBackup{
+machine_name = "yukon"
+}
+
+Device <|.. BaseDevice
+BaseDevice <|-- MonarqDevice
+BaseDevice <|-- MonarqSim
+MonarqDevice <|-- MonarqBackup
+
+@enduml
