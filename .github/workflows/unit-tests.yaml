@@ -1,7 +1,16 @@
 name: Unit tests
 
-on: pull_request
-# TODO Need to make it trigger on 1. All PRs 2. Pushes on main and dev
+on:
+  push:
+    # Trigger on all pushes to main and dev branches regardless of the files changed (failsafe)
+    branches:
+      - main
+      - dev
+  pull_request:
+    paths:
+      - ".github/workflows/unit-tests.yaml" # Trigger on changes to this workflow file
+      - "pennylane_calculquebec/**"
+      - "tests/**"
 
 jobs:
   unit-tests:
