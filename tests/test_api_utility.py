@@ -100,3 +100,23 @@ def test_body():
     assert result[keys.PROJECT_ID] == "c"
     assert result[keys.MACHINE_NAME] == "d"
     assert result[keys.SHOT_COUNT] == "e"
+
+@pytest.fixture
+def mock_tape():
+    """A simple mock quantum circuit for testing convert_circuit."""
+    ops = [qml.Hadamard(wires=0), qml.CNOT(wires=[0, 1])]
+    measurements = [qml.counts(wires=[0, 1])]
+    return QuantumTape(ops, measurements)
+
+## This checks if the bits associated with the measurement is a sequence starting at 0
+def test_convert_circuit(mock_tape):
+    circuit_dict = ApiUtility.convert_circuit(mock_tape)
+    # Extract the operations of type "readout" from the circuit dictionary
+    readout_operations = [
+        operation for operation in circuit_dict.get("operations", [])
+        if operation.get("type") == "readout"
+    ]
+    # Collect the bits from the readout operations
+    measurement_bits = [bit for operation in readout_operations for bit in operation.get("bits", [])]
+    # Check if the bits are a sequence starting at 0
+    assert measurement_bits == list(range(len(measurement_bits))), "Measurement bits are not a sequence starting at 0"
