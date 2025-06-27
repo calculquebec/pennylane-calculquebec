@@ -22,12 +22,13 @@ jobs:
       - name: Create PR with changes
         uses: peter-evans/create-pull-request@v7
         with:
-          title: "Format Python code with psf/black"
+          title: Format code in ${{github.head_ref}} branch
           body: |
-            There appear to be some python formatting errors in ${{ github.sha }}. This pull request
-            uses the [psf/black](https://github.com/psf/black) formatter to fix these issues.
+            There appear to be some python formatting errors in ${{ github.ref_name }}. This pull request
+            uses the [psf/black](https://github.com/psf/black) formatter to fix these issues. Please review the 
+            changes and merge if appropriate.
           base: ${{ github.head_ref }}
-          branch: reformat/${{ github.ref_name }}
+          branch: reformat/${{ github.head_ref }}
 
       - name: Fail if files are formatted by psf/black
         if: ${{ steps.black.outputs.exit_code == 1 }}
