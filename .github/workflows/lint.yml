@@ -12,8 +12,10 @@ jobs:
 
       - name: Format code with Black
         uses: psf/black@stable
+        id: black
+        continue-on-error: true
         with:
-          options: "--verbose"
+          options: "--verbose --check"
           jupyter: 'true'
           src: "./doc ./pennylane_calculquebec ./tests"
 
@@ -26,3 +28,16 @@ jobs:
             uses the [psf/black](https://github.com/psf/black) formatter to fix these issues.
           base: ${{ github.head_ref }}
           branch: reformat/${{ github.ref_name }}
+
+      - name: Fail if files are formatted by psf/black
+        if: ${{ steps.black.outputs.exit_code == 1 }}
+        run: |
+          echo "There are formatting issues in the code. Please review the pull request created by psf/black."
+          exit 1
+
+      - name: Fail if psf/black fails
+        if: ${{ steps.black.outputs.exit_code != 0 }}
+        run: |
+          echo "psf/black could not be run successfully. Please check the logs for more details."
+          exit 1
+      
