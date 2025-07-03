@@ -262,6 +262,18 @@ def test_get_machine_by_name(mock_requests_get):
 
 
 def test_get_project_id_by_name(mock_requests_get):
+    """
+    Test the get_project_id_by_name method of ApiAdapter.
+
+    The method should handle various scenarios including:
+
+    - Raising an ApiException when the request fails.
+    - Raising an ApiException when the response is not as expected.
+    - Raising an MultipleProjectsException when multiple projects with the same name are found.
+    - Raising an NoProjectFoundException when no projects are found for the given name.
+    - Successfully returning the project ID when a single project is found with the given name.
+    """
+
     ApiAdapter.clean_cache()
 
     ApiAdapter.initialize(client)
