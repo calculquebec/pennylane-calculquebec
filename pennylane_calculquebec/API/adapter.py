@@ -167,7 +167,17 @@ class ApiAdapter(object):
             ApiAdapter.raise_exception(res)
 
         converted = json.loads(res.text)
-        return converted[keys.ITEMS][0][keys.ID]
+
+        projects = converted.get(keys.ITEMS, [])
+        matching_projects = [p for p in projects if p.get(keys.NAME) == project_name]
+
+        if len(matching_projects) > 1:
+            raise MultipleProjectsException(matching_projects)
+
+        if len(matching_projects) == 1:
+            return matching_projects[0][keys.ID]
+
+        raise NoProjectFoundException(project_name)
 
     @staticmethod
     @retry(3)
