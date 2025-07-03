@@ -19,6 +19,58 @@ class ApiException(Exception):
 
     def __init__(self, code: int, message: str):
         self.message = f"API ERROR : {code}, {message}"
+        super().__init__(self.message)
+
+
+# TODO : Move this exception to a separate module
+class ProjectException(Exception):
+    """
+    An exception that is thrown when something goes wrong the parsing of a project
+
+    Args:
+        - message (str) : the message for the error
+    """
+
+    def __init__(self, message: str):
+        self.message = f"PROJECT ERROR : {message}"
+        super().__init__(self.message)
+
+
+class MultipleProjectsException(ProjectException):
+    """
+    An exception that is thrown when multiple projects with the same name are found.
+    It displays the projects names and corresponding IDs.
+
+    Args:
+        - projects (list) : the list of projects that were found with the same name
+    """
+
+    def __init__(self, projects: list):
+
+        message = (
+            f"Multiple projects found with the same name. When creating client, "
+            f"please use the project ID instead of the name.\n"
+            "Projects found:\n"
+        )
+        for project in projects:
+            message += (
+                f"Project Name: {project[keys.NAME]}, Project ID: {project[keys.ID]}\n"
+            )
+        super().__init__(message)
+
+
+class NoProjectFoundException(ProjectException):
+    """
+    An exception that is thrown when no project with the given name is found.
+    It displays the name of the project that was not found.
+
+    Args:
+        - message (str) : the message for the error
+    """
+
+    def __init__(self, project_name: str):
+        message = f"No project found with name: {project_name}"
+        super().__init__(message)
 
 
 class ApiAdapter(object):
