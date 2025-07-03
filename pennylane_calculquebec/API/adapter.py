@@ -144,7 +144,16 @@ class ApiAdapter(object):
 
     @staticmethod
     @retry(3)
-    def get_project_id_by_name(project_name: str) -> str:
+    def get_project_id_by_name(project_name: str = "default") -> str:
+        """
+        Get the id of a project by using the project's name stored in the client
+
+        Args:
+            project_name (str) : The name of the project you want to fetch. Defaults to "default"
+
+        Returns:
+            project_id (str) : The id of the project
+        """
         res = requests.get(
             ApiAdapter.instance().client.host
             + routes.PROJECTS
