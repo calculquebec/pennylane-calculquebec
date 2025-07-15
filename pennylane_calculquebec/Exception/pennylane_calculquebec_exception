@@ -1,0 +1,14 @@
+from abc import ABC, abstractmethod
+
+class PennylaneCalculQuebecException(Exception, ABC):
+
+    """Base class for all exceptions in the Pennylane CalculQuebec module."""
+
+    def __init__(self, message: str):
+        super().__init__(message)
+        self.message = message
+
+    @abstractmethod
+    def __str__(self) -> str:
+        """Return a string representation of the exception."""
+        return self.message
