@@ -26,14 +26,11 @@ def generate_pydoc(directory, output_dir):
                 relative_path = os.path.relpath(file_path, directory)
                 module_name = relative_path.replace(os.sep, ".").replace(".py", "")
 
-                try:
-                    # Generate the HTML documentation
-                    print(f"Generating documentation for module: {module_name}")
-                    output_file = os.path.join(output_dir, f"{module_name}.html")
-                    with open(output_file, "w") as f:
-                        f.write(pydoc.HTMLDoc().docmodule(pydoc.importfile(file_path)))
-                except Exception as e:
-                    print(f"Failed to generate documentation for {module_name}: {e}")
+                # Generate the HTML documentation
+                print(f"Generating documentation for module: {module_name}")
+                output_file = os.path.join(output_dir, f"{module_name}.html")
+                with open(output_file, "w") as f:
+                    f.write(pydoc.HTMLDoc().docmodule(pydoc.importfile(file_path)))
 
 
 # Example usage

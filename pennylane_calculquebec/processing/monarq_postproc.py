@@ -35,30 +35,22 @@ class PostProcessor:
             Returns:
                 QuantumTape : The processed results
             """
-            try:
-                wires = (
-                    tape.wires
-                    if circuit_wires is None or len(tape.wires) > len(circuit_wires)
-                    else circuit_wires
-                )
-                expanded_tape = PostProcessor.expand_full_measurements(tape, wires)
+            wires = (
+                tape.wires
+                if circuit_wires is None or len(tape.wires) > len(circuit_wires)
+                else circuit_wires
+            )
+            expanded_tape = PostProcessor.expand_full_measurements(tape, wires)
 
-                postproc_steps = [
-                    step
-                    for step in behaviour_config.steps
-                    if isinstance(step, PostProcStep)
-                ]
-                processed_results = deepcopy(results)
-                for step in postproc_steps:
-                    processed_results = step.execute(expanded_tape, processed_results)
-                return processed_results
-            except Exception as e:
-                logger.error(
-                    "Error %s in get_processor.process located in PostProcessor: %s",
-                    type(e).__name__,
-                    e,
-                )
-                return results
+            postproc_steps = [
+                step
+                for step in behaviour_config.steps
+                if isinstance(step, PostProcStep)
+            ]
+            processed_results = deepcopy(results)
+            for step in postproc_steps:
+                processed_results = step.execute(expanded_tape, processed_results)
+            return processed_results
 
         return process
 
@@ -73,19 +65,11 @@ class PostProcessor:
         Returns:
             QuantumTape: transformed tape
         """
-        try:
-            mps = []
-            for mp in tape.measurements:
-                if mp.wires == None or len(mp.wires) < 1:
-                    mps.append(type(mp)(wires=wires))
-                else:
-                    mps.append(mp)
+        mps = []
+        for mp in tape.measurements:
+            if mp.wires == None or len(mp.wires) < 1:
+                mps.append(type(mp)(wires=wires))
+            else:
+                mps.append(mp)
 
-            return type(tape)(tape.operations, mps, shots=tape.shots)
-        except Exception as e:
-            logger.error(
-                "Error %s in expand_full_measurements located in PostProcessor: %s",
-                type(e).__name__,
-                e,
-            )
-            return tape
+        return type(tape)(tape.operations, mps, shots=tape.shots)

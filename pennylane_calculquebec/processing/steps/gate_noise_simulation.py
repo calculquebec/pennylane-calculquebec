@@ -35,7 +35,6 @@ class GateNoiseSimulation(PreProcStep):
         return data.monarq_native_gates()
 
     def execute(self, tape):
-        try:
             # build qubit noise from readout 1 fidelity using typical value if benchmark should not be used
             connectivity = data.get_connectivity(self.machine_name, self.use_benchmark)
             qubit_count = len(set([a for b in connectivity.values() for a in b]))
@@ -117,10 +116,4 @@ class GateNoiseSimulation(PreProcStep):
                     )
 
             return type(tape)(operations, tape.measurements, tape.shots)
-        except Exception as e:
-            logger.error(
-                "Error %s in execute located in GateNoiseSimulation: %s",
-                type(e).__name__,
-                e,
-            )
-            return tape
+
