@@ -16,6 +16,7 @@ from pennylane_calculquebec.processing.steps import (
     PrintTape,
 )
 from typing import Callable
+from pennylane_calculquebec.calcul_quebec_error.utility_error import UtilityError
 
 
 class ProcessingConfig:
@@ -31,6 +32,10 @@ class ProcessingConfig:
     def __init__(self, *args: BaseStep):
         self._steps = []
         for arg in args:
+            # Custom error: arg must be instance of BaseStep (domain-specific, not enforced by Python)
+            if not isinstance(arg, BaseStep):
+                # Prevents silent logic errors if a non-step is passed
+                raise UtilityError(f"All arguments to ProcessingConfig must be BaseStep instances, got {type(arg)}.")
             self._steps.append(arg)
 
     @property
@@ -62,6 +67,10 @@ class ProcessingConfig:
         return True
 
     def __getitem__(self, idx: int) -> BaseStep:
+        # Custom error: idx must be within bounds (domain-specific, not enforced by Python)
+        if idx < 0 or idx >= len(self._steps):
+            # Prevents silent logic errors and IndexError with a more descriptive message
+            raise UtilityError(f"Index {idx} is out of bounds for steps list.")
         """returns step at index idx
 
         Args:
@@ -73,6 +82,11 @@ class ProcessingConfig:
         return self._steps[idx]
 
     def __setitem__(self, idx: int, value: BaseStep) -> None:
+        # Custom error: idx must be within bounds and value must be BaseStep
+        if idx < 0 or idx >= len(self._steps):
+            raise UtilityError(f"Index {idx} is out of bounds for steps list.")
+        if not isinstance(value, BaseStep):
+            raise UtilityError(f"Value assigned at index {idx} must be a BaseStep instance, got {type(value)}.")
         """Sets the item at index idx to given value
 
         Args:

@@ -10,6 +10,7 @@ import pennylane as qml
 import numpy as np
 import pennylane_calculquebec.processing.custom_gates as custom
 import random
+from pennylane_calculquebec.calcul_quebec_error.utility_error import UtilityError
 
 
 def compute_expval(probabilities: list[float]) -> float:
@@ -131,6 +132,10 @@ def to_qasm(tape: QuantumTape) -> str:
     }
     total_string = ""
     for op in tape.operations:
+        # Custom error: op.name must be in eq mapping (prevents KeyError and clarifies unsupported gate)
+        if op.name not in eq:
+            # Prevents silent logic errors if a gate is not supported in QASM mapping
+            raise UtilityError(f"Operation '{op.name}' is not supported for QASM conversion.")
         string = eq[op.name]
         if len(op.parameters) > 0:
             string += "(" + str(op.parameters[0]) + ")"

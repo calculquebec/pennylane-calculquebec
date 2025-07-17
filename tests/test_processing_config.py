@@ -1,8 +1,9 @@
 from pennylane_calculquebec.processing.config import *
 from pennylane_calculquebec.processing.steps import *
+from pennylane_calculquebec.processing.interfaces.base_step import BaseStep
 
 
-class Step:
+class Step(BaseStep):
     def __init__(self, arg):
         self.arg = arg
 

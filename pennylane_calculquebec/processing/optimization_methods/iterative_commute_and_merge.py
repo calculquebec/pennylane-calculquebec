@@ -2,7 +2,7 @@
 Contains utility classes for the iterative commute and merge optimization pre-processing step.
 """
 
-from pennylane.tape import QuantumTape
+from pennylane.tape import QuantumTape, QuantumScript
 from pennylane_calculquebec.utility.optimization import (
     find_previous_gate,
     find_next_gate,
@@ -12,7 +12,7 @@ import numpy as np
 from autograd.numpy.numpy_boxes import ArrayBox
 from pennylane.ops.op_math.adjoint import adjoint, Adjoint
 from pennylane_calculquebec.logger import logger
-
+from pennylane_calculquebec.calcul_quebec_error.optimization_error import OptimizationError
 
 def remove_root_zs(tape: QuantumTape, iterations=3) -> QuantumTape:
     """
@@ -25,6 +25,8 @@ def remove_root_zs(tape: QuantumTape, iterations=3) -> QuantumTape:
     Returns :
         - (QuantumTape) : the resulting quantum tape
     """
+    if not isinstance(iterations, int) or iterations <= 0:
+        raise OptimizationError("Iterations must be a positive integer.")
     new_operations = tape.operations.copy()
     for _ in range(iterations):
         list_copy = new_operations.copy()
@@ -102,8 +104,10 @@ def _remove_trivials(tape: QuantumTape, iteration=3, epsilon=1e-8) -> QuantumTap
     for op in tape.operations:
         op, isAdjoint = _get_adjoint_base(op)
 
-        if len(op.parameters) > 0:
+        if hasattr(op, "parameters") and len(op.parameters) > 0:
             angle = op.parameters[0]
+            if not isinstance(angle, (float, int, np.ndarray, ArrayBox)):
+                raise OptimizationError("Operation parameter is not a valid angle.")
             while angle > 2 * np.pi - epsilon:
                 angle -= 2 * np.pi
             while angle < 0:
@@ -120,16 +124,18 @@ def _remove_trivials(tape: QuantumTape, iteration=3, epsilon=1e-8) -> QuantumTap
     return type(tape)(new_operations, tape.measurements, tape.shots)
 
 
-def commute_and_merge(tape: QuantumTape) -> QuantumTape:
+def commute_and_merge(tape) -> QuantumTape:
     """
     applies commutations, rotation merges and inverses/trivial gates cancellations
 
     Args:
-        tape (QuantumTape) : the tape to act on
+        tape (QuantumTape or QuantumScript) : the tape to act on
 
     Returns :
         QuantumTape : the resulting quantum tape
     """
+    if not isinstance(tape, (QuantumTape, QuantumScript)):
+        raise OptimizationError("Input is not a QuantumTape or QuantumScript.")
     iterations = 3
 
     for _ in range(iterations):

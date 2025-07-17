@@ -63,9 +63,8 @@ def test_find_biggest_group():
 
     # no group
     graph = nx.Graph([])
-    expected = []
-    results = g.find_biggest_group(graph)
-    assert all(a == b for a, b in zip(expected, results))
+    with pytest.raises(g.UtilityError):
+        g.find_biggest_group(graph)
 
 
 def test_is_directly_connected():
@@ -115,8 +114,8 @@ def test_circuit_graph():
 
     # 1 3q op
     tape = QuantumTape(ops=[qml.Toffoli([0, 1, 2])])
-    with pytest.raises(g.GraphException):
-        results = g.circuit_graph(tape)
+    with pytest.raises(g.UtilityError):
+        g.circuit_graph(tape)
 
     # no op
     tape = QuantumTape(ops=[])

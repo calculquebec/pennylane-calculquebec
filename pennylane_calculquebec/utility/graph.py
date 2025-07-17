@@ -17,6 +17,7 @@ from pennylane_calculquebec.monarq_data import (
 from pennylane_calculquebec.utility.api import keys
 from networkx.exception import NetworkXNoPath
 import sys
+from pennylane_calculquebec.calcul_quebec_error.utility_error import UtilityError
 
 MAX_INT = sys.maxsize
 
@@ -34,6 +35,10 @@ def find_biggest_group(graph: nx.Graph) -> list:
     Returns:
         list: the biggest group
     """
+    # Custom error: graph must have at least one node (networkx will not error, but domain logic may require)
+    if graph.number_of_nodes() == 0:
+        # Prevents silent logic errors if graph is empty
+        raise UtilityError("Graph is empty.")
     if graph.number_of_edges() == 0:
         return []
     return max(nx.connected_components(graph), key=len)
@@ -76,10 +81,10 @@ def circuit_graph(tape: QuantumTape) -> nx.Graph:
     links: list[Tuple[int, int]] = []
 
     for operation in tape.operations:
+        # Custom error: operation should use <= 2 wires (domain-specific, not enforced by Pennylane)
         if len(operation.wires) > 2:
-            raise GraphException(
-                "All operations in the circuit should be using <= 2 wires"
-            )
+            # Prevents silent logic errors in graph construction
+            raise UtilityError("All operations in the circuit should be using <= 2 wires")
         if len(operation.wires) < 2:
             continue
         toAdd = (operation.wires[0], operation.wires[1])
@@ -111,6 +116,10 @@ def machine_graph(
     Returns:
         nx.Graph : a graph representing the machine's topology
     """
+    # Custom error: machine_name should not be empty (domain-specific, not enforced by Python)
+    if not machine_name:
+        # Prevents silent logic errors if machine_name is missing
+        raise UtilityError("machine_name must be provided.")
     broken_qubits_and_couplers = (
         get_broken_qubits_and_couplers(q1Acceptance, q2Acceptance, machine_name)
         if use_benchmark
