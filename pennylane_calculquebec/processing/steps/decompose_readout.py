@@ -8,7 +8,8 @@ from pennylane.tape import QuantumTape
 import pennylane as qml
 import pennylane.math as math
 from pennylane_calculquebec.processing.processing_exception import ProcessingException
-
+from pennylane_calculquebec.calcul_quebec_error import steps_error
+from pennylane_calculquebec.logger import logger
 
 class DecomposeReadout(PreProcStep):
 
@@ -32,7 +33,9 @@ class DecomposeReadout(PreProcStep):
 
         measurements = []
         matrices = []
-
+        if tape.measurements is None:
+            logger.warning("The tape has no measurements, returning an empty tape.")
+            return QuantumTape(operations, [], shots=tape.shots)
         for measurement in tape.measurements:
             if measurement.obs is None:
                 measurements.append(measurement)

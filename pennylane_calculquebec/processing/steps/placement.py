@@ -6,7 +6,7 @@ from pennylane.tape import QuantumTape
 import pennylane_calculquebec.utility.graph as graph_util
 from pennylane_calculquebec.processing.interfaces import PreProcStep
 from pennylane_calculquebec.logger import logger
-
+from pennylane_calculquebec.calcul_quebec_error import steps_error
 
 class Placement(PreProcStep):
     """
@@ -73,11 +73,27 @@ class ISMAGS(Placement):
             self.excluded_qubits,
             self.excluded_couplers,
         )
-
+        if circuit_topology.number_of_nodes == 0:
+            logger.warning(
+                "The circuit has no wires, cannot place it on the machine."
+            )
+            raise steps_error(
+                "The circuit has no wires, cannot place it on the machine."
+            )
+        if machine_topology.number_of_nodes == 0:
+            logger.warning(
+                "The machine has no qubits, cannot place the circuit on it."
+            )
+            raise steps_error(
+                "The machine has no qubits, cannot place the circuit on it."
+            )
         if len(graph_util.find_biggest_group(circuit_topology)) > len(
             graph_util.find_biggest_group(machine_topology)
         ):
-            raise Exception(
+            logger.warning(
+                f"There are {machine_topology.number_of_nodes} qubits on the machine but your circuit has {circuit_topology.number_of_nodes}."
+            )
+            raise steps_error(
                 f"There are {machine_topology.number_of_nodes} qubits on the machine but your circuit has {circuit_topology.number_of_nodes}."
             )
 
@@ -172,7 +188,10 @@ class VF2(Placement):
         if len(graph_util.find_biggest_group(circuit_topology)) > len(
             graph_util.find_biggest_group(machine_topology)
         ):
-            raise Exception(
+            logger.warning(
+                f"There are {machine_topology.number_of_nodes()} qubits on the machine but your circuit has {circuit_topology.number_of_nodes()}."
+            )
+            raise steps_error(
                 f"There are {machine_topology.number_of_nodes()} qubits on the machine but your circuit has {circuit_topology.number_of_nodes()}."
             )
 
@@ -305,7 +324,10 @@ class ASTAR(Placement):
         if len(graph_util.find_biggest_group(circuit_topology)) > len(
             graph_util.find_biggest_group(machine_topology)
         ):
-            raise Exception(
+            logger.warning(
+                f"There are {machine_topology.number_of_nodes} qubits on the machine but your circuit has {circuit_topology.number_of_nodes}."
+            )
+            raise steps_error(
                 f"There are {machine_topology.number_of_nodes} qubits on the machine but your circuit has {circuit_topology.number_of_nodes}."
             )
 
@@ -319,7 +341,9 @@ class ASTAR(Placement):
                 )
             )
         )
-
+        if to_explore == []:
+            logger.warning("The circuit has no wires, cannot place it on the machine.")
+            raise steps_error("The circuit has no wires, cannot place it on the machine.")
         for source in to_explore:
             if source in mapping:
                 continue

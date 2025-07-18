@@ -9,7 +9,8 @@ import numpy as np
 from pennylane.ops.op_math import SProd
 from pennylane_calculquebec.processing.interfaces import PreProcStep
 from pennylane_calculquebec.monarq_data import monarq_native_gates
-
+from pennylane_calculquebec.calcul_quebec_error import steps_error
+from pennylane_calculquebec.logger import logger
 
 class NativeDecomposition(PreProcStep):
     """
@@ -65,6 +66,9 @@ class MonarqDecomposition(NativeDecomposition):
         """
         new_operations = []
         with qml.QueuingManager.stop_recording():
+            if tape.operations is None:
+                logger.warning("The tape has no operations, returning an empty tape.")
+                return QuantumTape([], tape.measurements, shots=tape.shots)
             for operation in tape.operations:
                 if operation.name in MonarqDecomposition._decomp_map:
                     if operation.num_params > 0:

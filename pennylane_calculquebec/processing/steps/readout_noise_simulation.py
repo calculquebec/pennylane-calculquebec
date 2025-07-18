@@ -10,7 +10,7 @@ import numpy as np
 from pennylane_calculquebec.utility.debug import get_labels, get_measurement_wires
 from pennylane_calculquebec.utility.noise import readout_error, TypicalBenchmark
 from pennylane_calculquebec.logger import logger
-
+from pennylane_calculquebec.calcul_quebec_error import steps_error
 
 class ReadoutNoiseSimulation(PostProcStep):
     """Adds readout noise on the results"""
@@ -40,6 +40,13 @@ class ReadoutNoiseSimulation(PostProcStep):
                 ]
             )
         )
+        if qubit_count ==0:
+            logger.warning(
+                "No qubits found in the machine's connectivity. Cannot apply readout noise."
+            )
+            raise steps_error(
+                "No qubits found in the machine's connectivity. Cannot apply readout noise."
+            )
         coupler_count = len(data.get_connectivity(self.machine_name, False))
 
         results = results[0] if not isinstance(results, dict) else results
@@ -56,7 +63,11 @@ class ReadoutNoiseSimulation(PostProcStep):
         readout_matrix = np.identity(1)
 
         wires = get_measurement_wires(tape)
-
+        if wires is None or len(wires) == 0:
+            logger.warning(
+                "No measurement wires found in the tape. Cannot apply readout noise."
+            )
+            raise steps_error("No measurement wires found in the tape.")
         for wire in wires:
             readout_matrix = np.kron(readout_matrix, readout_error_matrices[wire])
 

@@ -9,6 +9,7 @@ import json
 import numpy as np
 from pennylane_calculquebec.processing.interfaces import PostProcStep
 from pennylane_calculquebec.logger import logger
+from pennylane_calculquebec.calcul_quebec_error import steps_error
 
 
 def all_combinations(num_qubits):
@@ -51,7 +52,11 @@ def get_readout_fidelities(machine_name, chosen_qubits):
         a tuple appending readouts on 0 and 1 for given qubits
     """
     benchmark = ApiAdapter.get_qubits_and_couplers(machine_name)
-
+    if benchmark is None:
+        logger.warning(
+            f"Benchmark data for machine {machine_name} is not available or empty."
+        )
+        raise steps_error(f"Benchmark data for machine {machine_name} is not available or empty.")
     readout0 = {}
     readout1 = {}
     for qubit in chosen_qubits:
@@ -72,6 +77,9 @@ def get_calibration_data(machine_name, chosen_qubits):
     Returns:
         readout matrices for given qubits
     """
+    if chosen_qubits is None:
+        logger.warning("Chosen qubits cannot be None.")
+        raise steps_error("Chosen qubits cannot be None.")
     num_qubits = len(chosen_qubits)
     readout0, readout1 = get_readout_fidelities(machine_name, chosen_qubits)
     calibration_data = [
@@ -91,7 +99,14 @@ def tensor_product_calibration(calibration_matrices):
     returns all calibrations concatenated together using tensor product
     """
     readout_matrix = calibration_matrices[0]
-
+    if len(calibration_matrices) == 1:
+        logger.warning(
+            "There is only one qubit in the calibration data, tensor product is not applicable."
+        )
+        raise steps_error(
+            "There is only one qubit in the calibration data, tensor product is not applicable."
+        )
+    
     # Tensor product of calibration matrices for all qubits
     for i in range(1, len(calibration_matrices)):
         readout_matrix = np.kron(readout_matrix, calibration_matrices[i])
@@ -101,8 +116,17 @@ def tensor_product_calibration(calibration_matrices):
 
 def get_full_readout_matrix(machine_name, chosen_qubits):
     calibration_data = get_calibration_data(machine_name, chosen_qubits)
+    if calibration_data is None or len(calibration_data) == 0:
+        logger.warning(
+            "Calibration data is empty or None for the given machine and qubits."
+        )
+        raise steps_error("Calibration data is empty or None for the given machine and qubits.")
     full_readout_matrix = tensor_product_calibration(calibration_data)
-
+    if full_readout_matrix is None or full_readout_matrix.size == 0:
+        logger.warning(
+            "Full readout matrix is empty or None after tensor product calculation."
+        )
+        raise steps_error("Full readout matrix is empty or None after tensor product calculation.")
     # normalize it
     for column in range(full_readout_matrix.shape[1]):
         column_sum = np.sum(full_readout_matrix[:, column])
@@ -161,44 +185,34 @@ class IBUReadoutMitigation(PostProcStep):
         Returns:
             final probabilities (numpy.ndarray): The final estimate of the true distribution.
         """
-        try:
-            current_probs = initial_guess.copy()
+        current_probs = initial_guess.copy()
 
-            for _ in range(max_iterations):
-                next_probs = np.zeros_like(current_probs)
+        for _ in range(max_iterations):
+            next_probs = np.zeros_like(current_probs)
 
-                for true_prob in range(len(current_probs)):  # Loop over true states
-                    numerator = 0
-                    for measured_probs in range(
-                        len(noisy_probs)
-                    ):  # Loop over measured states
-                        mitigated_current_prob = np.dot(
-                            readout_matrix[measured_probs, :], current_probs
-                        )  # Compute sum_m R_im * theta_m
-                        if mitigated_current_prob != 0:  # Avoid division by zero
-                            numerator += (
-                                noisy_probs[measured_probs]
-                                * readout_matrix[measured_probs, true_prob]
-                                * current_probs[true_prob]
-                                / mitigated_current_prob
-                            )
+            for true_prob in range(len(current_probs)):  # Loop over true states
+                numerator = 0
+                for measured_probs in range(len(noisy_probs)):  # Loop over measured states
+                    mitigated_current_prob = np.dot(
+                        readout_matrix[measured_probs, :], current_probs
+                    )  # Compute sum_m R_im * theta_m
+                    if mitigated_current_prob != 0:  # Avoid division by zero
+                        numerator += (
+                            noisy_probs[measured_probs]
+                            * readout_matrix[measured_probs, true_prob]
+                            * current_probs[true_prob]
+                            / mitigated_current_prob
+                        )
 
-                    next_probs[true_prob] = numerator
+                next_probs[true_prob] = numerator
 
-                # Check for convergence
-                if np.linalg.norm(next_probs - current_probs) < tolerance:
-                    return next_probs
+            # Check for convergence
+            if np.linalg.norm(next_probs - current_probs) < tolerance:
+                return next_probs
 
-                current_probs = next_probs
+            current_probs = next_probs
 
-            return current_probs
-        except Exception as e:
-            logger.error(
-                "Error %s in iterative_bayesian_unfolding located in IBUReadoutMitigation: %s",
-                type(e).__name__,
-                e,
-            )
-            return initial_guess
+        return current_probs
 
     def execute(self, tape, results):
         """applies iterative bayesian unfolding for readout mitigation
@@ -210,31 +224,22 @@ class IBUReadoutMitigation(PostProcStep):
         Returns:
             dict[str, int]: processed results
         """
-        try:
-            chosen_qubits = get_measurement_wires(tape)
-            num_qubits = len(chosen_qubits)
-            shots = tape.shots.total_shots
+        chosen_qubits = get_measurement_wires(tape)
+        num_qubits = len(chosen_qubits)
+        shots = tape.shots.total_shots
 
-            readout_matrix = get_full_readout_matrix(self.machine_name, chosen_qubits)
-            _all_results = all_results(results, num_qubits)
-            probs = [v / shots for _, v in _all_results.items()]
+        readout_matrix = get_full_readout_matrix(self.machine_name, chosen_qubits)
+        _all_results = all_results(results, num_qubits)
+        probs = [v / shots for _, v in _all_results.items()]
 
-            result = self.iterative_bayesian_unfolding(
-                readout_matrix, probs, self.initial_guess(num_qubits)
-            )
-            result_dict = {
-                key: np.round(shots * prob)
-                for key, prob in zip(_all_results.keys(), result)
-            }
-            return result_dict
-        except Exception as e:
-            logger.error(
-                "Error %s in execute located in IBUReadoutMitigation: %s",
-                type(e).__name__,
-                e,
-            )
-            return results
-
+        result = self.iterative_bayesian_unfolding(
+            readout_matrix, probs, self.initial_guess(num_qubits)
+        )
+        result_dict = {
+            key: np.round(shots * prob)
+            for key, prob in zip(_all_results.keys(), result)
+        }
+        return result_dict
 
 class MatrixReadoutMitigation(PostProcStep):
     """
@@ -266,25 +271,17 @@ class MatrixReadoutMitigation(PostProcStep):
         Returns:
             list[int, int]: the readout matrix with only observed columns and rows
         """
-        try:
-            # Convert observed bit strings to their integer indices
-            observed_indices = [
-                all_bit_strings.index(bit_str) for bit_str in observed_bit_strings
-            ]
+        # Convert observed bit strings to their integer indices
+        observed_indices = [
+            all_bit_strings.index(bit_str) for bit_str in observed_bit_strings
+        ]
 
-            # Extract the reduced A-matrix from the full A-matrix
-            reduced_readout_matrix = readout_matrix[
-                np.ix_(observed_indices, observed_indices)
-            ]
+        # Extract the reduced A-matrix from the full A-matrix
+        reduced_readout_matrix = readout_matrix[
+            np.ix_(observed_indices, observed_indices)
+        ]
 
-            return reduced_readout_matrix
-        except Exception as e:
-            logger.error(
-                "Error %s in _get_reduced_a_matrix located in MatrixReadoutMitigation: %s",
-                type(e).__name__,
-                e,
-            )
-            return readout_matrix
+        return reduced_readout_matrix
 
     def _get_inverted_reduced_a_matrix(self, chosen_qubits: list, results: dict):
         """create iverted reduced A matrix and cache it
@@ -296,65 +293,51 @@ class MatrixReadoutMitigation(PostProcStep):
         Returns:
             list[int, int]: the matrix representation of readout errors, reduced and inverted
         """
-        try:
-            num_qubits = len(chosen_qubits)
-            # Generate the full A-matrix
-            if (
-                MatrixReadoutMitigation._readout_matrix_normalized is None
-                or ApiAdapter.is_last_update_expired()
-            ):
-                MatrixReadoutMitigation._readout_matrix_reduced = None
-                MatrixReadoutMitigation._readout_matrix_reduced_inverted = None
-                MatrixReadoutMitigation._readout_matrix_normalized = (
-                    get_full_readout_matrix(self.machine_name, chosen_qubits)
-                )
-
-            observed_bit_string = list(all_results(results, num_qubits).keys())
-
-            # Build the reduced A-matrix
-            if MatrixReadoutMitigation._readout_matrix_reduced is None:
-                MatrixReadoutMitigation._readout_matrix_reduced = (
-                    self._get_reduced_a_matrix(
-                        MatrixReadoutMitigation._readout_matrix_normalized,
-                        observed_bit_string,
-                        all_combinations(num_qubits),
-                    )
-                )
-                for column in range(
-                    MatrixReadoutMitigation._readout_matrix_reduced.shape[1]
-                ):
-                    column_sum = np.sum(
-                        MatrixReadoutMitigation._readout_matrix_reduced[:, column]
-                    )
-                    if (
-                        column_sum > 1e-9
-                    ):  # Threshold to handle potential near-zero sums
-                        MatrixReadoutMitigation._readout_matrix_reduced[
-                            :, column
-                        ] /= column_sum
-
-            # Invert the reduced A-matrix
-            if MatrixReadoutMitigation._readout_matrix_reduced_inverted is None:
-                try:
-                    MatrixReadoutMitigation._readout_matrix_reduced_inverted = (
-                        np.linalg.inv(MatrixReadoutMitigation._readout_matrix_reduced)
-                    )
-                except np.linalg.LinAlgError:
-                    logger.warning(
-                        "The reduced A-matrix is not invertible, using pseudo-inverse."
-                    )
-                    MatrixReadoutMitigation._readout_matrix_reduced_inverted = (
-                        np.linalg.pinv(MatrixReadoutMitigation._readout_matrix_reduced)
-                    )
-
-            return MatrixReadoutMitigation._readout_matrix_reduced_inverted
-        except Exception as e:
-            logger.error(
-                "Error %s in _get_inverted_reduced_a_matrix located in MatrixReadoutMitigation: %s",
-                type(e).__name__,
-                e,
+        num_qubits = len(chosen_qubits)
+        # Generate the full A-matrix
+        if num_qubits == 0:
+            logger.warning("No qubits are chosen for readout error mitigation.")
+            raise steps_error("No qubits are chosen for readout error mitigation.")
+        if (
+            MatrixReadoutMitigation._readout_matrix_normalized is None
+            or ApiAdapter.is_last_update_expired()
+        ):
+            MatrixReadoutMitigation._readout_matrix_reduced = None
+            MatrixReadoutMitigation._readout_matrix_reduced_inverted = None
+            MatrixReadoutMitigation._readout_matrix_normalized = (
+                get_full_readout_matrix(self.machine_name, chosen_qubits)
             )
-            return None
+
+        observed_bit_string = list(all_results(results, num_qubits).keys())
+
+        # Build the reduced A-matrix
+        if MatrixReadoutMitigation._readout_matrix_reduced is None:
+            MatrixReadoutMitigation._readout_matrix_reduced = (
+                self._get_reduced_a_matrix(
+                    MatrixReadoutMitigation._readout_matrix_normalized,
+                    observed_bit_string,
+                    all_combinations(num_qubits),
+                )
+            )
+            for column in range(
+                MatrixReadoutMitigation._readout_matrix_reduced.shape[1]
+            ):
+                column_sum = np.sum(
+                    MatrixReadoutMitigation._readout_matrix_reduced[:, column]
+                )
+                if (
+                    column_sum > 1e-9
+                ):  # Threshold to handle potential near-zero sums
+                    MatrixReadoutMitigation._readout_matrix_reduced[
+                        :, column
+                    ] /= column_sum
+
+        # Invert the reduced A-matrix
+        if MatrixReadoutMitigation._readout_matrix_reduced_inverted is None:
+            MatrixReadoutMitigation._readout_matrix_reduced_inverted = (
+                np.linalg.inv(MatrixReadoutMitigation._readout_matrix_reduced)
+            )
+        return MatrixReadoutMitigation._readout_matrix_reduced_inverted
 
     def execute(self, tape: QuantumTape, results: dict[str, int]):
         """mitigates readout errors from results using state 0 and 1 readouts
@@ -366,36 +349,33 @@ class MatrixReadoutMitigation(PostProcStep):
         Returns:
             dict[str, int]: The resulting tape
         """
-        try:
-            wires = get_measurement_wires(tape)
-            num_qubits = len(wires)
+        wires = get_measurement_wires(tape)
+        num_qubits = len(wires)
+        if wires is None :
+            logger.warning("No measurement wires found in the tape.")
+            raise steps_error("No measurement wires found in the tape.")
+        if num_qubits == 0:
+            logger.warning("No qubits are chosen for readout error mitigation.")
+            raise steps_error("No qubits are chosen for readout error mitigation.")
+        real_counts = np.array(
+            [v for v in all_results(results, num_qubits).values()]
+        )
 
-            real_counts = np.array(
-                [v for v in all_results(results, num_qubits).values()]
-            )
-
-            inverted_reduced_readout_matrix = self._get_inverted_reduced_a_matrix(
-                wires, results
-            )
-            if inverted_reduced_readout_matrix is None:
-                logger.error(
-                    "Inverted reduced readout matrix is None in execute located in MatrixReadoutMitigation."
-                )
-                return results
-
-            # Correction
-            corrected_counts = np.dot(inverted_reduced_readout_matrix, real_counts)
-            corrected_counts = [np.round(count) for count in corrected_counts]
-
-            # reconstruct counts dict
-            return {
-                key: count
-                for key, count in zip(all_combinations(num_qubits), corrected_counts)
-            }
-        except Exception as e:
+        inverted_reduced_readout_matrix = self._get_inverted_reduced_a_matrix(
+            wires, results
+        )
+        if inverted_reduced_readout_matrix is None:
             logger.error(
-                "Error %s in execute located in MatrixReadoutMitigation: %s",
-                type(e).__name__,
-                e,
+                "Inverted reduced readout matrix is None in execute located in MatrixReadoutMitigation."
             )
             return results
+
+        # Correction
+        corrected_counts = np.dot(inverted_reduced_readout_matrix, real_counts)
+        corrected_counts = [np.round(count) for count in corrected_counts]
+
+        # reconstruct counts dict
+        return {
+            key: count
+            for key, count in zip(all_combinations(num_qubits), corrected_counts)
+        }

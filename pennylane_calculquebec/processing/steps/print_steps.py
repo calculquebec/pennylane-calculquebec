@@ -1,6 +1,5 @@
 from pennylane_calculquebec.processing.interfaces import PreProcStep, PostProcStep
 
-
 class PrintTape(PreProcStep):
     """
     Print a tape as a preprocessing step

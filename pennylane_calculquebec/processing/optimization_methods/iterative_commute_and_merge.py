@@ -53,6 +53,9 @@ def remove_leaf_zs(tape: QuantumTape, iterations=3) -> QuantumTape:
     Returns :
         - (QuantumTape) : the resulting quantum tape
     """
+    if not hasattr(tape, "operations") or tape.operations is None:
+        logger.warning("Input tape has no operations, returning empty tape.")
+        raise OptimizationError("Input tape has no operations.")
     new_operations = tape.operations.copy()
     for _ in range(iterations):
         list_copy = new_operations.copy()
@@ -101,6 +104,9 @@ def _remove_trivials(tape: QuantumTape, iteration=3, epsilon=1e-8) -> QuantumTap
         - (QuantumTape) : the resulting quantum tape
     """
     new_operations = []
+    if not hasattr(tape, "operations") or tape.operations is None:
+        logger.warning("Input tape has no operations, returning empty tape.")
+        raise OptimizationError("Input tape has no operations.")
     for op in tape.operations:
         op, isAdjoint = _get_adjoint_base(op)
 
@@ -135,6 +141,7 @@ def commute_and_merge(tape) -> QuantumTape:
         QuantumTape : the resulting quantum tape
     """
     if not isinstance(tape, (QuantumTape, QuantumScript)):
+        logger.warning("Input is not a QuantumTape or QuantumScript, returning original tape.")
         raise OptimizationError("Input is not a QuantumTape or QuantumScript.")
     iterations = 3
 

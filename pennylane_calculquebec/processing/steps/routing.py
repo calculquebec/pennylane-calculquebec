@@ -13,7 +13,7 @@ from pennylane_calculquebec.utility.graph import (
     is_directly_connected,
 )
 from pennylane_calculquebec.logger import logger
-
+from pennylane_calculquebec.calcul_quebec_error import steps_error
 
 class RoutingException(Exception):
     pass
@@ -82,7 +82,11 @@ class Swaps(Routing):
         )
         new_operations: list[Operation] = []
         list_copy = tape.operations.copy()
-
+        if list_copy is None or len(list_copy) == 0:
+            logger.warning(
+                "The tape is empty, no routing will be performed. Returning the original tape."
+            )
+            raise steps_error("Input tape has no operations.")
         for operation in list_copy:
             if operation.num_wires == 2 and not is_directly_connected(
                 operation, machine_topology
@@ -99,6 +103,11 @@ class Swaps(Routing):
                 if path is None:
                     raise RoutingException(
                         "It is not possible to route the circuit given available qubits and couplers"
+                    )
+                if len(path) < 2:
+                    logger.warning("No swaps needed for operation %s", operation)
+                    raise steps_error(
+                        "The path for the operation is too short, no swaps needed."
                     )
                 for node in reversed(range(1, len(path) - 1)):
                     new_operations += [qml.SWAP([path[node], path[node + 1]])]
@@ -120,5 +129,5 @@ class Swaps(Routing):
                 new_operations += [operation]
 
         new_tape = type(tape)(new_operations, tape.measurements, shots=tape.shots)
-
+        
         return new_tape
