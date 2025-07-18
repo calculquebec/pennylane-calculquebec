@@ -118,5 +118,5 @@ def test_execute(
 
     # invalid gate raises error
     tape = QuantumTape([qml.CNOT([0, 1])])
-    with pytest.raises(ValueError):
+    with pytest.raises(StepsError):
         tape = GateNoiseSimulation.execute(FakeStep("yamaska", False), tape)

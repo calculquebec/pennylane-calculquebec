@@ -13,7 +13,7 @@ from pennylane_calculquebec.utility.noise import (
 import pennylane as qml
 from pennylane_calculquebec.utility.api import keys
 from pennylane_calculquebec.logger import logger
-from pennylane_calculquebec.calcul_quebec_error import steps_error
+from pennylane_calculquebec.calcul_quebec_error.steps_error import StepsError
 
 class GateNoiseSimulation(PreProcStep):
     """
@@ -41,7 +41,7 @@ class GateNoiseSimulation(PreProcStep):
                 logger.warning(
                     f"Cannot find connectivity for machine {self.machine_name}. Cannot simulate noise."
                 )
-                raise steps_error(
+                raise StepsError(
                     f"Cannot find connectivity for machine {self.machine_name}. Cannot simulate noise."
                 )
             qubit_count = len(set([a for b in connectivity.values() for a in b]))
@@ -49,7 +49,7 @@ class GateNoiseSimulation(PreProcStep):
                 logger.warning(
                     f"Cannot find qubit count for machine {self.machine_name}. Cannot simulate noise."
                 )
-                raise steps_error(
+                raise StepsError(
                     f"Cannot find qubit count for machine {self.machine_name}. Cannot simulate noise."
                 )
             coupler_count = len(connectivity)
@@ -66,7 +66,7 @@ class GateNoiseSimulation(PreProcStep):
                 logger.warning(
                     f"Cannot find qubit noise for machine {self.machine_name}. Cannot simulate noise."
                 )
-                raise steps_error(
+                raise StepsError(
                     f"Cannot find qubit noise for machine {self.machine_name}. Cannot simulate noise."
                 )
             # build coupler noise from cz fidelity using typical value if benchmark should not be used
@@ -84,7 +84,7 @@ class GateNoiseSimulation(PreProcStep):
                 logger.warning(
                     f"Cannot find coupler noise for machine {self.machine_name}. Cannot simulate noise."
                 )
-                raise steps_error(
+                raise StepsError(
                     f"Cannot find coupler noise for machine {self.machine_name}. Cannot simulate noise."
                 )
             # build relaxation using typical t1 if not use_benchmark
@@ -110,7 +110,7 @@ class GateNoiseSimulation(PreProcStep):
             operations = []
             if tape.operations is None:
                 logger.warning("The tape has no operations, returning an empty tape.")
-                raise steps_error(
+                raise StepsError(
                     "The tape has no operations, cannot simulate noise."
                 )
             if any(
@@ -119,7 +119,7 @@ class GateNoiseSimulation(PreProcStep):
                 logger.warning(
                     "The circuit contains non-native gates. Cannot simulate noise."
                 )
-                raise steps_error(
+                raise StepsError(
                     "Your circuit should contain only MonarQ native gates. Cannot simulate noise."
                 )
             for operation in tape.operations:
