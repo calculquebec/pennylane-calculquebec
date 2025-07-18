@@ -5,8 +5,7 @@ contains every equivalences needed for decomposing MonarQ non-native gates.
 import pennylane_calculquebec.processing.custom_gates as custom
 import numpy as np
 import pennylane as qml
-
-
+from pennylane_calculquebec.calcul_quebec_error import utility_error
 def is_close_enough_to(angle, other_angle, epsilon=1e-7):
     return np.abs(angle - other_angle) < epsilon
 
