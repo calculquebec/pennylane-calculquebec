@@ -1,0 +1,54 @@
+@startuml
+
+class Error{}
+class PennylaneCQError
+{
++ message : string
+}
+class StepsError
+{
++message : string
+}
+class OptimizationError
+{
++message : string
+}
+class DecompositionsError
+{
++message : string
+}
+class ProcessingConfigError
+{
++message : string
+}
+class ProcessingError
+{
++message : string
+}
+class UtilityError
+{
++message : string
+}
+class ApiError
+{
+    +message : string
+}
+class DeviceError
+{
+    +message : string
+}
+class MeasurementError
+{
+    +message : string
+}
+Error <|-- PennylaneCQError
+PennylaneCQError <|-- DeviceError
+PennylaneCQError <|-- UtilityError
+PennylaneCQError <|-- ProcessingError 
+ProcessingError <|-- StepsError
+ProcessingError <|-- MeasurementError
+ProcessingError <|-- OptimizationError
+ProcessingError <|-- DecompositionsError
+ProcessingError <|-- ProcessingConfigError
+PennylaneCQError <|-- ApiError
+@enduml
