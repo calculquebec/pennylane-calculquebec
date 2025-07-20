@@ -7,7 +7,7 @@ from pennylane.tape import QuantumTape
 from pennylane_calculquebec.processing.config import ProcessingConfig
 from pennylane_calculquebec.processing.interfaces import PostProcStep
 from pennylane_calculquebec.logger import logger
-from calcul_quebec_error.processing_error import ProcessingError
+from pennylane_calculquebec.calcul_quebec_error.processing_error import ProcessingError
 
 class PostProcessor:
     """
@@ -41,12 +41,10 @@ class PostProcessor:
                 else circuit_wires
             )
             expanded_tape = PostProcessor.expand_full_measurements(tape, wires)
+            # Do not return early if there are no operations; allow post-processing steps to run regardless
             if expanded_tape.operations is None or len(expanded_tape.operations) < 1:
                 logger.warning(
-                    "The tape you are trying to post-process does not have any operations, returning the results as is."
-                )
-                raise ProcessingError(
-                    "monarq_postproc : process : tape has no operations"
+                    "The tape you are trying to post-process does not have any operations, but will still run post-processing steps."
                 )
             postproc_steps = [
                 step
@@ -57,9 +55,7 @@ class PostProcessor:
                 logger.warning(
                     "No post-processing steps found in the configuration, returning results as is."
                 )
-                raise ProcessingError(
-                    "monarq_postproc : process : no post-processing steps found"
-                )
+                return results
             processed_results = deepcopy(results)
             for step in postproc_steps:
                 processed_results = step.execute(expanded_tape, processed_results)

@@ -10,7 +10,7 @@ from pennylane_calculquebec.processing.config import ProcessingConfig
 from pennylane_calculquebec.processing.interfaces import PreProcStep
 from autograd.numpy.numpy_boxes import ArrayBox
 from pennylane_calculquebec.logger import logger
-from calcul_quebec_error.processing_error import ProcessingError
+from pennylane_calculquebec.calcul_quebec_error.processing_error import ProcessingError
 
 class PreProcessor:
     """

@@ -14,7 +14,7 @@ from pennylane_calculquebec.processing.steps import (
     ReadoutNoiseSimulation,
 )
 from pennylane_calculquebec.logger import logger
-from calcul_quebec_error.processing_error import ProcessingError
+from pennylane_calculquebec.calcul_quebec_error.processing_error import ProcessingError
 from pennylane_calculquebec.calcul_quebec_error.utility_error import UtilityError
 class MonarqSim(BaseDevice):
     """

@@ -1,6 +1,6 @@
 from .measurement_strategy import MeasurementStrategy
 import numpy as np
-from calcul_quebec_error import measurement_error
+from pennylane_calculquebec.calcul_quebec_error import measurement_error
 from pennylane_calculquebec import logger
 
 class Sample(MeasurementStrategy):
