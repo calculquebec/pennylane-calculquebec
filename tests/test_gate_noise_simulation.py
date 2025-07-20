@@ -1,4 +1,5 @@
 import pytest
+from pennylane_calculquebec.processing import StepsError
 from unittest.mock import patch
 from pennylane_calculquebec.processing.steps import GateNoiseSimulation
 from pennylane_calculquebec.utility.noise import TypicalBenchmark

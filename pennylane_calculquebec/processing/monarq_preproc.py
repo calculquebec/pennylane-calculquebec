@@ -10,7 +10,7 @@ from pennylane_calculquebec.processing.config import ProcessingConfig
 from pennylane_calculquebec.processing.interfaces import PreProcStep
 from autograd.numpy.numpy_boxes import ArrayBox
 from pennylane_calculquebec.logger import logger
-
+from calcul_quebec_error.processing_error import ProcessingError
 
 class PreProcessor:
     """
@@ -73,6 +73,11 @@ class PreProcessor:
         """
         tape = deepcopy(tape)
         operations = []
+        if tape.operations is None or len(tape.operations) < 1:
+            logger.warning(
+                "The tape you are trying to unroll does not have any operations, returning the tape as is."
+            )
+            raise ProcessingError("monarq_preproc : unroll_array_boxes : tape has no operations")
         for operation in tape.operations:
             if operation.num_params < 0:
                 operations.append(operation)

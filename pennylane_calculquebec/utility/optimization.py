@@ -11,7 +11,7 @@ from pennylane.tape import QuantumTape
 from pennylane.wires import Wires
 import numpy as np
 from pennylane_calculquebec.calcul_quebec_error.utility_error import UtilityError
-
+from pennylane_calculquebec.logger import logger
 T = TypeVar("T")
 U = TypeVar("U")
 
@@ -34,11 +34,13 @@ def expand(
     # Custom error: tape.operations should be a list of Operations (Pennylane may not always guarantee this)
     if not isinstance(tape.operations, list):
         # Prevents silent failures if tape structure is corrupted or unexpected
+        logger.error("tape.operations must be a list of Operations.")  # Log the error
         raise UtilityError("tape.operations must be a list of Operations.")
     # Custom error: decomps values should be callable (to avoid silent logic errors if user passes wrong mapping)
     for name, fn in decomps.items():
         if not callable(fn):
             # Prevents silent logic errors if a decomposition is not a function
+            logger.error(f"Decomposition for gate '{name}' is not callable.")  # Log the error
             raise UtilityError(f"Decomposition for gate '{name}' is not callable.")
 
     list_copy = tape.operations.copy()
@@ -67,6 +69,7 @@ def find_previous_gate(index: int, wires, op_list: list[Operation]) -> int:
     # Accept Wires object or list, convert to list of ints
     wires = list(wires)
     if not all(isinstance(w, int) for w in wires):
+        logger.error("wires must be a list of integers.")  # Log the error
         raise UtilityError("wires must be a list of integers.")
 
     for i in reversed(range(0, index)):
@@ -89,6 +92,7 @@ def find_next_gate(index: int, wires, op_list: list[Operation]) -> int:
     # Accept Wires object or list, convert to list of ints
     wires = list(wires)
     if not all(isinstance(w, int) for w in wires):
+        logger.error("wires must be a list of integers.")  # Log the error
         raise UtilityError("wires must be a list of integers.")
 
     for i in range(index + 1, len(op_list)):
@@ -110,6 +114,7 @@ def is_single_axis_gate(op: Operation, axis: str):
     # Custom error: op should have a 'basis' attribute (not all Operations may have this)
     if not hasattr(op, "basis"):
         # Prevents attribute errors and clarifies the source of the problem
+        logger.error("Operation does not have a 'basis' attribute.")  # Log the error
         raise UtilityError("Operation does not have a 'basis' attribute.")
 
     if op.num_wires != 1:

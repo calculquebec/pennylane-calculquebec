@@ -19,7 +19,7 @@ class Sample(MeasurementStrategy):
                 logger.warning(
                     "No shots were returned. This may be due to an empty circuit or an error in the simulation."
                 )
-                raise measurement_error.MeasurementError("No shots returned from simulation.")
+                raise measurement_error.MeasurementError("/sample : No shots returned from simulation.")
             return np.asarray(shots_results).astype(int)
         else:
             converter.apply_readouts(mp.obs)
@@ -30,7 +30,7 @@ class Sample(MeasurementStrategy):
                 logger.warning(
                     "No QPU available. Please ensure you have a valid QPU connection."
                 )
-                raise measurement_error.MeasurementError("No QPU available for measurement.")
+                raise measurement_error.MeasurementError("/sample : No QPU available for measurement.")
             shots_results, time = self.Snowflurry.transpile_and_run_job(
                 qpu,
                 self.Snowflurry.sf_circuit,
@@ -40,7 +40,7 @@ class Sample(MeasurementStrategy):
                 logger.warning(
                     "No shots were returned from the QPU. This may indicate an issue with the QPU or the circuit."
                 )
-                raise measurement_error.MeasurementError("No shots returned from QPU.")
+                raise measurement_error.MeasurementError("/sample : No shots returned from QPU.")
             return np.repeat(
                 [int(key) for key in shots_results.keys()],
                 [value for value in shots_results.values()],

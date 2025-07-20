@@ -11,7 +11,7 @@ import numpy as np
 import pennylane_calculquebec.processing.custom_gates as custom
 import random
 from pennylane_calculquebec.calcul_quebec_error.utility_error import UtilityError
-
+from pennylane_calculquebec.logger import logger
 
 def compute_expval(probabilities: list[float]) -> float:
     """Compute the expectation value using the parity of each outcome
@@ -132,9 +132,8 @@ def to_qasm(tape: QuantumTape) -> str:
     }
     total_string = ""
     for op in tape.operations:
-        # Custom error: op.name must be in eq mapping (prevents KeyError and clarifies unsupported gate)
         if op.name not in eq:
-            # Prevents silent logic errors if a gate is not supported in QASM mapping
+            logger.error(f"Operation '{op.name}' is not supported for QASM conversion.")
             raise UtilityError(f"Operation '{op.name}' is not supported for QASM conversion.")
         string = eq[op.name]
         if len(op.parameters) > 0:
@@ -161,8 +160,10 @@ def get_labels(up_to: int):
     """
 
     if not isinstance(up_to, int):
+        logger.error("up_to must be an int")
         raise ValueError("up_to must be an int")
     if up_to < 0:
+        logger.error("up_to must be >= 0")
         raise ValueError("up_to must be >= 0")
 
     num = int(np.log2(up_to)) + 1

@@ -18,7 +18,7 @@ from pennylane_calculquebec.utility.api import keys
 from networkx.exception import NetworkXNoPath
 import sys
 from pennylane_calculquebec.calcul_quebec_error.utility_error import UtilityError
-
+from pennylane_calculquebec.logger import logger 
 MAX_INT = sys.maxsize
 
 
@@ -38,6 +38,7 @@ def find_biggest_group(graph: nx.Graph) -> list:
     # Custom error: graph must have at least one node (networkx will not error, but domain logic may require)
     if graph.number_of_nodes() == 0:
         # Prevents silent logic errors if graph is empty
+        logger.error("Graph is empty.")  # Log the error
         raise UtilityError("Graph is empty.")
     if graph.number_of_edges() == 0:
         return []
@@ -56,11 +57,13 @@ def is_directly_connected(operation: Operation, machine_topology: nx.Graph) -> b
         bool: does the graph have a link that maps given operation?
     """
     if len(operation.wires) < 2:
+        logger.error(f"{operation.name} is not a 2 qubit operation.")  # Log the error
         raise GraphException(f"{operation.name} is not a 2 qubit operation")
     if (
         operation.wires[1] not in machine_topology.nodes
         or operation.wires[0] not in machine_topology.nodes
     ):
+        logger.error(f"operation {operation} is not properly mapped to physical qubits.")  # Log the error
         raise GraphException(
             f"operation {operation} is not properly mapped to physical qubits"
         )
@@ -83,7 +86,7 @@ def circuit_graph(tape: QuantumTape) -> nx.Graph:
     for operation in tape.operations:
         # Custom error: operation should use <= 2 wires (domain-specific, not enforced by Pennylane)
         if len(operation.wires) > 2:
-            # Prevents silent logic errors in graph construction
+            logger.error("All operations in the circuit should be using <= 2 wires.")  # Log the error
             raise UtilityError("All operations in the circuit should be using <= 2 wires")
         if len(operation.wires) < 2:
             continue
@@ -118,7 +121,7 @@ def machine_graph(
     """
     # Custom error: machine_name should not be empty (domain-specific, not enforced by Python)
     if not machine_name:
-        # Prevents silent logic errors if machine_name is missing
+        logger.error("machine_name must be provided.")  # Log the error
         raise UtilityError("machine_name must be provided.")
     broken_qubits_and_couplers = (
         get_broken_qubits_and_couplers(q1Acceptance, q2Acceptance, machine_name)
@@ -315,11 +318,13 @@ def find_best_neighbour(
         int : the neighbour with best score
     """
     if wire not in topology:
+        logger.error(f"node {wire} is not in graph.")  # Log the error
         raise GraphException(f"node {wire} is not in graph")
 
     neigh = list(topology.neighbors(wire))
 
     if len(neigh) <= 0:
+        logger.error(f"there are no neighbour to node {wire}.")  # Log the error
         raise GraphException(f"there are no neighbour to node {wire}")
 
     return max(
@@ -375,6 +380,7 @@ def find_closest_wire(
         int : the wire that has the smallest path from source
     """
     if source not in machine_graph:
+        logger.error(f"node {source} doesn't exist in the machine's graph.")  # Log the error
         raise GraphException(f"node {source} doesn't exist in the machine's graph")
 
     nodes = [
@@ -382,6 +388,7 @@ def find_closest_wire(
     ]
 
     if len(nodes) <= 0:
+        logger.error(f"Impossible to find closest wire for {source}.")  # Log the error
         raise GraphException(f"Impossible to find closest wire for {source}")
 
     return min(
@@ -437,6 +444,7 @@ def node_with_shortest_path_from_selection(
     nodes_minus_source = [node for node in selection if node != source]
 
     if len(nodes_minus_source) <= 0:
+        logger.error("There are not enough nodes for this circuit to run on the machine.")  # Log the error
         raise GraphException(
             "There are not enough nodes for this circuit to run on the machine"
         )

@@ -7,7 +7,7 @@ from pennylane.tape import QuantumTape
 from pennylane_calculquebec.processing.config import ProcessingConfig
 from pennylane_calculquebec.processing.interfaces import PostProcStep
 from pennylane_calculquebec.logger import logger
-
+from calcul_quebec_error.processing_error import ProcessingError
 
 class PostProcessor:
     """
@@ -41,12 +41,25 @@ class PostProcessor:
                 else circuit_wires
             )
             expanded_tape = PostProcessor.expand_full_measurements(tape, wires)
-
+            if expanded_tape.operations is None or len(expanded_tape.operations) < 1:
+                logger.warning(
+                    "The tape you are trying to post-process does not have any operations, returning the results as is."
+                )
+                raise ProcessingError(
+                    "monarq_postproc : process : tape has no operations"
+                )
             postproc_steps = [
                 step
                 for step in behaviour_config.steps
                 if isinstance(step, PostProcStep)
             ]
+            if not postproc_steps:
+                logger.warning(
+                    "No post-processing steps found in the configuration, returning results as is."
+                )
+                raise ProcessingError(
+                    "monarq_postproc : process : no post-processing steps found"
+                )
             processed_results = deepcopy(results)
             for step in postproc_steps:
                 processed_results = step.execute(expanded_tape, processed_results)
@@ -66,6 +79,11 @@ class PostProcessor:
             QuantumTape: transformed tape
         """
         mps = []
+        if tape.measurements is None or len(tape.measurements) < 1:
+            logger.warning(
+                "The tape you are trying to expand does not have any measurements, returning the tape as is."
+            )
+            raise ProcessingError("monarq_postproc : expand_full_measurements : tape has no measurements")
         for mp in tape.measurements:
             if mp.wires == None or len(mp.wires) < 1:
                 mps.append(type(mp)(wires=wires))

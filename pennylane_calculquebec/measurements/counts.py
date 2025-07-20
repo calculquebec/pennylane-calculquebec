@@ -16,7 +16,7 @@ class Counts(MeasurementStrategy):
             )
             if shots_results is None:
                 logger.error("Simulation failed, please check your circuit.")
-                raise measurement_error.MeasurementError("Simulation failed, please check your circuit.")
+                raise measurement_error.MeasurementError("/counts : Simulation failed, please check your circuit.")
             result = dict(Counter(shots_results))
             return result
         else:  # if we have a client, we use the real machine
@@ -26,12 +26,12 @@ class Counts(MeasurementStrategy):
             )
             if not qpu.is_connected():
                 logger.error("QPU is not connected, please check your connection.")
-                raise measurement_error.MeasurementError("QPU is not connected, please check your connection.")
+                raise measurement_error.MeasurementError("/counts : QPU is not connected, please check your connection.")
             shots_results, time = self.Snowflurry.transpile_and_run_job(
                 qpu, self.Snowflurry.sf_circuit, shots
             )
             if shots_results is None:
                 logger.error("Job failed, please check your circuit.")
-                raise measurement_error.MeasurementError("Job failed, please check your circuit.")
+                raise measurement_error.MeasurementError("/counts : Job failed, please check your circuit.")
             result = dict(Counter(shots_results))
             return result

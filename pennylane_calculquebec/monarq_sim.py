@@ -14,8 +14,8 @@ from pennylane_calculquebec.processing.steps import (
     ReadoutNoiseSimulation,
 )
 from pennylane_calculquebec.logger import logger
-
-
+from calcul_quebec_error.processing_error import ProcessingError
+from pennylane_calculquebec.calcul_quebec_error.utility_error import UtilityError
 class MonarqSim(BaseDevice):
     """
     a device that uses the monarq transpiler but simulates results using default.mixed
@@ -30,12 +30,13 @@ class MonarqSim(BaseDevice):
 
     def __init__(self, wires=None, shots=None, client=None, processing_config=None):
         use_benchmark = client is not None
-
-        if processing_config is None:
-            processing_config = MonarqDefaultConfig(
-                self.machine_name, use_benchmark
-            )
-
+        try:
+            if processing_config is None:
+                processing_config = MonarqDefaultConfig(
+                    self.machine_name, use_benchmark
+                )
+        except UtilityError as e:
+            raise UtilityError("monarq_sim/")
         super().__init__(wires, shots, client, processing_config)
         self.use_benchmark_for_simulation = use_benchmark
 
@@ -50,14 +51,16 @@ class MonarqSim(BaseDevice):
             a result, which format can change according to the measurement process
         """
         if len(tape.measurements) != 1:
-            raise DeviceException("Multiple measurements not supported")
+            logger.warning("monarq_sim : Multiple measurements not supported")
+            raise DeviceException("monarq_sim : Multiple measurements not supported")
         meas = type(tape.measurements[0]).__name__
 
         if not any(
             meas == measurement
             for measurement in MonarqSim.measurement_methods.keys()
         ):
-            raise DeviceException("Measurement not supported")
+            logger.warning("monarq_sim : Measurement not supported")
+            raise DeviceException("monarq_sim : Measurement not supported")
 
         # simulate counts from given circuit on default mixed
         counts_tape = type(tape)(
@@ -80,9 +83,12 @@ class MonarqSim(BaseDevice):
         sim_results = ReadoutNoiseSimulation(
             self.machine_name, self.use_benchmark_for_simulation
         ).execute(counts_tape, results)
-        results = PostProcessor.get_processor(self._processing_config, self.wires)(
-            counts_tape, sim_results
-        )
+        try:
+            results = PostProcessor.get_processor(self._processing_config, self.wires)(
+                counts_tape, sim_results
+            )
+        except ProcessingError as e:
+            raise ProcessingError(f"Post-processing error: {e}")
 
         # return desired measurement method
         measurement_method = MonarqSim.measurement_methods[meas]

@@ -14,7 +14,7 @@ from pennylane_calculquebec.device_exception import DeviceException
 from pennylane_calculquebec.base_device import BaseDevice
 from typing import Callable
 from pennylane_calculquebec.logger import logger
-
+from pennylane_calculquebec.calcul_quebec_error.utility_error import UtilityError
 
 class MonarqDevice(BaseDevice):
     """PennyLane device for interfacing with Anyon's quantum Hardware.
@@ -49,8 +49,11 @@ class MonarqDevice(BaseDevice):
         self.job_started = None
         self.job_status_changed = None
         self.job_completed = None
-        if processing_config is None:
-            processing_config = MonarqDefaultConfig(self.machine_name)
+        try:
+            if processing_config is None:
+                processing_config = MonarqDefaultConfig(self.machine_name)
+        except UtilityError as e:
+            raise UtilityError("monarq_device/")
         super().__init__(wires, shots, client, processing_config)
         if (
             isinstance(shots, int)
@@ -59,13 +62,19 @@ class MonarqDevice(BaseDevice):
             and (len(shots) < 1 or len(shots) > 1000)
             or shots == None
         ):
-            raise DeviceException(
+            logger.warning(
                 "The number of shots must be contained between 1 and 1000"
+            )
+            raise DeviceException(
+                "monarq_device : The number of shots must be contained between 1 and 1000"
             )
 
         if client is None:
-            raise DeviceException(
+            logger.warning(
                 "The client has not been defined. Cannot establish connection with MonarQ."
+            )
+            raise DeviceException(
+                "monarq_device : The client has not been defined. Cannot establish connection with MonarQ."
             )
 
     @property
@@ -87,14 +96,16 @@ class MonarqDevice(BaseDevice):
             a result, which format can change according to the measurement process
         """
         if len(tape.measurements) != 1:
-            raise DeviceException("Multiple measurements not supported")
+            logger.warning("monarq_device : Multiple measurements not supported")
+            raise DeviceException("monarq_device : Multiple measurements not supported")
         meas = type(tape.measurements[0]).__name__
 
         if not any(
             meas == measurement
             for measurement in MonarqDevice.measurement_methods.keys()
         ):
-            raise DeviceException("Measurement not supported")
+            logger.warning("monarq_device : Measurement not supported")
+            raise DeviceException("monarq_device : Measurement not supported")
 
         job = Job(tape, self.machine_name, self.circuit_name, self.project_name)
         job.started = self.job_started
