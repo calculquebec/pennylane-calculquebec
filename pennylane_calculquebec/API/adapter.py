@@ -169,7 +169,9 @@ class ApiAdapter(object):
         converted = json.loads(res.text)
 
         projects = converted.get(keys.ITEMS, [])
-        matching_projects = [p for p in projects if p.get(keys.NAME) == project_name]
+        matching_projects = [
+            project for project in projects if project.get(keys.NAME) == project_name
+        ]
 
         if len(matching_projects) > 1:
             raise MultipleProjectsException(matching_projects)
@@ -264,24 +266,29 @@ class ApiAdapter(object):
         circuit: dict,
         machine_name: str,
         circuit_name: str,
-        project_name: str,
         shot_count: int = 1,
-        max_retries=10,
+        project_name: str = "",
+        project_id: str = "",
     ) -> requests.Response:
         """
-        Post a new job for running a specific circuit a certain amount of times on given machine (machine name stored in client)
+        Post a new job for running a specific circuit a certain number of times on given machine (machine name stored in client)
 
         Args:
             circuit (dict) : The dictionary representation of a circuit
             machine_name (str) : The machine on which to run the circuit
             circuit_name (str) : The circuit name
+            shot_count (int) : The number of shots. default is 1
             project_name (str) : The project name
-            shot_count (int) : The amout of shots. default is 1
+            project_id (str) : The project id is optional, if not provided, it will be fetched using the project name.
 
         Returns:
             Response : The response of the /job post request
         """
-        project_id = ApiAdapter.get_project_id_by_name(project_name)
+        project_id = (
+            ApiAdapter.get_project_id_by_name(project_name)
+            if project_name
+            else project_id
+        )
         body = ApiUtility.job_body(
             circuit, circuit_name, project_id, machine_name, shot_count
         )
