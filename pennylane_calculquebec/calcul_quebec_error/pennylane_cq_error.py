@@ -1,6 +1,6 @@
-from .error import Error
 
-class PennylaneCQError(Error):
+
+class PennylaneCQError(Exception):
     """Pennylane Calcul Quebec base error."""
     def __init__(self, message: str):
         predefined = "Error coming from Pennylane Calcul Quebec/"
