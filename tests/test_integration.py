@@ -28,13 +28,16 @@ def mock_get_connectivity():
 
 def test_monarq_default(mock_get_connectivity):
     config = MonarqDefaultConfig("yamaska", False)
-    client = MonarqClient("test", "test", "test")
+    client = MonarqClient(
+        "test",
+        "test",
+        "test",
+        project_id="test_project_id",
+        circuit_name="test_circuit",
+    )
     dev = qml.device(
         "monarq.default", wires=[0], client=client, shots=1000, processing_config=config
     )
-
-    dev.circuit_name = "test_name"
-    dev.project_name = "test_name"
 
     qnode = qml.QNode(circuit, dev)
     with patch("requests.post") as post:

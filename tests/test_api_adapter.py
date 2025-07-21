@@ -10,7 +10,7 @@ from unittest.mock import patch
 from pennylane_calculquebec.utility.api import ApiUtility, keys
 from datetime import datetime, timedelta
 
-client = MonarqClient("test", "test", "test")
+client = MonarqClient("test", "test", "test", project_id="123")
 
 
 # ------------ MOCKS ----------------------

@@ -5,7 +5,7 @@ from unittest.mock import patch
 from pennylane_calculquebec.API.job import Job, JobException
 import json
 
-client = MonarqClient("test", "test", "test")
+client = MonarqClient("test", "test", "test", project_id="test_project_id")
 
 
 class Response_JobById:
