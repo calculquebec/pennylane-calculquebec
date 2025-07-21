@@ -46,57 +46,38 @@ class MonarqDevice(BaseDevice):
         client: ApiClient = None,
         processing_config: ProcessingConfig = None,
     ) -> None:
-        try:
-            self.job_started = None
-            self.job_status_changed = None
-            self.job_completed = None
+        self.job_started = None
+        self.job_status_changed = None
+        self.job_completed = None
 
-            if processing_config is None:
-                processing_config = MonarqDefaultConfig(self.machine_name)
+        if processing_config is None:
+            processing_config = MonarqDefaultConfig(self.machine_name)
 
-            super().__init__(wires, shots, client, processing_config)
+        super().__init__(wires, shots, client, processing_config)
 
-            if (
-                isinstance(shots, int)
-                and (shots < 1 or shots > 1000)
-                or isinstance(shots, list)
-                and (len(shots) < 1 or len(shots) > 1000)
-                or shots == None
-            ):
-                raise DeviceException(
-                    "The number of shots must be contained between 1 and 1000"
-                )
+        if (
+            isinstance(shots, int)
+            and (shots < 1 or shots > 1000)
+            or isinstance(shots, list)
+            and (len(shots) < 1 or len(shots) > 1000)
+            or shots == None
+        ):
+            raise DeviceException(
+                "The number of shots must be contained between 1 and 1000"
+            )
 
-            if client is None:
-                raise DeviceException(
-                    "The client has not been defined. Cannot establish connection with MonarQ."
-                )
-        except Exception as e:
-            logger.error(
-                "Error %s in __init__ located in MonarqDevice: %s", type(e).__name__, e
+        if client is None:
+            raise DeviceException(
+                "The client has not been defined. Cannot establish connection with MonarQ."
             )
 
     @property
     def machine_name(self):
-        try:
-            return "yamaska"
-        except Exception as e:
-            logger.error(
-                "Error %s in machine_name located in MonarqDevice: %s",
-                type(e).__name__,
-                e,
-            )
-            return None
+        return "yamaska"
 
     @property
     def name(self):
-        try:
-            return MonarqDevice.short_name
-        except Exception as e:
-            logger.error(
-                "Error %s in name located in MonarqDevice: %s", type(e).__name__, e
-            )
-            return None
+        return MonarqDevice.short_name
 
     def _measure(self, tape: QuantumTape):
         """
@@ -108,31 +89,25 @@ class MonarqDevice(BaseDevice):
         Returns :
             a result, which format can change according to the measurement process
         """
-        try:
-            if len(tape.measurements) != 1:
-                raise DeviceException("Multiple measurements not supported")
-            meas = type(tape.measurements[0]).__name__
+        if len(tape.measurements) != 1:
+            raise DeviceException("Multiple measurements not supported")
+        meas = type(tape.measurements[0]).__name__
 
-            if not any(
-                meas == measurement
-                for measurement in MonarqDevice.measurement_methods.keys()
-            ):
-                raise DeviceException("Measurement not supported")
+        if not any(
+            meas == measurement
+            for measurement in MonarqDevice.measurement_methods.keys()
+        ):
+            raise DeviceException("Measurement not supported")
 
-            job = Job(tape, self.machine_name, self.circuit_name, self.project_name)
-            job.started = self.job_started
-            job.status_changed = self.job_status_changed
-            job.completed = self.job_completed
-            results = job.run()
+        job = Job(tape, self.machine_name, self.circuit_name, self.project_name)
+        job.started = self.job_started
+        job.status_changed = self.job_status_changed
+        job.completed = self.job_completed
+        results = job.run()
 
-            results = PostProcessor.get_processor(self._processing_config, self.wires)(
-                tape, results
-            )
-            measurement_method = MonarqDevice.measurement_methods[meas]
+        results = PostProcessor.get_processor(self._processing_config, self.wires)(
+            tape, results
+        )
+        measurement_method = MonarqDevice.measurement_methods[meas]
 
-            return measurement_method(results)
-        except Exception as e:
-            logger.error(
-                "Error %s in _measure located in MonarqDevice: %s", type(e).__name__, e
-            )
-            return None
+        return measurement_method(results)

@@ -161,44 +161,34 @@ class IBUReadoutMitigation(PostProcStep):
         Returns:
             final probabilities (numpy.ndarray): The final estimate of the true distribution.
         """
-        try:
-            current_probs = initial_guess.copy()
+        current_probs = initial_guess.copy()
 
-            for _ in range(max_iterations):
-                next_probs = np.zeros_like(current_probs)
+        for _ in range(max_iterations):
+            next_probs = np.zeros_like(current_probs)
 
-                for true_prob in range(len(current_probs)):  # Loop over true states
-                    numerator = 0
-                    for measured_probs in range(
-                        len(noisy_probs)
-                    ):  # Loop over measured states
-                        mitigated_current_prob = np.dot(
-                            readout_matrix[measured_probs, :], current_probs
-                        )  # Compute sum_m R_im * theta_m
-                        if mitigated_current_prob != 0:  # Avoid division by zero
-                            numerator += (
-                                noisy_probs[measured_probs]
-                                * readout_matrix[measured_probs, true_prob]
-                                * current_probs[true_prob]
-                                / mitigated_current_prob
-                            )
+            for true_prob in range(len(current_probs)):  # Loop over true states
+                numerator = 0
+                for measured_probs in range(len(noisy_probs)):  # Loop over measured states
+                    mitigated_current_prob = np.dot(
+                        readout_matrix[measured_probs, :], current_probs
+                    )  # Compute sum_m R_im * theta_m
+                    if mitigated_current_prob != 0:  # Avoid division by zero
+                        numerator += (
+                            noisy_probs[measured_probs]
+                            * readout_matrix[measured_probs, true_prob]
+                            * current_probs[true_prob]
+                            / mitigated_current_prob
+                        )
 
-                    next_probs[true_prob] = numerator
+                next_probs[true_prob] = numerator
 
-                # Check for convergence
-                if np.linalg.norm(next_probs - current_probs) < tolerance:
-                    return next_probs
+            # Check for convergence
+            if np.linalg.norm(next_probs - current_probs) < tolerance:
+                return next_probs
 
-                current_probs = next_probs
+            current_probs = next_probs
 
-            return current_probs
-        except Exception as e:
-            logger.error(
-                "Error %s in iterative_bayesian_unfolding located in IBUReadoutMitigation: %s",
-                type(e).__name__,
-                e,
-            )
-            return initial_guess
+        return current_probs
 
     def execute(self, tape, results):
         """applies iterative bayesian unfolding for readout mitigation
