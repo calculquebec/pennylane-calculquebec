@@ -6,3 +6,23 @@ import importlib.util
 from .monarq_device import MonarqDevice
 from .monarq_sim import MonarqSim
 from .monarq_backup import MonarqBackup
+
+from pennylane_calculquebec.logger import logger
+class PennylaneCQError(Exception):
+    """Pennylane Calcul Quebec base error."""
+    def __init__(self, message: str):
+        predefined = "Error coming from Pennylane Calcul Quebec/"
+        full_message = f"{predefined}{message}"
+        super().__init__(full_message)
+        self.message = full_message
+        logger.error(full_message)
+
+
+class DeviceError(PennylaneCQError):
+    """Error related to device."""
+    def __init__(self, message: str,name_of_device:str):
+        predefined = "Device Error/"
+        full_message = f"{predefined}{message}"
+        super().__init__(full_message)
+        self.name_of_device = name_of_device
+        self.message = full_message
