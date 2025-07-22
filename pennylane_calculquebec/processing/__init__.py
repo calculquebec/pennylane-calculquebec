@@ -2,3 +2,12 @@
 
 from .monarq_postproc import PostProcessor
 from .monarq_preproc import PreProcessor
+
+from pennylane_calculquebec.pennylane_cq_error import CalculQuebecError
+class ProcessingError(CalculQuebecError):
+    """Error related to processing."""
+    def __init__(self, message: str):
+        predefined = "Processing Error/"
+        full_message = f"{predefined}{message}"
+        super().__init__(full_message)
+        self.message = full_message
