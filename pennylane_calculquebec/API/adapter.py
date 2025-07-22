@@ -19,6 +19,58 @@ class ApiException(Exception):
 
     def __init__(self, code: int, message: str):
         self.message = f"API ERROR : {code}, {message}"
+        super().__init__(self.message)
+
+
+# TODO : Move this exception to a separate module
+class ProjectException(Exception):
+    """
+    An exception that is thrown when something goes wrong the parsing of a project
+
+    Args:
+        - message (str) : the message for the error
+    """
+
+    def __init__(self, message: str):
+        self.message = f"PROJECT ERROR : {message}"
+        super().__init__(self.message)
+
+
+class MultipleProjectsException(ProjectException):
+    """
+    An exception that is thrown when multiple projects with the same name are found.
+    It displays the projects names and corresponding IDs.
+
+    Args:
+        - projects (list) : the list of projects that were found with the same name
+    """
+
+    def __init__(self, projects: list):
+
+        message = (
+            f"Multiple projects found with the same name. When creating client, "
+            f"please use the project ID instead of the name.\n"
+            "Projects found:\n"
+        )
+        for project in projects:
+            message += (
+                f"Project Name: {project[keys.NAME]}, Project ID: {project[keys.ID]}\n"
+            )
+        super().__init__(message)
+
+
+class NoProjectFoundException(ProjectException):
+    """
+    An exception that is thrown when no project with the given name is found.
+    It displays the name of the project that was not found.
+
+    Args:
+        - message (str) : the message for the error
+    """
+
+    def __init__(self, project_name: str):
+        message = f"No project found with name: {project_name}"
+        super().__init__(message)
 
 
 class ApiAdapter(object):
@@ -92,7 +144,16 @@ class ApiAdapter(object):
 
     @staticmethod
     @retry(3)
-    def get_project_id_by_name(project_name: str) -> str:
+    def get_project_id_by_name(project_name: str = "default") -> str:
+        """
+        Get the id of a project by using the project's name stored in the client
+
+        Args:
+            project_name (str) : The name of the project you want to fetch. Defaults to "default"
+
+        Returns:
+            project_id (str) : The id of the project
+        """
         res = requests.get(
             ApiAdapter.instance().client.host
             + routes.PROJECTS
@@ -106,7 +167,19 @@ class ApiAdapter(object):
             ApiAdapter.raise_exception(res)
 
         converted = json.loads(res.text)
-        return converted[keys.ITEMS][0][keys.ID]
+
+        projects = converted.get(keys.ITEMS, [])
+        matching_projects = [
+            project for project in projects if project.get(keys.NAME) == project_name
+        ]
+
+        if len(matching_projects) > 1:
+            raise MultipleProjectsException(matching_projects)
+
+        if len(matching_projects) == 1:
+            return matching_projects[0][keys.ID]
+
+        raise NoProjectFoundException(project_name)
 
     @staticmethod
     @retry(3)
@@ -193,24 +266,29 @@ class ApiAdapter(object):
         circuit: dict,
         machine_name: str,
         circuit_name: str,
-        project_name: str,
         shot_count: int = 1,
-        max_retries=10,
+        project_name: str = "",
+        project_id: str = "",
     ) -> requests.Response:
         """
-        Post a new job for running a specific circuit a certain amount of times on given machine (machine name stored in client)
+        Post a new job for running a specific circuit a certain number of times on given machine (machine name stored in client)
 
         Args:
             circuit (dict) : The dictionary representation of a circuit
             machine_name (str) : The machine on which to run the circuit
             circuit_name (str) : The circuit name
+            shot_count (int) : The number of shots. default is 1
             project_name (str) : The project name
-            shot_count (int) : The amout of shots. default is 1
+            project_id (str) : The project id is optional, if not provided, it will be fetched using the project name.
 
         Returns:
             Response : The response of the /job post request
         """
-        project_id = ApiAdapter.get_project_id_by_name(project_name)
+        project_id = (
+            ApiAdapter.get_project_id_by_name(project_name)
+            if project_name
+            else project_id
+        )
         body = ApiUtility.job_body(
             circuit, circuit_name, project_id, machine_name, shot_count
         )

@@ -1,4 +1,9 @@
-from pennylane_calculquebec.API.adapter import ApiAdapter, ApiException
+from pennylane_calculquebec.API.adapter import (
+    ApiAdapter,
+    ApiException,
+    MultipleProjectsException,
+    NoProjectFoundException,
+)
 from pennylane_calculquebec.API.client import MonarqClient
 import pytest
 from unittest.mock import patch
@@ -6,6 +11,7 @@ from pennylane_calculquebec.utility.api import ApiUtility, keys
 from datetime import datetime, timedelta
 
 client = MonarqClient("test", "test", "test")
+
 
 # ------------ MOCKS ----------------------
 
@@ -262,23 +268,52 @@ def test_get_machine_by_name(mock_requests_get):
 
 
 def test_get_project_id_by_name(mock_requests_get):
+    """
+    Test the get_project_id_by_name method of ApiAdapter.
+
+    The method should handle various scenarios including:
+
+    - Raising an ApiException when the request fails.
+    - Raising an ApiException when the response is not as expected.
+    - Raising an MultipleProjectsException when multiple projects with the same name are found.
+    - Raising an NoProjectFoundException when no projects are found for the given name.
+    - Successfully returning the project ID when a single project is found with the given name.
+    """
+
     ApiAdapter.clean_cache()
 
     ApiAdapter.initialize(client)
 
+    # Request fails
     mock_requests_get.side_effect = raise_exception
     with pytest.raises(Exception):
-        ApiAdapter.get_project_id_by_name("yamaska")
+        ApiAdapter.get_project_id_by_name("project0")
 
+    # Response is not as expected
     mock_requests_get.side_effect = lambda body, headers: Res(
-        400, '{"name" : "yamaska", "status" : "online", "answer" : 42}'
+        400, '{"name" : "project0", "status" : "online", "answer" : 42}'
     )
+    with pytest.raises(ApiException):
+        ApiAdapter.get_project_id_by_name("project0")
 
-    with pytest.raises(Exception):
-        ApiAdapter.get_project_id_by_name("yamaska")
-
+    # Multiple projects with the same name
     mock_requests_get.side_effect = lambda body, headers: Res(
-        200, '{"items" : [{"id" : 42}]}'
+        200,
+        '{"items" : [{"id" : 42, "name" : "project0"}, {"id" : 43, "name" : "project0"}]}',
     )
+    with pytest.raises(MultipleProjectsException):
+        ApiAdapter.get_project_id_by_name("project0")
 
-    assert ApiAdapter.get_project_id_by_name("yamaska") == 42
+    # No projects found for the given name
+    mock_requests_get.side_effect = lambda body, headers: Res(
+        200, '{"items" : [{"id" : 42, "name" : "project1"}]}'
+    )
+    with pytest.raises(NoProjectFoundException):
+        ApiAdapter.get_project_id_by_name("project0")
+
+    # Single project found with the given name
+    mock_requests_get.side_effect = lambda body, headers: Res(
+        200,
+        '{"items" : [{"id" : 42, "name" : "project0"}, {"id" : 43, "name" : "project1"}]}',
+    )
+    assert ApiAdapter.get_project_id_by_name("project0") == 42
