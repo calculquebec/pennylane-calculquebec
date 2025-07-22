@@ -126,6 +126,10 @@ class ApiAdapter(object):
             client.user, client.access_token, client.realm
         )
         cls._instance.client = client
+        if client.project_name != "":
+            cls._instance.client.project_id = ApiAdapter.get_project_id_by_name(
+                client.project_name
+            )
 
         cls._qubits_and_couplers: dict = None
         cls._machine: dict = None
