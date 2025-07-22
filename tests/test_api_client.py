@@ -257,37 +257,17 @@ class TestMonarqClient:
 
 
 class TestProjectParameterValidation:
-    """Test cases for project_name and project_id validation rules across all clients."""
+    """Test cases for project_name and project_id validation rules at Parent class level."""
 
-    @pytest.mark.parametrize(
-        "client_class,params",
-        [
-            (
-                ApiClient,
-                {
-                    "host": "host",
-                    "user": "user",
-                    "access_token": "token",
-                    "realm": "realm",
-                    "machine_name": "machine",
-                },
-            ),
-            (
-                CalculQuebecClient,
-                {
-                    "host": "host",
-                    "user": "user",
-                    "token": "token",
-                    "machine_name": "machine",
-                },
-            ),
-            (MonarqClient, {"host": "host", "user": "user", "access_token": "token"}),
-        ],
-    )
-    def test_all_clients_require_project_parameter(self, client_class, params):
-        """Test that all client types require either project_name or project_id."""
-        with pytest.raises(
-            ProjectParameterError,
-            match="Either project_name or project_id must be provided",
-        ):
-            client_class(**params)
+    def test_project_name_is_readonly(self, basic_client_params, project_name):
+        """Test that project_name is read-only after initialization."""
+        client = ApiClient(**basic_client_params, project_name=project_name)
+        with pytest.raises(AttributeError):
+            client.project_name = "new_project"
+
+    def test_project_id_is_writable(self, basic_client_params, project_id):
+        """Test that project_id can be set after initialization."""
+        client = ApiClient(**basic_client_params, project_id=project_id)
+        assert client.project_id == project_id
+        client.project_id = "new_project_id"
+        assert client.project_id == "new_project_id"

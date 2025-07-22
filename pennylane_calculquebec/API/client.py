@@ -37,13 +37,20 @@ class ApiClient:
         project_id (str) : the ID of the project
     """
 
-    host: str
-    user: str
-    access_token: str
-    realm: str
-    machine_name: str
-    project_name: str
-    project_id: str
+    @property
+    def project_name(self):
+        """Returns the project name."""
+        return self._project_name
+
+    @property
+    def project_id(self):
+        """Returns the project ID."""
+        return self._project_id
+
+    @project_id.setter
+    def project_id(self, value: str):
+        """Sets the project ID."""
+        self._project_id = value
 
     def __init__(
         self,
@@ -70,8 +77,8 @@ class ApiClient:
         self.access_token = access_token
         self.realm = realm
         self.machine_name = machine_name
-        self.project_name = project_name or ""
-        self.project_id = project_id or ""
+        self._project_name = project_name or ""
+        self._project_id = project_id or ""
 
 
 class CalculQuebecClient(ApiClient):
