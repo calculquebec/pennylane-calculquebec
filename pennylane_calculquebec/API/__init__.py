@@ -2,7 +2,7 @@
 This module contains everything service/network related for communicating with MonarQ.
 """
 
-from pennylane_calculquebec.pennylane_cq_error import PennylaneCQError
+from pennylane_calculquebec import PennylaneCQError
 
 class ApiError(PennylaneCQError):
     """Error related to API."""
