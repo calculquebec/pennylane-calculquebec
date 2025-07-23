@@ -38,10 +38,6 @@ class DeviceError
     +message : string
     +device_name : string
 }
-class MeasurementError
-{
-    +message : string
-}
 Exception <|-- PennylaneCQError
 PennylaneCQError <|-- DeviceError
 PennylaneCQError <|-- UtilityError
