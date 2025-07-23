@@ -36,6 +36,7 @@ class ApiError
 class DeviceError
 {
     +message : string
+    +device_name : string
 }
 class MeasurementError
 {

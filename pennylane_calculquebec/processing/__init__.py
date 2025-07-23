@@ -3,7 +3,7 @@
 from .monarq_postproc import PostProcessor
 from .monarq_preproc import PreProcessor
 
-from pennylane_calculquebec.pennylane_cq_error import CalculQuebecError
+from pennylane_calculquebec import PennylaneCQError as CalculQuebecError
 class ProcessingError(CalculQuebecError):
     """Error related to processing."""
     def __init__(self, message: str):

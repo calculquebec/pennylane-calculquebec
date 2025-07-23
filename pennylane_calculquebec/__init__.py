@@ -20,9 +20,9 @@ class PennylaneCQError(Exception):
 
 class DeviceError(PennylaneCQError):
     """Error related to device."""
-    def __init__(self, message: str,name_of_device:str):
+    def __init__(self, name_of_device:str):
         predefined = "Device Error/"
-        full_message = f"{predefined}{message}"
+        error_message= self.__class__.__name__
+        full_message = f"{predefined} of type {error_message} for device {name_of_device}"
         super().__init__(full_message)
         self.name_of_device = name_of_device
-        self.message = full_message
