@@ -94,5 +94,4 @@ class MonarqDecomposition(NativeDecomposition):
             for operation in new_operations
         ]
         new_tape = type(tape)(new_operations, tape.measurements, shots=tape.shots)
-
-        return
+        return new_tape

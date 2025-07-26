@@ -34,37 +34,15 @@ class TDagger(Operation):
     @staticmethod
     @lru_cache()
     def compute_matrix():
-        try:
-            return qml.PhaseShift.compute_matrix(-np.pi / 4)
-        except Exception as e:
-            logger.error(
-                "Error %s in compute_matrix located in TDagger: %s", type(e).__name__, e
-            )
-            return None
+        return qml.PhaseShift.compute_matrix(-np.pi / 4)
 
     @staticmethod
     def compute_eigvals():
-        try:
-            return np.linalg.eigvals(TDagger.compute_matrix())
-        except Exception as e:
-            logger.error(
-                "Error %s in compute_eigvals located in TDagger: %s",
-                type(e).__name__,
-                e,
-            )
-            return None
+        return np.linalg.eigvals(TDagger.compute_matrix())
 
     @staticmethod
     def compute_decomposition(wires):
-        try:
-            return [qml.adjoint(qml.T(wires))]
-        except Exception as e:
-            logger.error(
-                "Error %s in compute_decomposition located in TDagger: %s",
-                type(e).__name__,
-                e,
-            )
-            return []
+        return [qml.adjoint(qml.T(wires))]
 
     def pow(self, z):
         z = z % 8
@@ -111,35 +89,15 @@ class X90(Operation):
     @staticmethod
     @lru_cache()
     def compute_matrix():
-        try:
-            return qml.RX.compute_matrix(np.pi / 2)
-        except Exception as e:
-            logger.error(
-                "Error %s in compute_matrix located in X90: %s", type(e).__name__, e
-            )
-            return None
+        return qml.RX.compute_matrix(np.pi / 2)
 
     @staticmethod
     def compute_eigvals():
-        try:
-            return np.linalg.eigvals(X90.compute_matrix())
-        except Exception as e:
-            logger.error(
-                "Error %s in compute_eigvals located in X90: %s", type(e).__name__, e
-            )
-            return None
+        return np.linalg.eigvals(X90.compute_matrix())
 
     @staticmethod
     def compute_decomposition(wires):
-        try:
-            return [qml.RX(np.pi / 2, wires)]
-        except Exception as e:
-            logger.error(
-                "Error %s in compute_decomposition located in X90: %s",
-                type(e).__name__,
-                e,
-            )
-            return []
+        return [qml.RX(np.pi / 2, wires)]
 
     def pow(self, z):
         z = z % 8
@@ -177,35 +135,15 @@ class XM90(Operation):
     @staticmethod
     @lru_cache()
     def compute_matrix():
-        try:
-            return qml.RX.compute_matrix(-np.pi / 2)
-        except Exception as e:
-            logger.error(
-                "Error %s in compute_matrix located in XM90: %s", type(e).__name__, e
-            )
-            return None
+        return qml.RX.compute_matrix(-np.pi / 2)
 
     @staticmethod
     def compute_eigvals():
-        try:
-            return np.linalg.eigvals(XM90.compute_matrix())
-        except Exception as e:
-            logger.error(
-                "Error %s in compute_eigvals located in XM90: %s", type(e).__name__, e
-            )
-            return None
+        return np.linalg.eigvals(XM90.compute_matrix())
 
     @staticmethod
     def compute_decomposition(wires):
-        try:
-            return [qml.RX(-np.pi / 2, wires)]
-        except Exception as e:
-            logger.error(
-                "Error %s in compute_decomposition located in XM90: %s",
-                type(e).__name__,
-                e,
-            )
-            return []
+        return [qml.RX(-np.pi / 2, wires)]
 
     def pow(self, z):
         z = z % 8
@@ -243,35 +181,15 @@ class Y90(Operation):
     @staticmethod
     @lru_cache()
     def compute_matrix():
-        try:
-            return qml.RY.compute_matrix(np.pi / 2)
-        except Exception as e:
-            logger.error(
-                "Error %s in compute_matrix located in Y90: %s", type(e).__name__, e
-            )
-            return None
+        return qml.RY.compute_matrix(np.pi / 2)
 
     @staticmethod
     def compute_eigvals():
-        try:
-            return np.linalg.eigvals(Y90.compute_matrix())
-        except Exception as e:
-            logger.error(
-                "Error %s in compute_eigvals located in Y90: %s", type(e).__name__, e
-            )
-            return None
+        return np.linalg.eigvals(Y90.compute_matrix())
 
     @staticmethod
     def compute_decomposition(wires):
-        try:
-            return [qml.RY(np.pi / 2, wires)]
-        except Exception as e:
-            logger.error(
-                "Error %s in compute_decomposition located in Y90: %s",
-                type(e).__name__,
-                e,
-            )
-            return []
+        return [qml.RY(np.pi / 2, wires)]
 
     def pow(self, z):
         z = z % 8
@@ -309,35 +227,15 @@ class YM90(Operation):
     @staticmethod
     @lru_cache()
     def compute_matrix():
-        try:
-            return qml.RY.compute_matrix(-np.pi / 2)
-        except Exception as e:
-            logger.error(
-                "Error %s in compute_matrix located in YM90: %s", type(e).__name__, e
-            )
-            return None
+        return qml.RY.compute_matrix(-np.pi / 2)
 
     @staticmethod
     def compute_eigvals():
-        try:
-            return np.linalg.eigvals(YM90.compute_matrix())
-        except Exception as e:
-            logger.error(
-                "Error %s in compute_eigvals located in YM90: %s", type(e).__name__, e
-            )
-            return None
+        return np.linalg.eigvals(YM90.compute_matrix())
 
     @staticmethod
     def compute_decomposition(wires):
-        try:
-            return [qml.RY(-np.pi / 2, wires)]
-        except Exception as e:
-            logger.error(
-                "Error %s in compute_decomposition located in YM90: %s",
-                type(e).__name__,
-                e,
-            )
-            return []
+        return [qml.RY(-np.pi / 2, wires)]
 
     def pow(self, z):
         z = z % 8
@@ -375,35 +273,15 @@ class Z90(Operation):
     @staticmethod
     @lru_cache()
     def compute_matrix():
-        try:
-            return qml.RZ.compute_matrix(np.pi / 2)
-        except Exception as e:
-            logger.error(
-                "Error %s in compute_matrix located in Z90: %s", type(e).__name__, e
-            )
-            return None
+        return qml.RZ.compute_matrix(np.pi / 2)
 
     @staticmethod
     def compute_eigvals():
-        try:
-            return np.linalg.eigvals(Z90.compute_matrix())
-        except Exception as e:
-            logger.error(
-                "Error %s in compute_eigvals located in Z90: %s", type(e).__name__, e
-            )
-            return None
+        return np.linalg.eigvals(Z90.compute_matrix())
 
     @staticmethod
     def compute_decomposition(wires):
-        try:
-            return [qml.RZ(np.pi / 2, wires)]
-        except Exception as e:
-            logger.error(
-                "Error %s in compute_decomposition located in Z90: %s",
-                type(e).__name__,
-                e,
-            )
-            return []
+        return [qml.RZ(np.pi / 2, wires)]
 
     def pow(self, z):
         z = z % 8
@@ -441,35 +319,15 @@ class ZM90(Operation):
     @staticmethod
     @lru_cache()
     def compute_matrix():
-        try:
-            return qml.RZ.compute_matrix(-np.pi / 2)
-        except Exception as e:
-            logger.error(
-                "Error %s in compute_matrix located in ZM90: %s", type(e).__name__, e
-            )
-            return None
+        return qml.RZ.compute_matrix(-np.pi / 2)
 
     @staticmethod
     def compute_eigvals():
-        try:
-            return np.linalg.eigvals(ZM90.compute_matrix())
-        except Exception as e:
-            logger.error(
-                "Error %s in compute_eigvals located in ZM90: %s", type(e).__name__, e
-            )
-            return None
+        return np.linalg.eigvals(ZM90.compute_matrix())
 
     @staticmethod
     def compute_decomposition(wires):
-        try:
-            return [qml.RZ(-np.pi / 2, wires)]
-        except Exception as e:
-            logger.error(
-                "Error %s in compute_decomposition located in ZM90: %s",
-                type(e).__name__,
-                e,
-            )
-            return []
+        return [qml.RZ(-np.pi / 2, wires)]
 
     def pow(self, z):
         z = z % 8

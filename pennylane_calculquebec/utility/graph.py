@@ -284,7 +284,10 @@ def shortest_path(
             return w - 1
         return w
 
-    return nx.astar_path(g_copy, start, end, weight=lambda u, v, _: weight(u, v))
+    try:
+        return nx.astar_path(g_copy, start, end, weight=lambda u, v, _: weight(u, v))
+    except NetworkXNoPath:
+        return None
 
 
 def find_best_neighbour(
