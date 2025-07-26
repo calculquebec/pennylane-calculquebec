@@ -6,6 +6,5 @@ import importlib.util
 from .monarq_device import MonarqDevice
 from .monarq_sim import MonarqSim
 from .monarq_backup import MonarqBackup
-from .exception import PennylaneCQError, DeviceError
 
 
