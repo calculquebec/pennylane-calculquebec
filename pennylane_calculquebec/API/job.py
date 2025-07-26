@@ -55,6 +55,10 @@ class Job:
             raise JobException("you must provide a project name")
 
         self.circuit_dict = ApiUtility.convert_circuit(circuit)
+        if self.circuit_dict.get(0) != 0:
+            raise JobException(
+                "The circuit must start with 0"
+            )
         self.machine_name = machine_name
         self.circuit_name = circuit_name
         self.project_name = project_name
