@@ -10,3 +10,5 @@ from .processing_config import (
     PrintDefaultConfig,
     PrintNoPlaceNoRouteConfig,
 )
+
+from ...exception import ConfigError

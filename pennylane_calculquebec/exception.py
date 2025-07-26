@@ -1,18 +1,36 @@
-from pennylane_calculquebec.logger import logger
 class PennylaneCQError(Exception):
     """Pennylane Calcul Quebec base error."""
     def __init__(self, message: str):
-        predefined = "Error coming from Pennylane Calcul Quebec/"
+        class_names = []
+        cls = self.__class__
+        while cls != Exception:
+            class_names.append(cls.__name__)
+            if not cls.__bases__:
+                break
+            cls = cls.__bases__[0]
+        class_path = " / ".join(reversed(class_names))
+        predefined = f"{class_path} "
         full_message = f"{predefined}{message}"
         super().__init__(full_message)
         self.message = full_message
+        from pennylane_calculquebec.logger import logger
         logger.error(full_message)
 
 class DeviceError(PennylaneCQError):
     """Error related to device."""
-    def __init__(self, name_of_device:str):
-        predefined = "Device Error/"
-        error_message= self.__class__.__name__
-        full_message = f"{predefined} of type {error_message} for device {name_of_device}"
-        super().__init__(full_message)
-        self.name_of_device = name_of_device
+    
+class ProcessingError(PennylaneCQError):
+    """Error related to processing."""
+
+class UtilityError(PennylaneCQError):
+    """Error related to utility."""
+
+class ApiError(PennylaneCQError):
+    """Error related to API."""
+
+class ConfigError(ProcessingError):
+    """Error related to processing configuration."""
+
+class StepsError(ProcessingError):
+    """Error related to steps."""
+
