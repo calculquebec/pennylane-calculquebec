@@ -52,6 +52,11 @@ class ApiClient:
         """Sets the project ID."""
         self._project_id = value
 
+    @property
+    def circuit_name(self):
+        """Returns the circuit name."""
+        return self._circuit_name
+
     def __init__(
         self,
         host: str,
@@ -61,6 +66,7 @@ class ApiClient:
         machine_name: str,
         project_name: str = None,
         project_id: str = None,
+        circuit_name: str = None,
     ):
         # Validation of project_name and project_id parameters
         if project_name is None and project_id is None:
@@ -79,6 +85,7 @@ class ApiClient:
         self.machine_name = machine_name
         self._project_name = project_name or ""
         self._project_id = project_id or ""
+        self._circuit_name = circuit_name or ""
 
 
 class CalculQuebecClient(ApiClient):
@@ -96,10 +103,24 @@ class CalculQuebecClient(ApiClient):
     """
 
     def __init__(
-        self, host, user, token, machine_name, project_name=None, project_id=None
+        self,
+        host,
+        user,
+        token,
+        machine_name,
+        project_name=None,
+        project_id=None,
+        circuit_name=None,
     ):
         super().__init__(
-            host, user, token, "calculqc", machine_name, project_name, project_id
+            host,
+            user,
+            token,
+            "calculqc",
+            machine_name,
+            project_name,
+            project_id,
+            circuit_name,
         )
 
 
@@ -116,5 +137,21 @@ class MonarqClient(CalculQuebecClient):
 
     """
 
-    def __init__(self, host, user, access_token, project_name=None, project_id=None):
-        super().__init__(host, user, access_token, "yamaska", project_name, project_id)
+    def __init__(
+        self,
+        host,
+        user,
+        access_token,
+        project_name=None,
+        project_id=None,
+        circuit_name=None,
+    ):
+        super().__init__(
+            host,
+            user,
+            access_token,
+            "yamaska",
+            project_name,
+            project_id,
+            circuit_name,
+        )

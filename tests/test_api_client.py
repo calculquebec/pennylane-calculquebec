@@ -33,6 +33,12 @@ def project_id():
 
 
 @pytest.fixture
+def circuit_name():
+    """Standard circuit name for testing."""
+    return "test_circuit"
+
+
+@pytest.fixture
 def calcul_quebec_params():
     """Parameters specific to CalculQuebecClient."""
     return {
@@ -115,6 +121,23 @@ class TestApiClient:
         assert isinstance(client.machine_name, str)
         assert isinstance(client.project_name, str)
         assert isinstance(client.project_id, str)
+        assert isinstance(client.circuit_name, str)
+
+    def test_api_client_circuit_name_initialization(
+        self, basic_client_params, project_name, circuit_name
+    ):
+        """Test that ApiClient initializes correctly with circuit_name."""
+        client = ApiClient(
+            **basic_client_params, project_name=project_name, circuit_name=circuit_name
+        )
+        assert client.circuit_name == circuit_name
+
+    def test_api_client_circuit_name_defaults_to_empty_string(
+        self, basic_client_params, project_name
+    ):
+        """Test that circuit_name defaults to empty string when not provided."""
+        client = ApiClient(**basic_client_params, project_name=project_name)
+        assert client.circuit_name == ""
 
 
 class TestCalculQuebecClient:
@@ -254,6 +277,7 @@ class TestMonarqClient:
         assert hasattr(client, "machine_name")
         assert hasattr(client, "project_name")
         assert hasattr(client, "project_id")
+        assert hasattr(client, "circuit_name")
 
 
 class TestProjectParameterValidation:

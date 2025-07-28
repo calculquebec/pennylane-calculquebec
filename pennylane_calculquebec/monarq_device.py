@@ -119,7 +119,12 @@ class MonarqDevice(BaseDevice):
             ):
                 raise DeviceException("Measurement not supported")
 
-            job = Job(tape, self.machine_name, self.circuit_name, self.project_name)
+            job = Job(
+                tape,
+                self.machine_name,
+                self._client.circuit_name,
+                self._client.project_id,
+            )
             job.started = self.job_started
             job.status_changed = self.job_status_changed
             job.completed = self.job_completed
