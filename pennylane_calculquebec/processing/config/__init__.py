@@ -11,4 +11,4 @@ from .processing_config import (
     PrintNoPlaceNoRouteConfig,
 )
 
-from ...exception import ConfigError
+from pennylane_calculquebec.exception import ConfigError
