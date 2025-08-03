@@ -1,6 +1,6 @@
 import logging
 import os
-from ._version import __version__
+from pennylane_calculquebec._version import __version__
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG_PATH = os.environ.get(
