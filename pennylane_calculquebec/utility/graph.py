@@ -378,17 +378,17 @@ def find_closest_wire(
     return min(
         nodes,
         key=lambda dest: path_length(
-            shortest_path(
-                source,
-                dest,
-                machine_graph,
-                machine_name,
-                prioritized_nodes=prioritized,
-                use_benchmark=use_benchmark,
-            )
-        ),
-    )
-
+                shortest_path(
+                    source,
+                    dest,
+                    machine_graph,
+                    machine_name,
+                    prioritized_nodes=prioritized,
+                    use_benchmark=use_benchmark,
+                )
+            ),
+        )
+    
 
 def path_length(path):
     """the length of a path

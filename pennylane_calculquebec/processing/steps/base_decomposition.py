@@ -23,23 +23,14 @@ class BaseDecomposition(PreProcStep):
         return []
 
     def execute(self, tape: QuantumTape) -> QuantumTape:
-        try:
+        def stop_at(operation: Operation):
+            # TODO : voir quelles portes on veut stop at
+            return operation.name in self.base_gates
 
-            def stop_at(operation: Operation):
-                # TODO : voir quelles portes on veut stop at
-                return operation.name in self.base_gates
-
-            # pennylane create_expand_fn does the job for us
-            custom_expand_fn = transforms.create_expand_fn(depth=9, stop_at=stop_at)
-            tape = custom_expand_fn(tape)
-            return tape
-        except Exception as e:
-            logger.error(
-                "Error %s in execute located in BaseDecomposition: %s",
-                type(e).__name__,
-                e,
-            )
-            return tape
+        # pennylane create_expand_fn does the job for us
+        custom_expand_fn = transforms.create_expand_fn(depth=9, stop_at=stop_at)
+        tape = custom_expand_fn(tape)
+        return tape
 
 
 class CliffordTDecomposition(BaseDecomposition):
