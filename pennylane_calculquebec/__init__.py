@@ -1,8 +1,0 @@
-"""this is the top level module for the Pennylane Snowflurry plugin. It is used for communicating with MonarQ."""
-
-import importlib.util
-
-
-from .monarq_device import MonarqDevice
-from .monarq_sim import MonarqSim
-from .monarq_backup import MonarqBackup
