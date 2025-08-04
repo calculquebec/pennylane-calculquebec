@@ -50,12 +50,10 @@ def mock_convert_circut():
         yield convert_circuit
 
 
-@pytest.fixture(name="mock_create_job")
-def mock_create_job():
-    with patch(
-        "pennylane_calculquebec.API.adapter.ApiAdapter.create_job"
-    ) as create_job:
-        yield create_job
+@pytest.fixture(name="mock_post_job")
+def mock_post_job():
+    with patch("pennylane_calculquebec.API.adapter.ApiAdapter.post_job") as post_job:
+        yield post_job
 
 
 @pytest.fixture(name="mock_job_by_id")
@@ -64,7 +62,7 @@ def mock_job_by_id():
         yield job_by_id
 
 
-def test_run(mock_convert_circuit, mock_create_job, mock_job_by_id):
+def test_run(mock_convert_circuit, mock_post_job, mock_job_by_id):
     test_job_str = '{"job" : {"id" : 3}}'
     test_error_str = '{"code" : 400, "error" : "this is an error"}'
 
@@ -79,16 +77,16 @@ def test_run(mock_convert_circuit, mock_create_job, mock_job_by_id):
 
     ApiAdapter.initialize(client)
 
-    mock_create_job.return_value.status_code = 400
-    mock_create_job.return_value.text = test_error_str
+    mock_post_job.return_value.status_code = 400
+    mock_post_job.return_value.text = test_error_str
 
     # create job => code 400
     Circuit.i = 0
     with pytest.raises(JobException):
         result = Job(Circuit(), "yamaska", "circuit", "project").run()
 
-    mock_create_job.return_value.status_code = 200
-    mock_create_job.return_value.text = test_job_str
+    mock_post_job.return_value.status_code = 200
+    mock_post_job.return_value.text = test_job_str
     mock_job_by_id.side_effect = side_effect_generator(200)
 
     # typical flow

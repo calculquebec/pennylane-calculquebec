@@ -266,7 +266,7 @@ class ApiAdapter(object):
 
     @staticmethod
     @retry(3)
-    def create_job(
+    def post_job(
         circuit: dict,
         machine_name: str,
         circuit_name: str,

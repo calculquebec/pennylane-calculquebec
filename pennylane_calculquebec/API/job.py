@@ -72,7 +72,7 @@ class Job:
 
         response = None
         try:
-            response = ApiAdapter.create_job(
+            response = ApiAdapter.post_job(
                 self.circuit_dict,
                 self.machine_name,
                 self.circuit_name,
