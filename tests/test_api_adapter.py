@@ -168,12 +168,12 @@ def test_post_job(mock_job_body, mock_get_project_id_by_name, mock_requests_post
 
     mock_get_project_id_by_name.return_value = 0
 
-    mock_requests_post.return_value = Res(200, 42)
-    assert ApiAdapter.post_job({}, "yamaska", "circuit", "project").text == 42
+    mock_requests_post.return_value = Res(200, "{'jobID': 'a_job_uuid'}")
+    assert ApiAdapter.post_job(circuit={}).text == "{'jobID': 'a_job_uuid'}"
 
     mock_requests_post.return_value = Res(400, '{"error" : 42}')
     with pytest.raises(Exception):
-        ApiAdapter.post_job({}, "yamaska", "circuit", "project")
+        ApiAdapter.post_job(circuit={})
 
 
 def test_list_jobs(mock_requests_get):
