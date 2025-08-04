@@ -29,52 +29,60 @@ class ReadoutNoiseSimulation(PostProcStep):
         Returns:
             dict[str, int]: results with readout noise added to it
         """
-        qubit_count = len(
-            set(
-                [
-                    a
-                    for b in data.get_connectivity(
-                        self.machine_name, False
-                    ).values()
-                    for a in b
+        try:
+            qubit_count = len(
+                set(
+                    [
+                        a
+                        for b in data.get_connectivity(
+                            self.machine_name, False
+                        ).values()
+                        for a in b
+                    ]
+                )
+            )
+            coupler_count = len(data.get_connectivity(self.machine_name, False))
+
+            results = results[0] if not isinstance(results, dict) else results
+
+            readout_error_matrices = (
+                get_readout_noise_matrices(self.machine_name)
+                if self.use_benchmark
+                else [
+                    readout_error(TypicalBenchmark.readout0, TypicalBenchmark.readout1)
+                    for _ in range(qubit_count)
                 ]
             )
-        )
-        coupler_count = len(data.get_connectivity(self.machine_name, False))
 
-        results = results[0] if not isinstance(results, dict) else results
+            readout_matrix = np.identity(1)
 
-        readout_error_matrices = (
-            get_readout_noise_matrices(self.machine_name)
-            if self.use_benchmark
-            else [
-                readout_error(TypicalBenchmark.readout0, TypicalBenchmark.readout1)
-                for _ in range(qubit_count)
-            ]
-        )
+            wires = get_measurement_wires(tape)
 
-        readout_matrix = np.identity(1)
+            for wire in wires:
+                readout_matrix = np.kron(readout_matrix, readout_error_matrices[wire])
 
-        wires = get_measurement_wires(tape)
+            # Apply the readout error matrix (dot product with the probability vector)
+            probs = []
+            all_labels = get_labels((1 << len(wires)) - 1)
 
-        for wire in wires:
-            readout_matrix = np.kron(readout_matrix, readout_error_matrices[wire])
+            for label in all_labels:
+                probs.append(
+                    results[label] / tape.shots.total_shots if label in results else 0
+                )
 
-        # Apply the readout error matrix (dot product with the probability vector)
-        probs = []
-        all_labels = get_labels((1 << len(wires)) - 1)
+            prob_after_error = np.dot(readout_matrix, probs)
 
-        for label in all_labels:
-            probs.append(
-                results[label] / tape.shots.total_shots if label in results else 0
+            results_after_error = {
+                label: np.round(prob_after_error[i] * tape.shots.total_shots)
+                for i, label in enumerate(all_labels)
+            }
+
+            # Return the new measurement probabilities after applying the readout error
+            return results_after_error
+        except Exception as e:
+            logger.error(
+                "Error %s in execute located in ReadoutNoiseSimulation: %s",
+                type(e).__name__,
+                e,
             )
-
-        prob_after_error = np.dot(readout_matrix, probs)
-
-        results_after_error = {
-            label: np.round(prob_after_error[i] * tape.shots.total_shots)
-            for i, label in enumerate(all_labels)
-        }
-
-        # Return the new measurement probabilities after applying the readout error
-        return results_after_error
+            return results
