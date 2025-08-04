@@ -85,7 +85,7 @@ class ApiClient:
         self.machine_name = machine_name
         self._project_name = project_name or ""
         self._project_id = project_id or ""
-        self._circuit_name = circuit_name or ""
+        self._circuit_name = circuit_name or "none"
 
 
 class CalculQuebecClient(ApiClient):

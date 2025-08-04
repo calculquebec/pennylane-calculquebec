@@ -81,6 +81,7 @@ class TestApiClient:
         assert client.machine_name == basic_client_params["machine_name"]
         assert client.project_name == project_name
         assert client.project_id == ""
+        assert client.circuit_name == "none"
 
     def test_api_client_initialization_with_project_id(
         self, basic_client_params, project_id
