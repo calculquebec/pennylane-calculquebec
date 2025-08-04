@@ -50,7 +50,7 @@ pip install -e .
 
 Pennylane and other Python dependencies will be installed automatically during the installation process.
 
-The plugin will also take care of installing Julia and the required Julia packages, such as Snowflurry and PythonCall during the first run of the Snowflurry.Qubit device. 
+
 
 ## Usage
 
