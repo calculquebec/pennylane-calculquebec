@@ -62,55 +62,55 @@ def mock_job_by_id():
         yield job_by_id
 
 
-def test_run(mock_convert_circuit, mock_post_job, mock_job_by_id):
-    test_job_str = '{"job" : {"id" : 3}}'
-    test_error_str = '{"code" : 400, "error" : "this is an error"}'
+class TestJob:
+    def test_run(self, mock_convert_circuit, mock_post_job, mock_job_by_id):
+        test_job_str = '{"job" : {"id" : 3}}'
+        test_error_str = '{"code" : 400, "error" : "this is an error"}'
 
-    def side_effect_generator(status_code):
-        def side_effect(_):
-            Circuit.i += 1
-            if Circuit.i % 3 != 0:
-                return Response_JobById(status_code, "no")
-            return Response_JobById(status_code, "SUCCEEDED")
+        def side_effect_generator(status_code):
+            def side_effect(_):
+                Circuit.i += 1
+                if Circuit.i % 3 != 0:
+                    return Response_JobById(status_code, "no")
+                return Response_JobById(status_code, "SUCCEEDED")
 
-        return side_effect
+            return side_effect
 
-    ApiAdapter.initialize(client)
+        ApiAdapter.initialize(client)
 
-    mock_post_job.return_value.status_code = 400
-    mock_post_job.return_value.text = test_error_str
+        mock_post_job.return_value.status_code = 400
+        mock_post_job.return_value.text = test_error_str
 
-    # create job => code 400
-    Circuit.i = 0
-    with pytest.raises(JobException):
-        result = Job(Circuit(), "yamaska", "circuit", "project").run()
+        # create job => code 400
+        Circuit.i = 0
+        with pytest.raises(JobException):
+            result = Job(Circuit()).run()
 
-    mock_post_job.return_value.status_code = 200
-    mock_post_job.return_value.text = test_job_str
-    mock_job_by_id.side_effect = side_effect_generator(200)
+        mock_post_job.return_value.status_code = 200
+        mock_post_job.return_value.text = test_job_str
+        mock_job_by_id.side_effect = side_effect_generator(200)
 
-    # typical flow
-    Circuit.i = 0
-    result = Job(Circuit(), "yamaska", "circuit", "project").run()
-    assert result == 42
-    assert Circuit.i == 3
+        # typical flow
+        Circuit.i = 0
+        result = Job(Circuit()).run()
+        assert result == 42
+        assert Circuit.i == 3
 
-    # job_by_id => code 400
-    mock_job_by_id.side_effect = side_effect_generator(400)
+        # job_by_id => code 400
+        mock_job_by_id.side_effect = side_effect_generator(400)
 
-    Circuit.i = 0
-    with pytest.raises(JobException):
-        result = Job(Circuit(), "yamaska", "circuit", "project").run()
+        Circuit.i = 0
+        with pytest.raises(JobException):
+            result = Job(Circuit()).run()
 
-    # runs past iteration limit
-    mock_job_by_id.side_effect = side_effect_generator(200)
-    Circuit.i = 0
-    with pytest.raises(JobException):
-        Job(Circuit(), "yamaska", "circuit", "project").run(2)
-    Circuit.i == 2
+        # runs past iteration limit
+        mock_job_by_id.side_effect = side_effect_generator(200)
+        Circuit.i = 0
+        with pytest.raises(JobException):
+            Job(Circuit()).run(2)
+        Circuit.i == 2
 
-
-def test_raise_api_error():
-    response = Response_Error()
-    with pytest.raises(JobException):
-        Job(Circuit(), "yamaska", "circuit", "project").raise_api_error(response)
+    def test_raise_api_error(self):
+        response = Response_Error()
+        with pytest.raises(JobException):
+            Job(Circuit()).raise_api_error(response)
