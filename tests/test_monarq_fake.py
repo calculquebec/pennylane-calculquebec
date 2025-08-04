@@ -105,6 +105,12 @@ def test_execute(mock_measure):
     assert mock_measure.call_count == 4
 
 
+def test_monarqsim_without_client():
+    """Test that MonarqSim does not require a client."""
+    sim = MonarqSim(shots=1000)
+    assert not hasattr(sim, "_client")
+
+
 def test_measure(mock_PostProcessor_get_processor, mock_gate_noise, mock_readout_noise):
     from pennylane.tape import QuantumTape
 

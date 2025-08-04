@@ -79,6 +79,13 @@ def test_constructor(mock_api_initialize):
     assert dev._processing_config is config
 
 
+def test_device_registers_client():
+    """Test that MonarqDevice registers the client when initialized."""
+    dev = MonarqDevice(client=client, shots=1000)
+    assert hasattr(dev, "_client")
+    assert isinstance(dev._client, MonarqClient)
+
+
 def test_preprocess(mock_PreProcessor_get_processor, mock_api_initialize):
     mock_PreProcessor_get_processor.return_value = transform(lambda tape: tape)
     dev = MonarqDevice(client=client, shots=1000)
