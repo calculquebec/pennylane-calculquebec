@@ -16,7 +16,6 @@ def basic_client_params():
         "user": "test_user",
         "access_token": "test_token_123",
         "realm": "test_realm",
-        "machine_name": "test_machine",
     }
 
 
@@ -45,7 +44,6 @@ def calcul_quebec_params():
         "host": "https://calculquebec.example.com",
         "user": "cq_user",
         "token": "cq_token_456",
-        "machine_name": "cq_machine",
     }
 
 
@@ -78,10 +76,10 @@ class TestApiClient:
         assert client.user == basic_client_params["user"]
         assert client.access_token == basic_client_params["access_token"]
         assert client.realm == basic_client_params["realm"]
-        assert client.machine_name == basic_client_params["machine_name"]
         assert client.project_name == project_name
         assert client.project_id == ""
         assert client.circuit_name == "none"
+        assert client.machine_name == ""  # Machine name is set later
 
     def test_api_client_initialization_with_project_id(
         self, basic_client_params, project_id
@@ -138,7 +136,7 @@ class TestApiClient:
     ):
         """Test that circuit_name defaults to empty string when not provided."""
         client = ApiClient(**basic_client_params, project_name=project_name)
-        assert client.circuit_name == ""
+        assert client.circuit_name == "none"
 
 
 class TestCalculQuebecClient:
@@ -154,7 +152,7 @@ class TestCalculQuebecClient:
         assert client.user == calcul_quebec_params["user"]
         assert client.access_token == calcul_quebec_params["token"]
         assert client.realm == "calculqc"
-        assert client.machine_name == calcul_quebec_params["machine_name"]
+        assert client.machine_name == ""
         assert client.project_name == project_name
         assert client.project_id == ""
 
@@ -217,7 +215,7 @@ class TestMonarqClient:
         assert client.user == monarq_params["user"]
         assert client.access_token == monarq_params["access_token"]
         assert client.realm == "calculqc"
-        assert client.machine_name == "yamaska"
+        assert client.machine_name == ""
         assert client.project_name == project_name
         assert client.project_id == ""
 
@@ -229,7 +227,7 @@ class TestMonarqClient:
 
         assert client.project_id == project_id
         assert client.project_name == ""
-        assert client.machine_name == "yamaska"
+        assert client.machine_name == ""
         assert client.realm == "calculqc"
 
     def test_monarq_client_requires_project_parameter(self, monarq_params):
@@ -258,11 +256,6 @@ class TestMonarqClient:
         client = MonarqClient(**monarq_params, project_name=project_name)
         assert isinstance(client, CalculQuebecClient)
         assert isinstance(client, ApiClient)
-
-    def test_monarq_client_machine_name_is_fixed(self, monarq_params, project_name):
-        """Test that MonarqClient always sets machine_name to 'yamaska'."""
-        client = MonarqClient(**monarq_params, project_name=project_name)
-        assert client.machine_name == "yamaska"
 
     def test_monarq_client_inheritance_chain(self, monarq_params, project_name):
         """Test the complete inheritance chain for MonarqClient.

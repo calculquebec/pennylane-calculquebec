@@ -38,7 +38,8 @@ def test_monarq_default(mock_get_connectivity):
     dev = qml.device(
         "monarq.default", wires=[0], client=client, shots=1000, processing_config=config
     )
-
+    assert dev._client is client
+    assert dev._client.machine_name == dev.machine_name
     qnode = qml.QNode(circuit, dev)
     with patch("requests.post") as post:
         post.return_value = Response('{"job" : {"id" : 1}}')

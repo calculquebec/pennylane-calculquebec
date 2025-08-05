@@ -47,7 +47,8 @@ class BaseDevice(Device):
 
         if client is not None:
             self._client = client
-            ApiAdapter.initialize(client)
+            self._client.machine_name = self.machine_name
+            ApiAdapter.initialize(self._client)
 
     def preprocess(
         self,

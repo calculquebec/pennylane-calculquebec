@@ -35,6 +35,7 @@ class ApiClient:
         machine_name (str) : the name of the machine
         project_name (str) : the name of the project
         project_id (str) : the ID of the project
+        circuit_name (str) : the name of the circuit to use for the job
     """
 
     @property
@@ -57,35 +58,49 @@ class ApiClient:
         """Returns the circuit name."""
         return self._circuit_name
 
+    @circuit_name.setter
+    def circuit_name(self, value: str):
+        """Sets the circuit name."""
+        self._circuit_name = value
+
+    @property
+    def machine_name(self):
+        """Returns the machine name."""
+        return self._machine_name
+
+    @machine_name.setter
+    def machine_name(self, value: str):
+        """Sets the machine name."""
+        self._machine_name = value
+
     def __init__(
         self,
         host: str,
         user: str,
         access_token: str,
         realm: str,
-        machine_name: str,
-        project_name: str = None,
-        project_id: str = None,
-        circuit_name: str = None,
+        project_name: str = "",
+        project_id: str = "",
+        circuit_name: str = "none",
     ):
         # Validation of project_name and project_id parameters
-        if project_name is None and project_id is None:
+        if project_name == "" and project_id == "":
             raise ProjectParameterError(
                 "Either project_name or project_id must be provided"
             )
 
-        if project_name is not None and project_id is not None:
+        if project_name != "" and project_id != "":
             # If both are provided, use only project_id
-            project_name = None
+            project_name = ""
 
         self.host = host
         self.user = user
         self.access_token = access_token
         self.realm = realm
-        self.machine_name = machine_name
-        self._project_name = project_name or ""
-        self._project_id = project_id or ""
-        self._circuit_name = circuit_name or "none"
+        self._machine_name = ""
+        self._project_name = project_name
+        self._project_id = project_id
+        self._circuit_name = circuit_name
 
 
 class CalculQuebecClient(ApiClient):
@@ -96,9 +111,9 @@ class CalculQuebecClient(ApiClient):
         host (str) : the server address for the machine
         user (str) : the users identifier
         access_token (str) : the unique access key provided to the user
-        machine_name (str) : the name of the machine
         project_name (str) : the name of the project (exclusive with project_id)
         project_id (str) : the ID of the project (exclusive with project_name)
+        circuit_name (str) : the name of the circuit to use for the job
 
     """
 
@@ -107,17 +122,15 @@ class CalculQuebecClient(ApiClient):
         host,
         user,
         token,
-        machine_name,
-        project_name=None,
-        project_id=None,
-        circuit_name=None,
+        project_name="",
+        project_id="",
+        circuit_name="",
     ):
         super().__init__(
             host,
             user,
             token,
             "calculqc",
-            machine_name,
             project_name,
             project_id,
             circuit_name,
@@ -134,23 +147,25 @@ class MonarqClient(CalculQuebecClient):
         access_token (str) : the unique access key provided to the user
         project_name (str) : the name of the project (exclusive with project_id)
         project_id (str) : the ID of the project (exclusive with project_name)
+        circuit_name (str) : the name of the circuit to use for the job
 
     """
+
+    # FIXME : deprecate this class in favor of CalculQuebecClient
 
     def __init__(
         self,
         host,
         user,
         access_token,
-        project_name=None,
-        project_id=None,
-        circuit_name=None,
+        project_name="",
+        project_id="",
+        circuit_name="",
     ):
         super().__init__(
             host,
             user,
             access_token,
-            "yamaska",
             project_name,
             project_id,
             circuit_name,
