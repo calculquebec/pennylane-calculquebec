@@ -126,6 +126,10 @@ class ApiAdapter(object):
             client.user, client.access_token, client.realm
         )
         cls._instance.client = client
+        if client.project_name != "":
+            cls._instance.client.project_id = ApiAdapter.get_project_id_by_name(
+                client.project_name
+            )
 
         cls._qubits_and_couplers: dict = None
         cls._machine: dict = None
@@ -262,33 +266,23 @@ class ApiAdapter(object):
 
     @staticmethod
     @retry(3)
-    def create_job(
+    def post_job(
         circuit: dict,
-        machine_name: str,
-        circuit_name: str,
         shot_count: int = 1,
-        project_name: str = "",
-        project_id: str = "",
     ) -> requests.Response:
         """
         Post a new job for running a specific circuit a certain number of times on given machine (machine name stored in client)
 
         Args:
             circuit (dict) : The dictionary representation of a circuit
-            machine_name (str) : The machine on which to run the circuit
-            circuit_name (str) : The circuit name
             shot_count (int) : The number of shots. default is 1
-            project_name (str) : The project name
-            project_id (str) : The project id is optional, if not provided, it will be fetched using the project name.
 
         Returns:
             Response : The response of the /job post request
         """
-        project_id = (
-            ApiAdapter.get_project_id_by_name(project_name)
-            if project_name
-            else project_id
-        )
+        project_id = ApiAdapter.instance().client.project_id
+        circuit_name = ApiAdapter.instance().client.circuit_name
+        machine_name = ApiAdapter.instance().client.machine_name
         body = ApiUtility.job_body(
             circuit, circuit_name, project_id, machine_name, shot_count
         )

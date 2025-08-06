@@ -12,7 +12,7 @@ from pennylane_calculquebec.base_device import BaseDevice
 import pennylane_calculquebec.API.job as api_job
 
 
-client = MonarqClient("host", "user", "token")
+client = MonarqClient("test", "test", "test", project_id="test_project_id")
 
 
 @pytest.fixture
@@ -103,6 +103,12 @@ def test_execute(mock_measure):
     # ran 4 times
     result = dev.execute([quantum_tape, quantum_tape, quantum_tape])
     assert mock_measure.call_count == 4
+
+
+def test_monarqsim_without_client():
+    """Test that MonarqSim does not require a client."""
+    sim = MonarqSim(shots=1000)
+    assert not hasattr(sim, "_client")
 
 
 def test_measure(mock_PostProcessor_get_processor, mock_gate_noise, mock_readout_noise):
