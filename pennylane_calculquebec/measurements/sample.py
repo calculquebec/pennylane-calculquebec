@@ -1,4 +1,4 @@
-from pennylane_calculquebec.measurements.measurement_strategy import MeasurementStrategy
+from .measurement_strategy import MeasurementStrategy
 import numpy as np
 
 
