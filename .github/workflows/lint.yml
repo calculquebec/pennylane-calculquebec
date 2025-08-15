@@ -17,7 +17,7 @@ jobs:
           jupyter: 'true'
           src: "./doc ./pennylane_calculquebec ./tests"
 
-  format-PR:
+  format-in-PR:
     runs-on: ubuntu-latest
     needs: lint-check
     if: ${{ failure() }}
@@ -35,7 +35,7 @@ jobs:
 
       - name: Create PR with changes
         uses: peter-evans/create-pull-request@v7
-        if: steps.black-format.conclusion == success()
+        if: steps.black-format.conclusion == 'success'
         with:
           title: Format code in ${{github.head_ref}} branch
           body: |
