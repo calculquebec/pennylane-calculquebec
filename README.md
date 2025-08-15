@@ -31,9 +31,6 @@ It also offers simulation and pre-processing / post-processing capabilities rela
 
 As shown in the diagram below, this plugin contains a Pennylane [device](https://pennylane.ai/plugins/) named `monarq.default`. This devices is defined by the class `MonarqDevice`. It first applies a series of pre-processing steps to the circuit in order to simplify it, and make it executable on MonarQ. It then creates and submits a job using API calls, and gets the results back once they're ready. A series of post-processing steps are then applied, and the processed results are returned to the end user. 
 
-
-![project_structure](https://raw.githubusercontent.com/calculquebec/pennylane-calculquebec/9276a260959c886eed87373b74090a9d652b130c/doc/assets/project_structure.png)
-
 ## Local installation
 
 Pennylane-calculquebec can be installed using pip:
