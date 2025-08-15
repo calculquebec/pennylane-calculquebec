@@ -120,3 +120,21 @@ def test_convert_circuit(mock_tape):
     measurement_bits = [bit for operation in readout_operations for bit in operation.get("bits", [])]
     # Check if the bits are a sequence starting at 0
     assert measurement_bits == list(range(len(measurement_bits))), "Measurement bits are not a sequence starting at 0"
+
+
+def test_measurement_bits_are_sequential_and_start_at_zero():
+    wires = [3, 7, 1]
+    tape = QuantumTape(ops=[], measurements=[qml.counts(wires=wires)], shots=1000)
+    circuit_dict = ApiUtility.convert_circuit(tape)
+    # Extract the operations of type "readout" from the circuit dictionary
+    readout_operations = [
+        operation for operation in circuit_dict.get("operations", [])
+        if operation.get("type") == "readout"
+    ]
+    # Collect the bits from the readout operations
+    measurement_bits = [bit for operation in readout_operations for bit in operation.get("bits", [])]
+    # Check if the bits are a sequence starting at 0
+    assert measurement_bits == list(range(len(measurement_bits))), "Measurement bits are not a sequence starting at 0"
+    # Qubits should match the wires order
+    qubits = [operation.get("qubits", [])[0] for operation in readout_operations]
+    assert qubits == wires
