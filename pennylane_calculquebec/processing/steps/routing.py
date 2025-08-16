@@ -76,60 +76,54 @@ class Swaps(Routing):
         Returns:
             QuantumTape: the transformed tape
         """
-        try:
-            circuit_topology = circuit_graph(tape)
-            machine_topology = machine_graph(
-                self.machine_name,
-                self.use_benchmark,
-                self.q1_acceptance,
-                self.q2_acceptance,
-                self.excluded_qubits,
-                self.excluded_couplers,
-            )
-            new_operations: list[Operation] = []
-            list_copy = tape.operations.copy()
+        circuit_topology = circuit_graph(tape)
+        machine_topology = machine_graph(
+            self.machine_name,
+            self.use_benchmark,
+            self.q1_acceptance,
+            self.q2_acceptance,
+            self.excluded_qubits,
+            self.excluded_couplers,
+        )
+        new_operations: list[Operation] = []
+        list_copy = tape.operations.copy()
 
-            for operation in list_copy:
-                if operation.num_wires == 2 and not is_directly_connected(
-                    operation, machine_topology
-                ):
-                    path = shortest_path(
-                        operation.wires[0],
-                        operation.wires[1],
-                        machine_topology,
-                        self.machine_name,
-                        prioritized_nodes=[n for n in circuit_topology.nodes],
-                        use_benchmark=self.use_benchmark,
+        for operation in list_copy:
+            if operation.num_wires == 2 and not is_directly_connected(
+                operation, machine_topology
+            ):
+                path = shortest_path(
+                    operation.wires[0],
+                    operation.wires[1],
+                    machine_topology,
+                    self.machine_name,
+                    prioritized_nodes=[n for n in circuit_topology.nodes],
+                    use_benchmark=self.use_benchmark,
+                )
+
+                if path is None:
+                    raise RoutingException(
+                        "It is not possible to route the circuit given available qubits and couplers"
                     )
+                for node in reversed(range(1, len(path) - 1)):
+                    new_operations += [qml.SWAP([path[node], path[node + 1]])]
 
-                    if path is None:
-                        raise RoutingException(
-                            "It is not possible to route the circuit given available qubits and couplers"
-                        )
-                    for node in reversed(range(1, len(path) - 1)):
-                        new_operations += [qml.SWAP([path[node], path[node + 1]])]
+                new_operations += [
+                    operation.map_wires(
+                        {
+                            origin: target
+                            for (origin, target) in zip(
+                                operation.wires, [path[0], path[1]]
+                            )
+                        }
+                    )
+                ]
 
-                    new_operations += [
-                        operation.map_wires(
-                            {
-                                origin: target
-                                for (origin, target) in zip(
-                                    operation.wires, [path[0], path[1]]
-                                )
-                            }
-                        )
-                    ]
+                for node in range(1, len(path) - 1):
+                    new_operations += [qml.SWAP([path[node], path[node + 1]])]
+            else:
+                new_operations += [operation]
 
-                    for node in range(1, len(path) - 1):
-                        new_operations += [qml.SWAP([path[node], path[node + 1]])]
-                else:
-                    new_operations += [operation]
+        new_tape = type(tape)(new_operations, tape.measurements, shots=tape.shots)
 
-            new_tape = type(tape)(new_operations, tape.measurements, shots=tape.shots)
-
-            return new_tape
-        except Exception as e:
-            logger.error(
-                "Error %s in execute located in Swaps: %s", type(e).__name__, e
-            )
-            return tape
+        return new_tape
