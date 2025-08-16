@@ -1,4 +1,4 @@
 """
 This module contains everything service/network related for communicating with MonarQ.
 """
-from pennylane_calculquebec.exception import ApiError
+from pennylane_calculquebec.exceptions import ApiError

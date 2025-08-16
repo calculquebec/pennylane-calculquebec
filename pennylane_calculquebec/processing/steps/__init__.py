@@ -12,4 +12,4 @@ from .decompose_readout import DecomposeReadout
 from .gate_noise_simulation import GateNoiseSimulation
 from .readout_noise_simulation import ReadoutNoiseSimulation
 from .print_steps import PrintResults, PrintTape, PrintWires
-from pennylane_calculquebec.exception import StepsError
+from pennylane_calculquebec.exceptions import StepsError

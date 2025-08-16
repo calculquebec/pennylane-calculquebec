@@ -2,4 +2,4 @@
 
 from .monarq_postproc import PostProcessor
 from .monarq_preproc import PreProcessor  
-from pennylane_calculquebec.exception import ProcessingError
+from pennylane_calculquebec.exceptions import ProcessingError
