@@ -1,1 +1,1 @@
-from pennylane_calculquebec.exception import UtilityError
+from pennylane_calculquebec.exceptions import UtilityError
