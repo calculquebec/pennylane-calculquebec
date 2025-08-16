@@ -30,8 +30,6 @@ class Job:
 
     Args:
         circuit (QuantumTape) : the circuit you want to execute
-        machine_name (str) : the name of the machine
-        circuit_name (str) : the name of the circuit, defaults to "default"
     """
 
     started: Callable[[int], None]
@@ -41,27 +39,11 @@ class Job:
     def __init__(
         self,
         circuit: QuantumTape,
-        machine_name: str,
-        circuit_name: str,
-        project_name: str,
     ):
         self.started = None
         self.status_changed = None
         self.completed = None
-        if circuit_name is None:
-            raise JobException("you must provide a circuit name")
-
-        if project_name is None:
-            raise JobException("you must provide a project name")
-
         self.circuit_dict = ApiUtility.convert_circuit(circuit)
-        if self.circuit_dict.get(0) != 0:
-            raise JobException(
-                "The circuit must start with 0"
-            )
-        self.machine_name = machine_name
-        self.circuit_name = circuit_name
-        self.project_name = project_name
         self.shots = circuit.shots.total_shots
 
     def run(self, max_tries: int = 2**15) -> dict:
@@ -76,11 +58,8 @@ class Job:
 
         response = None
         try:
-            response = ApiAdapter.create_job(
+            response = ApiAdapter.post_job(
                 self.circuit_dict,
-                self.machine_name,
-                self.circuit_name,
-                self.project_name,
                 self.shots,
             )
         except:

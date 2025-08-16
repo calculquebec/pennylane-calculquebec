@@ -15,7 +15,7 @@ from pennylane_calculquebec.base_device import BaseDevice
 import pennylane_calculquebec.API.job as api_job
 
 
-client = MonarqClient("host", "user", "token")
+client = MonarqClient("host", "user", "token", project_id="test_project_id")
 
 
 @pytest.fixture
@@ -77,6 +77,13 @@ def test_constructor(mock_api_initialize):
     dev = MonarqDevice(client=client, processing_config=config, shots=1000)
     mock_api_initialize.assert_called_once()
     assert dev._processing_config is config
+
+
+def test_device_registers_client():
+    """Test that MonarqDevice registers the client when initialized."""
+    dev = MonarqDevice(client=client, shots=1000)
+    assert hasattr(dev, "_client")
+    assert isinstance(dev._client, MonarqClient)
 
 
 def test_preprocess(mock_PreProcessor_get_processor, mock_api_initialize):

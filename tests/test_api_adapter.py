@@ -10,7 +10,7 @@ from unittest.mock import patch
 from pennylane_calculquebec.utility.api import ApiUtility, keys
 from datetime import datetime, timedelta
 
-client = MonarqClient("test", "test", "test")
+client = MonarqClient("test", "test", "test", project_id="123")
 
 
 # ------------ MOCKS ----------------------
@@ -163,17 +163,17 @@ def test_get_benchmark(
         benchmark = ApiAdapter.get_benchmark("yamaska")
 
 
-def test_create_job(mock_job_body, mock_get_project_id_by_name, mock_requests_post):
+def test_post_job(mock_job_body, mock_get_project_id_by_name, mock_requests_post):
     ApiAdapter.initialize(client)
 
     mock_get_project_id_by_name.return_value = 0
 
-    mock_requests_post.return_value = Res(200, 42)
-    assert ApiAdapter.create_job({}, "yamaska", "circuit", "project").text == 42
+    mock_requests_post.return_value = Res(200, "{'jobID': 'a_job_uuid'}")
+    assert ApiAdapter.post_job(circuit={}).text == "{'jobID': 'a_job_uuid'}"
 
     mock_requests_post.return_value = Res(400, '{"error" : 42}')
     with pytest.raises(Exception):
-        ApiAdapter.create_job({}, "yamaska", "circuit", "project")
+        ApiAdapter.post_job(circuit={})
 
 
 def test_list_jobs(mock_requests_get):
