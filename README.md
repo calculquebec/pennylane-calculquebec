@@ -26,11 +26,6 @@ It also offers simulation and pre-processing / post-processing capabilities rela
 
 [Calcul Quebec](https://www.calculquebec.ca/) is a non-profit organization that regroups universities from the Province of Quebec and provides computing power to research and academia.  
 
-
-## Project structure
-
-As shown in the diagram below, this plugin contains a Pennylane [device](https://pennylane.ai/plugins/) named `monarq.default`. This devices is defined by the class `MonarqDevice`. It first applies a series of pre-processing steps to the circuit in order to simplify it, and make it executable on MonarQ. It then creates and submits a job using API calls, and gets the results back once they're ready. A series of post-processing steps are then applied, and the processed results are returned to the end user. 
-
 ## Local installation
 
 Pennylane-calculquebec can be installed using pip:
