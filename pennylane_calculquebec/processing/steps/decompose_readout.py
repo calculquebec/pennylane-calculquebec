@@ -7,7 +7,7 @@ from pennylane_calculquebec.processing.interfaces import PreProcStep
 from pennylane.tape import QuantumTape
 import pennylane as qml
 import pennylane.math as math
-from pennylane_calculquebec.processing.processing_exception import ProcessingException
+from pennylane_calculquebec.exceptions import ProcessingException
 
 
 class DecomposeReadout(PreProcStep):

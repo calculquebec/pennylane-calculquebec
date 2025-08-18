@@ -22,6 +22,9 @@ class DeviceError(PennylaneCQError):
 class ProcessingError(PennylaneCQError):
     """Error related to processing."""
 
+class ProcessingException(ProcessingError):
+    """Legacy alias for processing-related exceptions."""
+
 class UtilityError(PennylaneCQError):
     """Error related to utility."""
 
