@@ -3,6 +3,7 @@ import pennylane as qml
 import pytest
 from unittest.mock import patch
 from pennylane_calculquebec.utility.api import ApiUtility, keys
+from pennylane_calculquebec.API.job import Job
 from pennylane.tape import QuantumTape
 
 
@@ -100,3 +101,27 @@ def test_body():
     assert result[keys.PROJECT_ID] == "c"
     assert result[keys.MACHINE_NAME] == "d"
     assert result[keys.SHOT_COUNT] == "e"
+def test_measure_bits_zero_based_and_consecutive_in_job_init():
+    # Non-consecutive, non-zero-starting wire labels to reproduce past bug scenario
+    wires = [5, 12, 3, 9]
+
+    # Create a real QuantumTape with a counts measurement over these wires
+    tape = QuantumTape(ops=[qml.PauliX(0)], measurements=[qml.counts(wires=wires)], shots=100)
+
+    # Initialize Job (no network calls happen in __init__)
+    job = Job(tape)
+
+    # Extract readout operations appended during circuit conversion
+    ops = job.circuit_dict[keys.OPERATIONS]
+    readouts = [op for op in ops if op[keys.TYPE] == "readout"]
+
+    # One readout per measured wire
+    assert len(readouts) == len(wires)
+
+    # Bits must be a global zero-based consecutive sequence (0..N-1)
+    bits = [op[keys.BITS][0] for op in readouts]
+    assert bits == list(range(len(wires)))
+
+    # Qubits must match the measurement wires order
+    qubits = [op[keys.QUBITS][0] for op in readouts]
+    assert qubits == wires

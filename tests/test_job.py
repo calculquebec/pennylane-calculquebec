@@ -4,6 +4,9 @@ import pytest
 from unittest.mock import patch
 from pennylane_calculquebec.API.job import Job, JobException
 import json
+import pennylane as qml
+from pennylane.tape import QuantumTape
+from pennylane_calculquebec.utility.api import keys
 
 client = MonarqClient("test", "test", "test", project_id="test_project_id")
 
@@ -114,3 +117,5 @@ class TestJob:
         response = Response_Error()
         with pytest.raises(JobException):
             Job(Circuit()).raise_api_error(response)
+
+
