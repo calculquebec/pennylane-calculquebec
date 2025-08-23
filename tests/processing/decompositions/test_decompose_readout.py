@@ -1,7 +1,7 @@
 import pennylane as qml
 from pennylane.tape import QuantumTape
 import numpy as np
-from pennylane_calculquebec.processing.processing_exception import ProcessingException
+from pennylane_calculquebec.exceptions import ProcessingError
 from pennylane_calculquebec.processing.steps import DecomposeReadout
 import pytest
 from unittest.mock import patch
@@ -26,5 +26,5 @@ def test_execute():
     # unsupported observable
     for observable in obs:
         tape = QuantumTape([], [qml.counts(observable)])
-        with pytest.raises(ProcessingException):
+        with pytest.raises(ProcessingError):
             tape = step.execute(tape)

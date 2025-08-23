@@ -7,7 +7,7 @@ from pennylane_calculquebec.processing.interfaces import PreProcStep
 from pennylane.tape import QuantumTape
 import pennylane as qml
 import pennylane.math as math
-from pennylane_calculquebec.processing.processing_exception import ProcessingException
+from pennylane_calculquebec.exceptions import ProcessingError
 
 
 class DecomposeReadout(PreProcStep):
@@ -29,9 +29,7 @@ class DecomposeReadout(PreProcStep):
             QuantumTape: a readout with only computational basis observables
         """
         operations = tape.operations.copy()
-
         measurements = []
-        matrices = []
 
         for measurement in tape.measurements:
             if measurement.obs is None:
@@ -41,7 +39,7 @@ class DecomposeReadout(PreProcStep):
             mat = qml.matrix(measurement.obs)
 
             if not math.allclose(mat.conj().T, mat):
-                raise ProcessingException(
+                raise ProcessingError(
                     f"The observable {measurement.obs} is not supported"
                 )
 
