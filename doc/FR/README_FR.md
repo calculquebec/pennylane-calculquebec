@@ -24,14 +24,6 @@ Le plugin offre aussi des fonctionnalités de simulation et de pré/post traitem
 
 [Calcul Quebec](https://www.calculquebec.ca/) est un organisme sans but lucratif qui regroupe les universités de la province de Québec et fournit de la puissance de calcul aux milieux académique et de la recherche.  
 
-
-## Structure du projet
-
-Comme présenté dans le diagramme ci-dessous, ce plugin contient un [device](https://pennylane.ai/plugins/) PennyLane appelé `monarq.default`. Ce device est définit par une classe `MonarqDevice`. Le device applique tout d'abord au circuit une série d'étapes de pré-traitement pour le simplifier et le rendre exécutable sur MonarQ. Le device crée et soumet ensuite une Job en utilisant des appels à une API, et récupère les résultats quand ils sont prêts. Une série d'étape de post-traitement est alors appliquée et le résultat traité est retourné à l'utilisateur. 
-
-
-![project_structure](https://raw.githubusercontent.com/calculquebec/pennylane-calculquebec/9276a260959c886eed87373b74090a9d652b130c/doc/assets/project_structure.png)
-
 ## Installation locale
 
 Pennylane-calculquebec peut être installé en utilisant pip:
