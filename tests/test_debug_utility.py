@@ -117,3 +117,16 @@ def test_get_measurement_wires():
     result = debug.get_measurement_wires(tape)
 
     assert len(expected) == len(result) and all(a in result for a in expected)
+
+def test_probs_to_counts():
+    input_probs = [0.5, 0.5]
+    input_count = 1000
+    expected = {"00": 500, "01": 500}
+    result = debug.probs_to_counts(input_probs, input_count)
+    assert expected == result
+    # invalid length (not power of two)
+    with pytest.raises(ValueError):
+        debug.probs_to_counts([0.2, 0.3, 0.5], 10)
+    # empty
+    with pytest.raises(ValueError):
+        debug.probs_to_counts([], 10)

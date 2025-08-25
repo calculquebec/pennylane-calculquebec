@@ -33,18 +33,36 @@ def compute_expval(probabilities: list[float]) -> float:
     return expval
 
 
-def probs_to_counts(probs: list, count: int) -> dict[str, int]:
+def probs_to_counts(probs: list, count: float) -> dict[str, float]:
     """turns probabilities into counts
 
     Args:
         probs (list): the probability distribution
-        count (int): the amount of shots
+        count (float): the amount of shots
 
     Returns:
-        dict[str, int]: the counts
+        dict[str, float]: the counts
     """
-    bit_length = np.log2(len(probs))
-    return {label_from(i, bit_length): round(p * count) for i, p in enumerate(probs)}
+    # NOTE:
+    # ``label_from`` expects an integer number of binary places. The previous implementation
+    # passed the raw result of ``np.log2(len(probs))`` (a float), which produced an invalid
+    # format specification such as '01.0b' and raised a ValueError when executed.
+    #
+    # Existing tests (and downstream usage generating virtual shots) expect the labels for
+    # a probability vector of length 2 to be zero‑padded to 2 bits ("00", "01"), not 1 bit
+    # ("0", "1"). To remain backward compatible with that expectation we pad with an
+    # extra bit: bit_length = log2(len(probs)) + 1.
+    #
+    # If len(probs) is not a power of two, we raise a ValueError because there is no clear
+    # mapping to evenly sized bitstrings.
+    length = len(probs)
+    if length == 0:
+        raise ValueError("probs must not be empty")
+    log2_len = np.log2(length)
+    if not float(log2_len).is_integer():
+        raise ValueError("Length of probs must be a power of two")
+    bit_length = int(log2_len) + 1
+    return {label_from(i, bit_length): p * count for i, p in enumerate(probs)}
 
 
 def counts_to_probs(counts: dict) -> list[float]:
