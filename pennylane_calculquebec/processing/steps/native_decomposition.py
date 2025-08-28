@@ -64,43 +64,35 @@ class MonarqDecomposition(NativeDecomposition):
         Returns:
             QuantumTape: The processed quantum tape
         """
-        try:
-            new_operations = []
+        new_operations = []
 
-            with qml.QueuingManager.stop_recording():
-                for operation in tape.operations:
-                    if operation.name in MonarqDecomposition._decomp_map:
-                        if operation.num_params > 0:
-                            new_operations.extend(
-                                MonarqDecomposition._decomp_map[operation.name](
-                                    angle=operation.data[0], wires=operation.wires
-                                )
+        with qml.QueuingManager.stop_recording():
+            for operation in tape.operations:
+                if operation.name in MonarqDecomposition._decomp_map:
+                    if operation.num_params > 0:
+                        new_operations.extend(
+                            MonarqDecomposition._decomp_map[operation.name](
+                                angle=operation.data[0], wires=operation.wires
                             )
-                        else:
-                            new_operations.extend(
-                                MonarqDecomposition._decomp_map[operation.name](
-                                    wires=operation.wires
-                                )
-                            )
+                        )
                     else:
-                        if operation.name in self.native_gates():
-                            new_operations.append(operation)
-                        else:
-                            raise ValueError(
-                                f"gate {operation.name} is not handled by the native decomposition step. Did you bypass the base decomposition step?"
+                        new_operations.extend(
+                            MonarqDecomposition._decomp_map[operation.name](
+                                wires=operation.wires
                             )
+                        )
+                else:
+                    if operation.name in self.native_gates():
+                        new_operations.append(operation)
+                    else:
+                        raise ValueError(
+                            f"gate {operation.name} is not handled by the native decomposition step. Did you bypass the base decomposition step?"
+                        )
 
-            new_operations = [
-                operation.data[0][0] if isinstance(operation, SProd) else operation
-                for operation in new_operations
-            ]
-            new_tape = type(tape)(new_operations, tape.measurements, shots=tape.shots)
+        new_operations = [
+            operation.data[0][0] if isinstance(operation, SProd) else operation
+            for operation in new_operations
+        ]
+        new_tape = type(tape)(new_operations, tape.measurements, shots=tape.shots)
 
-            return new_tape
-        except Exception as e:
-            logger.error(
-                "Error %s in execute located in MonarqDecomposition: %s",
-                type(e).__name__,
-                e,
-            )
-            return tape
+        return new_tape
