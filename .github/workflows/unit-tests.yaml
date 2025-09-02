@@ -11,6 +11,7 @@ on:
       - ".github/workflows/unit-tests.yaml" # Trigger on changes to this workflow file
       - "pennylane_calculquebec/**"
       - "tests/**"
+      - "*.toml"
 
 jobs:
   unit-tests:
