@@ -27,7 +27,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-	"Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Scientific/Engineering :: Physics",
 ]
@@ -46,7 +46,15 @@ test = ["matplotlib", "pytest", "pytest-mock", "flaky", "tox"]
 [project.entry-points."pennylane.io"]
 
 [tool.setuptools]
-packages = ["pennylane_calculquebec", "pennylane_calculquebec.measurements", "pennylane_calculquebec.utility", "pennylane_calculquebec.API", "pennylane_calculquebec.processing", "pennylane_calculquebec.processing.steps", "pennylane_calculquebec.processing.config", "pennylane_calculquebec.processing.interfaces"]
+packages = [
+    "pennylane_calculquebec",
+    "pennylane_calculquebec.utility",
+    "pennylane_calculquebec.API",
+    "pennylane_calculquebec.processing",
+    "pennylane_calculquebec.processing.steps",
+    "pennylane_calculquebec.processing.config",
+    "pennylane_calculquebec.processing.interfaces",
+]
 
 [tool.setuptools.dynamic]
 version = { attr = "pennylane_calculquebec._version.__version__" }
