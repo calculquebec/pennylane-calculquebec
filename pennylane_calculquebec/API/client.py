@@ -170,3 +170,10 @@ class MonarqClient(CalculQuebecClient):
             project_id,
             circuit_name,
         )
+        import warnings
+
+        warnings.warn(
+            "MonarqClient is deprecated and will be removed in a future release. Use CalculQuebecClient instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        ),

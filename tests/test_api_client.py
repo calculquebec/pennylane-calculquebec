@@ -273,6 +273,11 @@ class TestMonarqClient:
         assert hasattr(client, "project_id")
         assert hasattr(client, "circuit_name")
 
+    def test_deprecation_warning(self, monarq_params, project_name):
+        """Test that MonarqClient raises a deprecation warning when initialized."""
+        with pytest.warns(DeprecationWarning):
+            MonarqClient(**monarq_params, project_name=project_name)
+
 
 class TestProjectParameterValidation:
     """Test cases for project_name and project_id validation rules at Parent class level."""
