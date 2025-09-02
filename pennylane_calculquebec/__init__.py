@@ -6,5 +6,3 @@ import importlib.util
 from pennylane_calculquebec.monarq_device import MonarqDevice
 from pennylane_calculquebec.monarq_sim import MonarqSim
 from pennylane_calculquebec.monarq_backup import MonarqBackup
-
-
