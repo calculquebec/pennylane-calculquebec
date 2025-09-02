@@ -209,14 +209,12 @@ class VF2(Placement):
                 for possible in machine_topology.nodes
                 if possible not in mapping.values()
             ]
-            shortest_path_mapping = (
-                graph_util.node_with_shortest_path_from_selection(
-                    mapping[most_connected_node],
-                    possibles,
-                    machine_topology,
-                    machine_name=self.machine_name,
-                    use_benchmark=self.use_benchmark,
-                )
+            shortest_path_mapping = graph_util.node_with_shortest_path_from_selection(
+                mapping[most_connected_node],
+                possibles,
+                machine_topology,
+                machine_name=self.machine_name,
+                use_benchmark=self.use_benchmark,
             )
 
             mapping[node] = shortest_path_mapping

@@ -1,5 +1,6 @@
 class PennylaneCQError(Exception):
     """Pennylane Calcul Quebec base error."""
+
     def __init__(self, message: str):
         class_names = []
         cls = self.__class__
@@ -14,23 +15,29 @@ class PennylaneCQError(Exception):
         super().__init__(full_message)
         self.message = full_message
         from pennylane_calculquebec.logger import logger
+
         logger.error(full_message)
+
 
 class DeviceError(PennylaneCQError):
     """Error related to device."""
-    
+
+
 class ProcessingError(PennylaneCQError):
     """Error related to processing."""
+
 
 class UtilityError(PennylaneCQError):
     """Error related to utility."""
 
+
 class ApiError(PennylaneCQError):
     """Error related to API."""
+
 
 class ConfigError(ProcessingError):
     """Error related to processing configuration."""
 
+
 class StepsError(ProcessingError):
     """Error related to steps."""
-

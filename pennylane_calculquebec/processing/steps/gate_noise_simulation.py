@@ -44,8 +44,7 @@ class GateNoiseSimulation(PreProcStep):
             data.get_qubit_noise(self.machine_name)
             if self.use_benchmark
             else [
-                depolarizing_noise(TypicalBenchmark.qubit)
-                for _ in range(qubit_count)
+                depolarizing_noise(TypicalBenchmark.qubit) for _ in range(qubit_count)
             ]
         )
 
@@ -66,8 +65,7 @@ class GateNoiseSimulation(PreProcStep):
             data.get_amplitude_damping(self.machine_name)
             if self.use_benchmark
             else [
-                amplitude_damping(1e-6, TypicalBenchmark.t1)
-                for _ in range(qubit_count)
+                amplitude_damping(1e-6, TypicalBenchmark.t1) for _ in range(qubit_count)
             ]
         )
 
@@ -104,9 +102,7 @@ class GateNoiseSimulation(PreProcStep):
                     )
 
                 for wire in operation.wires:
-                    operations.append(
-                        qml.DepolarizingChannel(noises[0], wires=wire)
-                    )
+                    operations.append(qml.DepolarizingChannel(noises[0], wires=wire))
                 continue
 
             operations.append(operation)
