@@ -101,7 +101,7 @@ def test_optimize_cu():
         qml.Hadamard(0),
         qml.Hadamard(1),
         qml.ControlledQubitUnitary(
-            np.array([[1, 1], [1, -1]]) / np.sqrt(2), [0, 1], [2], [0, 1]
+            np.array([[1, 1], [1, -1]]) / np.sqrt(2), [0, 1, 2], [0, 1]
         ),
     ]
     tape = QuantumTape(ops=ops, measurements=[qml.probs()])
