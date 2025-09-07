@@ -1,3 +1,7 @@
-class DeviceException(Exception):
-    def __init__(self, message):
-        super().__init__(message)
+from pennylane_calculquebec.exceptions import DeviceError
+
+
+class DeviceException(DeviceError):
+    """Exception for device-related errors (legacy alias)."""
+
+    pass

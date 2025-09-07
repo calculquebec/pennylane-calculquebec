@@ -65,8 +65,7 @@ class MonarqSim(BaseDevice):
         meas = type(tape.measurements[0]).__name__
 
         if not any(
-            meas == measurement
-            for measurement in MonarqSim.measurement_methods.keys()
+            meas == measurement for measurement in MonarqSim.measurement_methods.keys()
         ):
             raise DeviceException("Measurement not supported")
 
