@@ -227,9 +227,6 @@ def PrintNoPlaceNoRouteConfig(only_wires=True) -> ProcessingConfig:
     config.steps.append(PrintWires() if only_wires else PrintTape())
     return config
 
-def FakeMonarqConfig(machine_name : str, use_benchmark = False) -> ProcessingConfig: 
-    """
-    A configuration preset that does the same thing as the default config, but adds gate and readout noise at the end. This config is deprecated. Use MonarqDefaultConfig instead, or use no config at all.
 
 def FakeMonarqConfig(machine_name: str, use_benchmark=False) -> ProcessingConfig:
     """
