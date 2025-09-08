@@ -2,16 +2,17 @@
 
 ## Contenu
 
-- [Définitions](#definitions)
-- [Structure du projet](#structure-du-projet)
-- [Installation locale](#installation-locale)
-- [Utilisation](#utilisation)
-    - [Lancer des fichiers](#lancer-des-fichiers)
-- [Dépendances](#dependances)
+- [pennylane-calculquebec](#pennylane-calculquebec)
+  - [Contenu](#contenu)
+  - [Definitions](#definitions)
+  - [Installation locale](#installation-locale)
+  - [Utilisation](#utilisation)
+    - [Executer des fichiers](#executer-des-fichiers)
+  - [Dependances](#dependances)
     - [Modules Python](#modules-python)
-- [État du projet et problèmes connus](#etat-du-projet-et-problemes-connus)
+  - [Etat du projet et problemes connus](#etat-du-projet-et-problemes-connus)
     - [Plans futurs](#plans-futurs)
-- [Réferences](#references)
+  - [References](#references)
 
 
 ## Definitions

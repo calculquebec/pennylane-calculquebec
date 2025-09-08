@@ -85,6 +85,7 @@ class ApiAdapter(object):
     - get benchmark by machine name
     - get machine id by name
 
+
     """
 
     def __init__(self):
@@ -98,6 +99,9 @@ class ApiAdapter(object):
 
     @staticmethod
     def clean_cache():
+        """
+        Cleans all cache values
+        """
         """
         Cleans all cache values
         """
@@ -120,6 +124,10 @@ class ApiAdapter(object):
 
         Args :
             client (ApiClient) : The client to initialize ApiAdapter with
+        Create a unique ApiAdapter instance
+
+        Args :
+            client (ApiClient) : The client to initialize ApiAdapter with
         """
         cls._instance = cls.__new__(cls)
         cls._instance.headers = ApiUtility.headers(
@@ -138,6 +146,12 @@ class ApiAdapter(object):
 
     @staticmethod
     def is_last_update_expired():
+        """
+        Checks if the last update has been done more than 24 h ago
+
+        Returns:
+            bool : Was the last update more than 24 h ago?
+        """
         """
         Checks if the last update has been done more than 24 h ago
 
@@ -209,6 +223,7 @@ class ApiAdapter(object):
 
             res = requests.get(route, headers=ApiAdapter.instance().headers)
 
+
             if res.status_code != 200:
                 ApiAdapter.raise_exception(res)
             ApiAdapter._machine = json.loads(res.text)
@@ -232,6 +247,7 @@ class ApiAdapter(object):
         return benchmark[keys.RESULTS_PER_DEVICE]
 
     @staticmethod
+    @retry(3)
     @retry(3)
     def get_benchmark(machine_name):
         """
@@ -297,9 +313,13 @@ class ApiAdapter(object):
 
     @staticmethod
     @retry(3)
+    @retry(3)
     def list_jobs() -> requests.Response:
         """
         get all jobs for a given user (user stored in client)
+
+        Returns:
+            Response : the response of the /jobs get request
 
         Returns:
             Response : the response of the /jobs get request

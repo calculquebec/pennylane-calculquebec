@@ -45,12 +45,10 @@ def mock_PostProcessor_get_processor():
     with patch("pennylane_calculquebec.processing.PostProcessor.get_processor") as proc:
         yield proc
 
-
 @pytest.fixture
 def mock_PreProcessor_get_processor():
     with patch("pennylane_calculquebec.processing.PreProcessor.get_processor") as proc:
         yield proc
-
 
 def test_constructor(mock_api_initialize):
     # no shots given, should raise DeviceException
@@ -96,7 +94,6 @@ def test_execute(mock_measure):
     results = dev.execute(quantum_tape)
     mock_measure.assert_called_once()
     assert results == ["a", "b", "c"]
-
     # ran 4 times
     result = dev.execute([quantum_tape, quantum_tape, quantum_tape])
     assert mock_measure.call_count == 4
@@ -167,7 +164,6 @@ def test_measure(mock_PostProcessor_get_processor):
         quantum_tape.measurements[0] = qml.expval(qml.PauliZ(0))
         expval = MonarqBackup._measure(dev, quantum_tape)
         assert expval == expected_expectation
-
         # since the method has been called one time before, the call count is incremented to 2
         assert job.call_count == 3
 

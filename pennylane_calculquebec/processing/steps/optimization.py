@@ -74,7 +74,6 @@ class IterativeCommuteAndMerge(Optimize):
 
         Args:
             wires (WireLike): which wires do the swap act on
-
         Returns:
             list[Operation] : cnot(a, b) cnot(b, a) cnot(a, b)
         """

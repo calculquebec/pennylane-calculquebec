@@ -127,7 +127,6 @@ class ApiUtility:
         }
         return body
 
-
 class JobStatus(Enum):
     SUCCEEDED = "SUCCEEDED"
     FAILED = "FAILED"
@@ -135,11 +134,9 @@ class JobStatus(Enum):
     RUNNING = "RUNNING"
     CANCELLED = "CANCELLED"
 
-
 class queries:
     MACHINE_NAME = "?machineName"
     NAME = "?name"
-
 
 class routes:
     JOBS = "/jobs"

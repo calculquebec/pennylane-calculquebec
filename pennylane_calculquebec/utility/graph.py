@@ -46,7 +46,6 @@ def is_directly_connected(operation: Operation, machine_topology: nx.Graph) -> b
     Args:
         operation (Operation) : a two qubits operation
         machine_topology (Graph) : the machine's graph
-
     Returns:
         bool: does the graph have a link that maps given operation?
     """
@@ -167,7 +166,6 @@ def _find_isomorphisms(circuit: nx.Graph, machine: nx.Graph) -> dict[int, int]:
     Args:
         circuit (Graph) : the graph of the circuit
         machine (Graph) : the graph of the machine
-
     Returns:
         dict[int, int] : a mapping between the circuit's wires and the machines qubits
     """
@@ -184,7 +182,6 @@ def find_largest_common_subgraph_vf2(circuit: nx.Graph, machine: nx.Graph):
     Args:
         circuit (Graph) : the graph of the circuit
         machine (Graph) : the graph of the machine
-
     Returns:
         dict[int, int] : a mapping between the circuit's wires and the machines qubits
     """
@@ -206,7 +203,6 @@ def find_largest_common_subgraph_ismags(circuit: nx.Graph, machine: nx.Graph):
     Args:
         circuit (Graph) : the graph of the circuit
         machine (Graph) : the graph of the machine
-
     Returns:
         dict[int, int] : a mapping between the circuit's wires and the machines qubits
     """
@@ -239,7 +235,6 @@ def shortest_path(
         excluding : nodes we dont want to use
         prioritized_nodes : nodes we want to use if possible
         use_benchmark : should we consider fidelities in choosing the paths?
-
         Returns:
             list[int] : the shortest path from start to end
     """
@@ -329,7 +324,6 @@ def find_best_wire(
         machine_name (str) : the quantum machine's name
         excluded (list[int]) : wires we want to skip
         use_benchmark (bool) : should we use fidelities?
-
     Returns:
         int : the wire with best score
     """
@@ -361,7 +355,6 @@ def find_closest_wire(
         machine_name (str) : the quantum machine's name
         prioritized (list[int]) : nodes that should be in the path if possible
         use_benchmark (bool) : should we use qubit fidelities?
-
     Returns:
         int : the wire that has the smallest path from source
     """
@@ -420,7 +413,6 @@ def node_with_shortest_path_from_selection(
         graph (Graph) : the graph to work on
         machine_name (str) : the name of the machine. Usually yukon or yamaska
         use_benchmark (bool) : should we use real benchmarks for this operation?
-
     Returns:
         int : the closest node to source that was contained in selection
     """

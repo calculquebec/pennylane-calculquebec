@@ -5,7 +5,6 @@ class PrintTape(PreProcStep):
     """
     Print a tape as a preprocessing step
     """
-
     def execute(self, tape):
         """Shows the tape using the builtin print function without altering it
 
@@ -23,7 +22,6 @@ class PrintResults(PostProcStep):
     """
     Prints the results of a tape
     """
-
     def execute(self, tape, results):
         """Prints the results of a tape without altering them
 
@@ -42,7 +40,6 @@ class PrintWires(PreProcStep):
     """
     prints wires as a processing step using the print builtin python function
     """
-
     def execute(self, tape):
         """prints the wires a circuit acts upon without altering the circuit
 

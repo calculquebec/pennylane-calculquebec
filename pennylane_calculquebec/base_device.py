@@ -43,6 +43,8 @@ class BaseDevice(Device):
 
     def __init__(self, wires=None, shots=None, client=None, processing_config=None):
         super().__init__(wires, shots)
+        self._circuit_name = None
+        self._project_name = None
         self._processing_config = processing_config
 
         if client is not None:

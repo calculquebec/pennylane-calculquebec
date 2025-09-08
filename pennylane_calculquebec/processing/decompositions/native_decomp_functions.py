@@ -14,7 +14,6 @@ def is_close_enough_to(angle, other_angle, epsilon=1e-7):
 def _custom_tdag(wires):
     """
     a MonarQ native implementation of the adjoint(T) operation
-
     Args:
         wires (list[int]) : Which wires does the operation act on?
 
@@ -56,7 +55,6 @@ def _custom_s(wires):
 
     Args:
         wires (list[int]) : Which wires does the operation act on?
-
     Returns:
         list[Operation] : Which operations correspond to an s gate on MonarQ
     """
@@ -69,7 +67,6 @@ def _custom_sdag(wires):
 
     Args:
         wires (list[int]) : Which wires does the operation act on?
-
     Returns:
         list[Operation] : Which operations correspond to an adjoint s gate on MonarQ
     """

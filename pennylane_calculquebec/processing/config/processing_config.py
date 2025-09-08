@@ -46,7 +46,6 @@ class ProcessingConfig:
 
         Args:
             - other (ProcessingConfig) : processing config to compare
-
         Returns:
             (bool) : are both processing config equal?
         """
@@ -66,7 +65,6 @@ class ProcessingConfig:
 
         Args:
             idx (int): the index to return
-
         Returns:
             (BaseStep) : the step at given index
         """
@@ -229,6 +227,9 @@ def PrintNoPlaceNoRouteConfig(only_wires=True) -> ProcessingConfig:
     config.steps.append(PrintWires() if only_wires else PrintTape())
     return config
 
+def FakeMonarqConfig(machine_name : str, use_benchmark = False) -> ProcessingConfig: 
+    """
+    A configuration preset that does the same thing as the default config, but adds gate and readout noise at the end. This config is deprecated. Use MonarqDefaultConfig instead, or use no config at all.
 
 def FakeMonarqConfig(machine_name: str, use_benchmark=False) -> ProcessingConfig:
     """

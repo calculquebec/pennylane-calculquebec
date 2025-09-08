@@ -131,7 +131,6 @@ def test_measure(mock_PostProcessor_get_processor):
             self.job_started = None
             self.job_status_changed = None
             self.job_completed = None
-
     dev = MockDevice()
     expected_counts = Job().run()
     expected_probs = [750 / 775, 25 / 775]

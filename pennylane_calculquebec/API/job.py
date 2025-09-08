@@ -54,6 +54,9 @@ class Job:
 
         Args:
             max_tries (int) : the number of tries before dropping a circuit. Defaults to 2 ^ 15
+
+        Args:
+            max_tries (int) : the number of tries before dropping a circuit. Defaults to 2 ^ 15
         """
 
         response = None
