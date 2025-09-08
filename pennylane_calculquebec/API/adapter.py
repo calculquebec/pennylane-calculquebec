@@ -223,7 +223,6 @@ class ApiAdapter(object):
 
             res = requests.get(route, headers=ApiAdapter.instance().headers)
 
-
             if res.status_code != 200:
                 ApiAdapter.raise_exception(res)
             ApiAdapter._machine = json.loads(res.text)

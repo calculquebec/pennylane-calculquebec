@@ -45,10 +45,12 @@ def mock_PostProcessor_get_processor():
     with patch("pennylane_calculquebec.processing.PostProcessor.get_processor") as proc:
         yield proc
 
+
 @pytest.fixture
 def mock_PreProcessor_get_processor():
     with patch("pennylane_calculquebec.processing.PreProcessor.get_processor") as proc:
         yield proc
+
 
 def test_constructor(mock_api_initialize):
     # no shots given, should raise DeviceException

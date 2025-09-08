@@ -5,6 +5,7 @@ from pennylane_calculquebec.processing.interfaces import PreProcStep, PostProcSt
 from autograd.numpy.numpy_boxes import ArrayBox
 import numpy as np
 
+
 @pytest.fixture
 def mock_expand_full_measurements():
     with patch(
@@ -103,6 +104,7 @@ def test_expand_full_measurements():
     solution = [1, 2]
     for i, w in enumerate(solution):
         assert w == result.measurements[i].wires[0]
+
 
 def test_unroll_array_boxes():
     op1 = op([0])

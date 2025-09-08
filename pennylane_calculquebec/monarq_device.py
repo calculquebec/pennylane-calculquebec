@@ -35,9 +35,9 @@ class MonarqDevice(BaseDevice):
     name = "MonarqDevice"
     short_name = "monarq.default"
 
-    job_started : Callable[[int], None]
-    job_status_changed : Callable[[int, str], None]
-    job_completed : Callable[[int], None]
+    job_started: Callable[[int], None]
+    job_status_changed: Callable[[int, str], None]
+    job_completed: Callable[[int], None]
 
     job_started: Callable[[int], None]
     job_status_changed: Callable[[int, str], None]

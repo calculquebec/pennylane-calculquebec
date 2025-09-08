@@ -32,6 +32,7 @@ class FakeStep:
             "RZ",
         ]
 
+
 @pytest.fixture
 def mock_get_connectivity():
     with patch("pennylane_calculquebec.monarq_data.get_connectivity") as mock:
