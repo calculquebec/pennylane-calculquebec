@@ -1,0 +1,53 @@
+name: Lint
+
+on:
+  pull_request:
+
+jobs:
+  lint-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check Black format compliance
+        uses: psf/black@stable
+        with:
+          options: "--diff --check"
+          jupyter: 'true'
+          src: "./doc ./pennylane_calculquebec ./tests"
+
+  format-in-PR:
+    runs-on: ubuntu-latest
+    needs: lint-check
+    if: ${{ failure() }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Format code with Black
+        uses: psf/black@stable
+        id: black-format
+        with:
+          options: "--verbose"
+          jupyter: 'true'
+          src: "./doc ./pennylane_calculquebec ./tests"
+
+      - name: Create PR with changes
+        uses: peter-evans/create-pull-request@v7
+        if: steps.black-format.conclusion == 'success'
+        with:
+          title: Format code in ${{github.head_ref}} branch
+          body: |
+            There appear to be some python formatting errors in ${{ github.ref_name }}. This pull request
+            uses the [psf/black](https://github.com/psf/black) formatter to fix these issues. Please review the 
+            changes and merge if appropriate.
+          base: ${{ github.head_ref }}
+          branch: reformat/${{ github.head_ref }}
+
+      - name: Fail if lint check failed
+        if: ${{ needs.lint-check.result == 'failure' }}
+        run: |
+          echo "There are formatting issues in the code. Please review the pull request created by psf/black. If no pull request was created, please check the logs for more details."
+          exit 1
+      

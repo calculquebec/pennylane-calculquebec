@@ -1,0 +1,57 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+hide empty members
+left to right direction
+skinparam backgroundColor transparent
+
+class BaseDevice
+
+class MonarqDevice
+
+package transpiler <<Rectangle>> {
+    class PreProcessor{
+
+    }
+
+    class PostProcessor{
+
+    }
+}
+
+package "configuration for the transpiler" <<Rectangle>> {
+    class ProcessingConfig{
+        - steps : List[BaseStep]
+    }
+
+    interface BaseStep{
+        execute()
+    }
+
+    class PreProcStep{
+        execute()
+    }
+
+    class PostProcStep{
+        execute()
+    }
+
+}
+
+PreProcStep --|> BaseStep
+PostProcStep --|> BaseStep
+
+BaseDevice --> PreProcessor
+MonarqDevice --> PostProcessor
+
+BaseStep -up-* ProcessingConfig
+
+PreProcessor --> ProcessingConfig
+PostProcessor --> ProcessingConfig
+
+note left of ProcessingConfig
+This class can be instantiated by user
+to customize the transpiler.
+end note
+
+@enduml

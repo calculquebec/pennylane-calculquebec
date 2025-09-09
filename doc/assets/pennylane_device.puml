@@ -1,0 +1,45 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+hide empty members
+
+skinparam backgroundColor transparent
+
+package pennylane{ 
+    abstract class Device{
+        preprocess()
+        execute(QuantumTape)
+    }
+
+    class QuantumTape{
+        oprations : list[Operation]
+        measurements : list[MeasurementProcess]
+        wires : Wires
+    }
+
+    abstract class MeasurementProcess
+
+    class Operation{
+        name : str
+        basis: str
+        wires : Wires
+    }
+
+    class Counts
+    class Sample
+    class Probs
+    class ExpVal
+
+}
+
+Device -right-> QuantumTape
+
+QuantumTape --* Operation
+QuantumTape -down-* MeasurementProcess
+
+Counts -up-|> MeasurementProcess
+Sample -up-|> MeasurementProcess
+Probs -up-|> MeasurementProcess
+ExpVal -up-|> MeasurementProcess
+
+@enduml

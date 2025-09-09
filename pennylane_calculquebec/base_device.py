@@ -10,52 +10,38 @@ from pennylane.tape import QuantumScript, QuantumTape
 from pennylane.devices import DefaultExecutionConfig, ExecutionConfig
 from pennylane_calculquebec.API.adapter import ApiAdapter
 from pennylane_calculquebec.processing import PreProcessor, PostProcessor
-from pennylane_calculquebec.processing.config import ProcessingConfig, MonarqDefaultConfig
+from pennylane_calculquebec.processing.config import (
+    ProcessingConfig,
+    MonarqDefaultConfig,
+)
 from pennylane_calculquebec.API.client import ApiClient
 from pennylane_calculquebec.API.job import Job
 from pennylane_calculquebec.utility.debug import counts_to_probs, compute_expval
 import pennylane.measurements as measurements
 from pennylane_calculquebec.device_exception import DeviceException
 
+
 class BaseDevice(Device):
     pennylane_requires = ">=0.36.0"
     author = "CalculQuebec"
-    
+
     realm = "calculqc"
 
-    observables = {
-        "PauliZ"
+    observables = {"PauliZ"}
+    measurement_methods: dict = {
+        "CountsMP": lambda counts: counts,
+        "ProbabilityMP": counts_to_probs,
+        "ExpectationMP": compute_expval,
     }
-    measurement_methods : dict = {
-        "CountsMP" : lambda counts : counts,
-        "ProbabilityMP" : counts_to_probs,
-        "ExpectationMP" : compute_expval
-    }
-    
-    _client : ApiClient
-    _processing_config : ProcessingConfig
 
-    @property
-    def circuit_name(self):
-        return self._circuit_name
-    
-    @circuit_name.setter
-    def circuit_name(self, value):
-        self._circuit_name = value
-
-    @property
-    def project_name(self):
-        return self._project_name
-    
-    @project_name.setter
-    def project_name(self, value):
-        self._project_name = value
+    _client: ApiClient
+    _processing_config: ProcessingConfig
 
     @property
     def processing_config(self):
         return self._processing_config
-    
-    def __init__(self, wires = None, shots = None, client = None, processing_config = None):
+
+    def __init__(self, wires=None, shots=None, client=None, processing_config=None):
         super().__init__(wires, shots)
         self._circuit_name = None
         self._project_name = None
@@ -63,8 +49,8 @@ class BaseDevice(Device):
 
         if client is not None:
             self._client = client
-            ApiAdapter.initialize(client)
-        
+            self._client.machine_name = self.machine_name
+            ApiAdapter.initialize(self._client)
 
     def preprocess(
         self,
@@ -88,18 +74,21 @@ class BaseDevice(Device):
         transform_program.add_transform(transform=transform(processor))
         return transform_program, config
 
-
-    def execute(self, circuits: QuantumTape | list[QuantumTape], execution_config : ExecutionConfig = DefaultExecutionConfig):
+    def execute(
+        self,
+        circuits: QuantumTape | list[QuantumTape],
+        execution_config: ExecutionConfig = DefaultExecutionConfig,
+    ):
         """
         This function runs provided quantum circuit on MonarQ
-        A job is first created, and then ran. 
+        A job is first created, and then ran.
         Results are then post-processed and returned to the user.
         """
-        is_single_circuit : bool = isinstance(circuits, QuantumScript)
+        is_single_circuit: bool = isinstance(circuits, QuantumScript)
         if is_single_circuit:
             circuits = [circuits]
-        
-         # Check if execution_config is an instance of ExecutionConfig
+
+        # Check if execution_config is an instance of ExecutionConfig
         if isinstance(execution_config, ExecutionConfig):
             interface = (
                 execution_config.interface
@@ -109,13 +98,13 @@ class BaseDevice(Device):
         else:
             # Fallback or default behavior if execution_config is not an instance of ExecutionConfig
             interface = None
-        
-        results = [self._measure(tape) for tape in circuits]       
+
+        results = [self._measure(tape) for tape in circuits]
         return results if not is_single_circuit else results[0]
 
     @property
     def machine_name(self):
         raise NotImplementedError()
 
-    def _measure(self, tape : QuantumTape):
+    def _measure(self, tape: QuantumTape):
         raise NotImplementedError()

@@ -13,9 +13,14 @@ import numpy as np
 
 T = TypeVar("T")
 U = TypeVar("U")
-            
-def expand(tape : QuantumTape, decomps : dict[str, Callable[[Wires], list[Operation]]], iterations = 1) -> QuantumTape:
-    """Decomposes a quantum tape's operations into mapped sets of given operations 
+
+
+def expand(
+    tape: QuantumTape,
+    decomps: dict[str, Callable[[Wires], list[Operation]]],
+    iterations=1,
+) -> QuantumTape:
+    """Decomposes a quantum tape's operations into mapped sets of given operations
 
     Args:
         tape (QuantumTape): the tape you want to decompose
@@ -36,7 +41,8 @@ def expand(tape : QuantumTape, decomps : dict[str, Callable[[Wires], list[Operat
         list_copy = new_operations.copy()
     return type(tape)(list_copy, tape.measurements, tape.shots)
 
-def find_previous_gate(index : int, wires : list[int], op_list : list[Operation]) -> int:
+
+def find_previous_gate(index: int, wires: list[int], op_list: list[Operation]) -> int:
     """find first operation that shares a list of wires prior to an index in a list
 
     Args:
@@ -52,7 +58,8 @@ def find_previous_gate(index : int, wires : list[int], op_list : list[Operation]
             return i
     return None
 
-def find_next_gate(index : int, wires : list[int], op_list : list[Operation]) -> int:
+
+def find_next_gate(index: int, wires: list[int], op_list: list[Operation]) -> int:
     """find first operation that shares a list of wires after an index in a list
 
     Args:
@@ -63,12 +70,13 @@ def find_next_gate(index : int, wires : list[int], op_list : list[Operation]) ->
     Returns:
         int: the index of the next operation. None if none were found
     """
-    for i in range(index+1, len(op_list)):
+    for i in range(index + 1, len(op_list)):
         if any(w in op_list[i].wires for w in wires):
             return i
     return None
 
-def is_single_axis_gate(op : Operation, axis : str):
+
+def is_single_axis_gate(op: Operation, axis: str):
     """check if given operation is on given basis
 
     Args:
@@ -78,5 +86,6 @@ def is_single_axis_gate(op : Operation, axis : str):
     Returns:
         bool: true if operation is on given basis. false otherwise
     """
-    if op.num_wires != 1: return False
+    if op.num_wires != 1:
+        return False
     return op.basis == axis

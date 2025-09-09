@@ -1,0 +1,39 @@
+name: Unit tests
+
+on:
+  push:
+    # Trigger on all pushes to main and dev branches regardless of the files changed (failsafe)
+    branches:
+      - main
+      - dev
+  pull_request:
+    paths:
+      - ".github/workflows/unit-tests.yaml" # Trigger on changes to this workflow file
+      - "pennylane_calculquebec/**"
+      - "tests/**"
+      - "*.toml"
+
+jobs:
+  unit-tests:
+    name: Run unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Install package and dependencies from pyproject.toml
+          pip install -e .[test]
+
+      - name: Run unit tests with pytest
+        run: |
+          python -m pytest tests/

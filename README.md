@@ -10,7 +10,6 @@ Pour la version en français, visitez [cette page](https://github.com/calculqueb
 - [Usage](#usage)
     - [Running files](#running-files)
 - [Dependencies](#dependencies)
-    - [Julia](#julia)
     - [Python modules](#python-modules)
 - [State of the project and known issues](#state-of-the-project-and-known-issues)
     - [Future plans](#future-plans)
@@ -26,16 +25,6 @@ It also offers simulation and pre-processing / post-processing capabilities rela
 [Pennylane](https://pennylane.ai/) is a cross-platform Python library for quantum machine learning, automatic differentiation, and optimization of hybrid quantum-classical computations.
 
 [Calcul Quebec](https://www.calculquebec.ca/) is a non-profit organization that regroups universities from the Province of Quebec and provides computing power to research and academia.  
-
-[Snowflurry](https://snowflurry.org/) is a quantum computing framework developed in Julia by Anyon Systems and aims to provide access to quantum hardware and simulators.
-
-## Project structure
-
-As shown in the diagram below, this plugin contains a Pennylane [device](https://pennylane.ai/plugins/) named `monarq.default`. This devices is defined by the class `MonarqDevice`. It first applies a series of pre-processing steps to the circuit in order to simplify it, and make it executable on MonarQ. It then creates and submits a job using API calls, and gets the results back once they're ready. A series of post-processing steps are then applied, and the processed results are returned to the end user. 
-
-An other device named `snowflurry.qubit` also lives in the package. It works by converting a PennyLane circuit into a Snowflurry circuit, thanks to packages like JuliaCall that allow the communication between Python and Julia environments. The The Snowflurry circuit can then be used with the available backends, either a simulator or real quantum hardware. The results are then converted back into PennyLane's format and returned to the user.
-
-![project_structure](https://raw.githubusercontent.com/calculquebec/pennylane-calculquebec/9276a260959c886eed87373b74090a9d652b130c/doc/assets/project_structure.png)
 
 ## Local installation
 
@@ -53,7 +42,7 @@ pip install -e .
 
 Pennylane and other Python dependencies will be installed automatically during the installation process.
 
-The plugin will also take care of installing Julia and the required Julia packages, such as Snowflurry and PythonCall during the first run of the Snowflurry.Qubit device. 
+
 
 ## Usage
 
@@ -69,23 +58,12 @@ python base_circuit.py
 
 ## Dependencies
 
-### Julia
-
-As of version 0.3.0, **there is no need to install Julia manually**, since the plugin will download and install the required version automatically upon first use. This Julia environment is bound to the plugin.
-
-However, if you wish to manage your Julia environment, you can download it from the [official website](https://julialang.org/downloads/). It is highly recommended to install using the installer file, as it will ask to add Julia to the system's environment variables.
-
-**To ensure this correct configuration, during the installation process, the checkbox `Add Julia to PATH` must be checked.**
-
-As of version 0.5.0, **Julia will only be installed if you use Snowflurry.Qubit**. You can use Monarq.Default without depending on Julia. 
 
 ### Python modules
 
 Those packages are installed automatically during the plugin installation process and are necessary for the plugin to work. Here are the links to their respective documentation:
 
 - For PennyLane, please refer to the [PennyLane documentation](https://pennylane.ai/install/).
-
-- For Snowflurry, please refer to the [Snowflurry documentation](https://snowflurry.org).
 
 - Netowkx is a Python graph algorithms library. It is used seemlessly during some of the transpiling steps. Here's the [documentation](https://networkx.org/).
 
