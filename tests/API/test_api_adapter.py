@@ -4,13 +4,13 @@ from pennylane_calculquebec.API.adapter import (
     MultipleProjectsException,
     NoProjectFoundException,
 )
-from pennylane_calculquebec.API.client import MonarqClient
+from pennylane_calculquebec.API.client import CalculQuebecClient
 import pytest
 from unittest.mock import patch
 from pennylane_calculquebec.utility.api import ApiUtility, keys
 from datetime import datetime, timedelta
 
-client = MonarqClient("test", "test", "test", project_id="123")
+client = CalculQuebecClient("test", "test", "test", project_id="123")
 
 
 # ------------ MOCKS ----------------------

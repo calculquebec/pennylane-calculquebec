@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch
 from pennylane_calculquebec.monarq_device import MonarqDevice, DeviceException
-from pennylane_calculquebec.API.client import MonarqClient
+from pennylane_calculquebec.API.client import CalculQuebecClient
 from pennylane_calculquebec.processing.config import (
     MonarqDefaultConfig,
     NoPlaceNoRouteConfig,
@@ -15,7 +15,7 @@ from pennylane_calculquebec.base_device import BaseDevice
 import pennylane_calculquebec.API.job as api_job
 
 
-client = MonarqClient("host", "user", "token", project_id="test_project_id")
+client = CalculQuebecClient("host", "user", "token", project_id="test_project_id")
 
 
 @pytest.fixture
@@ -83,7 +83,7 @@ def test_device_registers_client():
     """Test that MonarqDevice registers the client when initialized."""
     dev = MonarqDevice(client=client, shots=1000)
     assert hasattr(dev, "_client")
-    assert isinstance(dev._client, MonarqClient)
+    assert isinstance(dev._client, CalculQuebecClient)
 
 
 def test_preprocess(mock_PreProcessor_get_processor, mock_api_initialize):
