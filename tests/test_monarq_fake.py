@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import patch
 from pennylane_calculquebec.monarq_sim import MonarqSim, MonarqDefaultConfig
 from pennylane_calculquebec.monarq_device import DeviceException
-from pennylane_calculquebec.API.client import MonarqClient
+from pennylane_calculquebec.API.client import CalculQuebecClient
 from pennylane_calculquebec.processing.config import EmptyConfig
 from pennylane_calculquebec.processing import PreProcessor
 from pennylane.transforms import transform
@@ -12,7 +12,7 @@ from pennylane_calculquebec.base_device import BaseDevice
 import pennylane_calculquebec.API.job as api_job
 
 
-client = MonarqClient("test", "test", "test", project_id="test_project_id")
+client = CalculQuebecClient("test", "test", "test", project_id="test_project_id")
 
 
 @pytest.fixture
