@@ -124,7 +124,7 @@ class CalculQuebecClient(ApiClient):
         token,
         project_name="",
         project_id="",
-        circuit_name="",
+        circuit_name="none",
     ):
         super().__init__(
             host,
@@ -160,7 +160,7 @@ class MonarqClient(CalculQuebecClient):
         access_token,
         project_name="",
         project_id="",
-        circuit_name="",
+        circuit_name="none",
     ):
         super().__init__(
             host,

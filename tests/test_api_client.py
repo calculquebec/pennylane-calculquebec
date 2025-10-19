@@ -131,7 +131,7 @@ class TestApiClient:
         )
         assert client.circuit_name == circuit_name
 
-    def test_api_client_circuit_name_defaults_to_empty_string(
+    def test_api_client_circuit_name_defaults_to_none_string(
         self, basic_client_params, project_name
     ):
         """Test that circuit_name defaults to empty string when not provided."""
@@ -200,6 +200,13 @@ class TestCalculQuebecClient:
         """Test that CalculQuebecClient always sets realm to 'calculqc'."""
         client = CalculQuebecClient(**calcul_quebec_params, project_name=project_name)
         assert client.realm == "calculqc"
+
+    def test_calcul_quebec_circuit_name_defaults_to_none_string(
+        self, calcul_quebec_params, project_name
+    ):
+        """Test that circuit_name defaults to 'none' when not provided."""
+        client = CalculQuebecClient(**calcul_quebec_params, project_name=project_name)
+        assert client.circuit_name == "none"
 
 
 class TestMonarqClient:
