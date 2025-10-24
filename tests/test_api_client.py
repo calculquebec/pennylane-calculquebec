@@ -43,7 +43,7 @@ def calcul_quebec_params():
     return {
         "host": "https://calculquebec.example.com",
         "user": "cq_user",
-        "token": "cq_token_456",
+        "access_token": "cq_token_456",
     }
 
 
@@ -150,7 +150,7 @@ class TestCalculQuebecClient:
 
         assert client.host == calcul_quebec_params["host"]
         assert client.user == calcul_quebec_params["user"]
-        assert client.access_token == calcul_quebec_params["token"]
+        assert client.access_token == calcul_quebec_params["access_token"]
         assert client.realm == "calculqc"
         assert client.machine_name == ""
         assert client.project_name == project_name

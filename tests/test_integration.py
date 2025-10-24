@@ -1,5 +1,5 @@
 import pennylane as qml
-from pennylane_calculquebec.API.client import MonarqClient
+from pennylane_calculquebec.API.client import CalculQuebecClient
 import pytest
 from unittest.mock import patch
 import pennylane_calculquebec.monarq_data as data
@@ -28,7 +28,7 @@ def mock_get_connectivity():
 
 def test_monarq_default(mock_get_connectivity):
     config = MonarqDefaultConfig("yamaska", False)
-    client = MonarqClient(
+    client = CalculQuebecClient(
         "test",
         "test",
         "test",

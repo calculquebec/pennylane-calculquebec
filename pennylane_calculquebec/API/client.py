@@ -121,7 +121,7 @@ class CalculQuebecClient(ApiClient):
         self,
         host,
         user,
-        token,
+        access_token,
         project_name="",
         project_id="",
         circuit_name="none",
@@ -129,7 +129,7 @@ class CalculQuebecClient(ApiClient):
         super().__init__(
             host,
             user,
-            token,
+            access_token,
             "calculqc",
             project_name,
             project_id,

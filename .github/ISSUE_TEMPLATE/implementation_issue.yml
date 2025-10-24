@@ -1,0 +1,61 @@
+name: Implémentation
+description: Décrire un problème d'implémentation ou une tâche à réaliser
+title: "En tant que [Rôle], je veux [À terminer]"
+projects: "github/10"
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Votre version
+      placeholder: v0.5.10
+    validations:
+      required: false
+
+  - type: textarea
+    id: need
+    attributes:
+      label: Description du problème ou de la tâche
+      description: Décrivez ce qui ne fonctionne pas ou ce qui doit être fait.
+      placeholder: Il y a un problème avec... / Je dois implémenter...
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Livrables
+      description: Décrivez les artéfacts ou les comportements attendus.
+      placeholder: Le code doit contenir... / L'application doit se comporter comme suit...
+    validations:
+      required: true
+
+  - type: textarea
+    id: other_info
+    attributes:
+      label: Autres informations
+      description: Ajoutez les autres informations utiles (problèmes actuels, idées, etc.)
+      placeholder: Optionnel
+    validations:
+      required: false
+
+  - type: textarea
+    id: references
+    attributes:
+      label: Références
+      description: Ajoutez des liens vers des documents, des tickets ou des ressources utiles.
+      placeholder: Optionnel
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priorité
+      description: Importance de cette demande
+      options:
+        - 🔴 Critique (bloquant)
+        - 🟠 Haute
+        - 🟡 Moyenne
+        - 🟢 Basse
+    validations:
+      required: false
