@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pennylane-calculquebec"
 dynamic = ["version"]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = ["numpy", "pennylane >= 0.36.0", "networkx >= 3.3"]
 description = "Pennylane plugin enabling seamless job execution on MonarQ, Calcul Québec’s nonprofit-hosted quantum computer"
 readme = "README.md"
@@ -25,7 +25,6 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3 :: Only",
@@ -64,7 +63,6 @@ legacy_tox_ini = """
     [tox]
     min_version = 4.0
     env_list =
-        py310
         py311
         py312
         py313
