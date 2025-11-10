@@ -81,9 +81,7 @@ class MonarqSim(BaseDevice):
         ).execute(counts_tape)
         results = qml.execute(
             [sim_tape],
-            qml.device(
-                "default.mixed", wires=sim_tape.wires, shots=tape.shots.total_shots
-            ),
+            qml.device("default.mixed", wires=sim_tape.wires),
         )[0]
 
         # apply post processing

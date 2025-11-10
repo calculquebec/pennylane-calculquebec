@@ -75,7 +75,7 @@ def are_tape_same_probs(tape1, tape2):
     """
     tolerance_place = 5
 
-    dev = qml.device("default.qubit", shots=1000)
+    dev = qml.device("default.qubit")
     results1 = qml.execute([tape1], dev)[0]
     results2 = qml.execute([tape2], dev)[0]
 
