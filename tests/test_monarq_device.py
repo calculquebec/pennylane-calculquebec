@@ -10,6 +10,7 @@ from pennylane_calculquebec.processing.config import (
 from pennylane_calculquebec.processing import PreProcessor
 from pennylane.transforms import transform
 from pennylane.tape import QuantumTape
+from pennylane.exceptions import PennyLaneDeprecationWarning
 import pennylane as qml
 from pennylane_calculquebec.base_device import BaseDevice
 import pennylane_calculquebec.API.job as api_job
@@ -53,42 +54,35 @@ def mock_PreProcessor_get_processor():
 
 
 def test_constructor(mock_api_initialize):
-    # no shots given, should raise DeviceException
-    with pytest.raises(DeviceException):
-        dev = MonarqDevice()
-
-    mock_api_initialize.assert_not_called()
-
-    # no client given, should raise DeviceException
-    with pytest.raises(DeviceException):
-        dev = MonarqDevice(shots=1000)
-
-    mock_api_initialize.assert_not_called()
-
-    # client given, no config given, should set default config
-    dev = MonarqDevice(client=client, shots=1000)
+    dev = MonarqDevice(client=client)
     mock_api_initialize.assert_called_once()
-    assert dev.shots.total_shots == 1000
     assert dev._processing_config == MonarqDefaultConfig("yamaska")
 
     # config given, should set given config
     mock_api_initialize.reset_mock()
     config = NoPlaceNoRouteConfig()
-    dev = MonarqDevice(client=client, processing_config=config, shots=1000)
+    dev = MonarqDevice(client=client, processing_config=config)
     mock_api_initialize.assert_called_once()
     assert dev._processing_config is config
 
 
+def test_constructor_shots_deprecated(mock_api_initialize):
+    # Passing shots via constructor should emit a deprecation warning
+    with pytest.warns(PennyLaneDeprecationWarning):
+        dev = MonarqDevice(client=client, shots=1000)
+    mock_api_initialize.assert_called_once()
+
+
 def test_device_registers_client():
     """Test that MonarqDevice registers the client when initialized."""
-    dev = MonarqDevice(client=client, shots=1000)
+    dev = MonarqDevice(client=client)
     assert hasattr(dev, "_client")
     assert isinstance(dev._client, CalculQuebecClient)
 
 
 def test_preprocess(mock_PreProcessor_get_processor, mock_api_initialize):
     mock_PreProcessor_get_processor.return_value = transform(lambda tape: tape)
-    dev = MonarqDevice(client=client, shots=1000)
+    dev = MonarqDevice(client=client)
     result = dev.preprocess()[0]
     assert len(result) == 1
     mock_PreProcessor_get_processor.assert_called_once()
@@ -96,7 +90,7 @@ def test_preprocess(mock_PreProcessor_get_processor, mock_api_initialize):
 
 def test_execute(mock_measure):
     mock_measure.return_value = ["a", "b", "c"]
-    dev = MonarqDevice(client=client, shots=1000)
+    dev = MonarqDevice(client=client)
 
     # ran 1 time
     quantum_tape = QuantumTape([], [], 1000)
