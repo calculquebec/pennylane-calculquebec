@@ -54,7 +54,7 @@ class BaseDevice(Device):
 
     def preprocess(
         self,
-        execution_config = ExecutionConfig,
+        execution_config=ExecutionConfig,
     ) -> Tuple[TransformProgram, ExecutionConfig]:
         """This function defines the device transfrom program to be applied and an updated execution config.
 
@@ -77,7 +77,7 @@ class BaseDevice(Device):
     def execute(
         self,
         circuits: QuantumTape | list[QuantumTape],
-        execution_config = ExecutionConfig,
+        execution_config=ExecutionConfig,
     ):
         """
         This function runs provided quantum circuit on MonarQ
