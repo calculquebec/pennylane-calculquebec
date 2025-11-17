@@ -36,11 +36,12 @@ def test_monarq_default(mock_get_connectivity):
         circuit_name="test_circuit",
     )
     dev = qml.device(
-        "monarq.default", wires=[0], client=client, shots=1000, processing_config=config
+        "monarq.default", wires=[0], client=client, processing_config=config
     )
     assert dev._client is client
     assert dev._client.machine_name == dev.machine_name
     qnode = qml.QNode(circuit, dev)
+    qml.set_shots(qnode, 1000)
     with patch("requests.post") as post:
         post.return_value = Response('{"job" : {"id" : 1}}')
         with patch("requests.get") as get:
@@ -55,9 +56,10 @@ def test_monarq_default(mock_get_connectivity):
 
 def test_monarq_sim(mock_get_connectivity):
     config = MonarqDefaultConfig("yamaska", False)
-    dev = qml.device("monarq.sim", wires=[0], shots=1000, processing_config=config)
+    dev = qml.device("monarq.sim", wires=[0], processing_config=config)
 
     qnode = qml.QNode(circuit, dev)
+    qml.set_shots(qnode, 1000)
     results = qnode()
     assert results is not None
     assert len(results) == 2 and all(result in results for result in ["0", "1"])

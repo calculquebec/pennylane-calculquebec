@@ -7,6 +7,7 @@ from pennylane_calculquebec.processing.config import EmptyConfig
 from pennylane_calculquebec.processing import PreProcessor
 from pennylane.transforms import transform
 from pennylane.tape import QuantumTape
+from pennylane.exceptions import PennyLaneDeprecationWarning
 import pennylane as qml
 from pennylane_calculquebec.base_device import BaseDevice
 import pennylane_calculquebec.API.job as api_job
@@ -66,25 +67,30 @@ def mock_PreProcessor_get_processor():
 def test_constructor(mock_api_initialize):
 
     # no client given, no config given, should set default config
-    dev = MonarqSim(shots=1000)
+    dev = MonarqSim()
     mock_api_initialize.assert_not_called()
-    assert dev.shots.total_shots == 1000
     assert dev._processing_config == MonarqDefaultConfig("yamaska", False)
 
-    dev = MonarqSim(shots=1000, client=client)
+    dev = MonarqSim(client=client)
     mock_api_initialize.assert_called_once()
 
     # config given, should set given config
     mock_api_initialize.reset_mock()
     config = EmptyConfig()
-    dev = MonarqSim(client=client, processing_config=config, shots=1000)
+    dev = MonarqSim(client=client, processing_config=config)
     mock_api_initialize.assert_called_once()
     assert dev._processing_config is config
 
 
+def test_constructor_shots_deprecated(mock_api_initialize):
+    # Passing shots via constructor should emit a deprecation warning
+    with pytest.warns(PennyLaneDeprecationWarning):
+        dev = MonarqSim(shots=1000)
+
+
 def test_preprocess(mock_PreProcessor_get_processor):
     mock_PreProcessor_get_processor.return_value = transform(lambda tape: tape)
-    dev = MonarqSim(shots=1000)
+    dev = MonarqSim()
     result = dev.preprocess()[0]
     assert len(result) == 1
     mock_PreProcessor_get_processor.assert_called_once()
@@ -92,7 +98,7 @@ def test_preprocess(mock_PreProcessor_get_processor):
 
 def test_execute(mock_measure):
     mock_measure.return_value = ["a", "b", "c"]
-    dev = MonarqSim(client=client, shots=1000)
+    dev = MonarqSim(client=client)
 
     # ran 1 time
     quantum_tape = QuantumTape([], [], 1000)
@@ -107,7 +113,7 @@ def test_execute(mock_measure):
 
 def test_monarqsim_without_client():
     """Test that MonarqSim does not require a client."""
-    sim = MonarqSim(shots=1000)
+    sim = MonarqSim()
     assert not hasattr(sim, "_client")
 
 
@@ -119,7 +125,7 @@ def test_measure(mock_PostProcessor_get_processor, mock_gate_noise, mock_readout
 
     mock_PostProcessor_get_processor.return_value = lambda a, b: b
 
-    dev = MonarqSim([0], 1000, client=None, processing_config=EmptyConfig())
+    dev = MonarqSim([0], client=None, processing_config=EmptyConfig())
     expected_counts = {"0": 968, "1": 32}
     expected_probs = [968 / 1000, 32 / 1000]
     expected_expectation = 0.936
