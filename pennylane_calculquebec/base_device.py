@@ -7,7 +7,7 @@ from pennylane.devices import Device
 from pennylane.transforms import transform
 from pennylane.transforms.core import TransformProgram
 from pennylane.tape import QuantumScript, QuantumTape
-from pennylane.devices import DefaultExecutionConfig, ExecutionConfig
+from pennylane.devices import ExecutionConfig
 from pennylane_calculquebec.API.adapter import ApiAdapter
 from pennylane_calculquebec.processing import PreProcessor, PostProcessor
 from pennylane_calculquebec.processing.config import (
@@ -54,7 +54,7 @@ class BaseDevice(Device):
 
     def preprocess(
         self,
-        execution_config: ExecutionConfig = DefaultExecutionConfig,
+        execution_config=ExecutionConfig,
     ) -> Tuple[TransformProgram, ExecutionConfig]:
         """This function defines the device transfrom program to be applied and an updated execution config.
 
@@ -77,7 +77,7 @@ class BaseDevice(Device):
     def execute(
         self,
         circuits: QuantumTape | list[QuantumTape],
-        execution_config: ExecutionConfig = DefaultExecutionConfig,
+        execution_config=ExecutionConfig,
     ):
         """
         This function runs provided quantum circuit on MonarQ
