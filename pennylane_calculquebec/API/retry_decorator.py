@@ -1,5 +1,8 @@
 from time import sleep
 import warnings
+import logging
+
+logger = logging.getLogger("pennylane_calculquebec.API.retry_decorator")
 
 
 def retry(
@@ -26,14 +29,11 @@ def retry(
                     return func(*args, **kwargs)
                 except Exception as e:
                     if attempt < retries:
-                        warnings.warn(
-                            f"The request failed. \nThis was caused by inner exception: \n{e}\nRetrying in {delay} seconds...",
-                            stacklevel=2,
-                        )
+                        logger.warning(f"Thunderhead request failed on attempt number {attempt}. Retrying in {delay} seconds...\nThis was caused by inner exception: \n{e}")
                         sleep(delay)
                         delay *= backoff_factor
                     else:
-                        warnings.warn(
+                        logger.error(
                             f"The request failed after {retries} retries. \nThis was caused by inner exception: \n{e}",
                             stacklevel=2,
                         )

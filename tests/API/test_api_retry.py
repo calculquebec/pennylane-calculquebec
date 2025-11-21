@@ -55,8 +55,13 @@ def mock_sleep():
 
 
 @pytest.fixture
-def mock_warnings():
-    with patch("pennylane_calculquebec.API.retry_decorator.warnings.warn") as mock:
+def mock_logger_error():
+    with patch("pennylane_calculquebec.API.retry_decorator.logger.error") as mock:
+        yield mock
+
+@pytest.fixture
+def mock_logger_warning():
+    with patch("pennylane_calculquebec.API.retry_decorator.logger.warning") as mock:
         yield mock
 
 
@@ -72,9 +77,10 @@ def test_successful_execution_no_retries(mock_sleep):
     mock_sleep.assert_not_called()
 
 
-def test_failed_execution_with_retries(mock_sleep, mock_warnings):
+def test_failed_execution_with_retries(mock_sleep, mock_logger_error, mock_logger_warning):
     """Test that a failing function retries the correct number of times"""
     retries = 5
+    expected_failed_attempt = retries - 1
 
     decorated_func = retry(retries=retries)(function_always_fails)
 
@@ -82,10 +88,13 @@ def test_failed_execution_with_retries(mock_sleep, mock_warnings):
         decorated_func()
 
     # Check the correct number of sleep calls (one less than retries since the last attempt doesn't sleep)
-    assert mock_sleep.call_count == retries - 1
+    assert mock_sleep.call_count == expected_failed_attempt
+
+    # Check that we are logging warnings for each failed attempt except the last
+    assert mock_logger_warning.call_count == expected_failed_attempt
 
     # Check final warning message
-    mock_warnings.assert_called_with(
+    mock_logger_error.assert_called_with(
         f"The request failed after {retries} retries. \nThis was caused by inner exception: \nTest exception",
         stacklevel=2,
     )
