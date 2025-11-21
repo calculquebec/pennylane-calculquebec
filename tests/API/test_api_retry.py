@@ -59,6 +59,7 @@ def mock_logger_error():
     with patch("pennylane_calculquebec.API.retry_decorator.logger.error") as mock:
         yield mock
 
+
 @pytest.fixture
 def mock_logger_warning():
     with patch("pennylane_calculquebec.API.retry_decorator.logger.warning") as mock:
@@ -77,7 +78,9 @@ def test_successful_execution_no_retries(mock_sleep):
     mock_sleep.assert_not_called()
 
 
-def test_failed_execution_with_retries(mock_sleep, mock_logger_error, mock_logger_warning):
+def test_failed_execution_with_retries(
+    mock_sleep, mock_logger_error, mock_logger_warning
+):
     """Test that a failing function retries the correct number of times"""
     retries = 5
     expected_failed_attempt = retries - 1
