@@ -98,8 +98,7 @@ def test_failed_execution_with_retries(
 
     # Check final warning message
     mock_logger_error.assert_called_with(
-        f"The request failed after {retries} retries. \nThis was caused by inner exception: \nTest exception",
-        stacklevel=2,
+        f"The request failed after {retries} retries. \nThis was caused by inner exception: \nTest exception"
     )
 
 
