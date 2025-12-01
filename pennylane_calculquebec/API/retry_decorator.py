@@ -1,5 +1,4 @@
 from time import sleep
-import warnings
 import logging
 
 logger = logging.getLogger("pennylane_calculquebec.API.retry_decorator")
