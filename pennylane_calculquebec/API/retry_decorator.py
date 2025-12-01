@@ -35,8 +35,7 @@ def retry(
                         delay *= backoff_factor
                     else:
                         logger.error(
-                            f"The request failed after {retries} retries. \nThis was caused by inner exception: \n{e}",
-                            stacklevel=2,
+                            f"The request failed after {retries} retries. \nThis was caused by inner exception: \n{e}"
                         )
                         raise e
             return func(*args, **kwargs)
