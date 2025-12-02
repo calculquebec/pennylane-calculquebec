@@ -71,7 +71,8 @@ def test_constructor(mock_api_initialize):
     mock_api_initialize.assert_not_called()
     assert dev._processing_config == MonarqDefaultConfig("yamaska", False)
 
-    dev = MonarqSim(client=client)
+    MonarqSim(client=client)
+
     mock_api_initialize.assert_called_once()
 
     # config given, should set given config
@@ -85,7 +86,7 @@ def test_constructor(mock_api_initialize):
 def test_constructor_shots_deprecated(mock_api_initialize):
     # Passing shots via constructor should emit a deprecation warning
     with pytest.warns(PennyLaneDeprecationWarning):
-        dev = MonarqSim(shots=1000)
+        MonarqSim(shots=1000)
 
 
 def test_preprocess(mock_PreProcessor_get_processor):

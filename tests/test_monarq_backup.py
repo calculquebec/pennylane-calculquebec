@@ -69,7 +69,7 @@ def test_constructor(mock_api_initialize):
 def test_constructor_shots_deprecated(mock_api_initialize):
     # Passing shots via constructor should emit a deprecation warning
     with pytest.warns(PennyLaneDeprecationWarning):
-        dev = MonarqBackup(client=client, shots=1000)
+        MonarqBackup(client=client, shots=1000)
     mock_api_initialize.assert_called_once()
 
 
