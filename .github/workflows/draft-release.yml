@@ -1,0 +1,30 @@
+# This workflow will create a Draft Release when a version tag is pushed on main branch
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Draft Release on Tag Push
+
+on:
+    push:
+        tags:
+        - 'v*.*.*'
+
+permissions:
+  contents: read
+
+jobs:
+  create-draft-release:
+    name: Create Draft Release
+    runs-on: ubuntu-latest
+    permissions:
+        contents: write
+
+    steps:
+      - name: Create Draft Release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+

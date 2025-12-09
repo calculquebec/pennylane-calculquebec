@@ -60,7 +60,6 @@ class MonarqDevice(BaseDevice):
             and (shots < 1 or shots > 1000)
             or isinstance(shots, list)
             and (len(shots) < 1 or len(shots) > 1000)
-            or shots == None
         ):
             raise DeviceException(
                 "The number of shots must be contained between 1 and 1000"

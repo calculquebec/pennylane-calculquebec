@@ -10,6 +10,7 @@ from pennylane_calculquebec.processing.config import (
 from pennylane_calculquebec.processing import PreProcessor
 from pennylane.transforms import transform
 from pennylane.tape import QuantumTape
+from pennylane.exceptions import PennyLaneDeprecationWarning
 import pennylane as qml
 from pennylane_calculquebec.base_device import BaseDevice
 import pennylane_calculquebec.API.job as api_job
@@ -53,35 +54,28 @@ def mock_PreProcessor_get_processor():
 
 
 def test_constructor(mock_api_initialize):
-    # no shots given, should raise DeviceException
-    with pytest.raises(DeviceException):
-        dev = MonarqBackup()
-
-    mock_api_initialize.assert_not_called()
-
-    # no client given, should raise DeviceException
-    with pytest.raises(DeviceException):
-        dev = MonarqBackup(shots=1000)
-
-    mock_api_initialize.assert_not_called()
-
-    # client given, no config given, should set default config
-    dev = MonarqBackup(client=client, shots=1000)
+    dev = MonarqBackup(client=client)
     mock_api_initialize.assert_called_once()
-    assert dev.shots.total_shots == 1000
     assert dev._processing_config == MonarqDefaultConfig("yukon")
 
     # config given, should set given config
     mock_api_initialize.reset_mock()
     config = NoPlaceNoRouteConfig()
-    dev = MonarqBackup(client=client, processing_config=config, shots=1000)
+    dev = MonarqBackup(client=client, processing_config=config)
     mock_api_initialize.assert_called_once()
     assert dev._processing_config is config
 
 
+def test_constructor_shots_deprecated(mock_api_initialize):
+    # Passing shots via constructor should emit a deprecation warning
+    with pytest.warns(PennyLaneDeprecationWarning):
+        MonarqBackup(client=client, shots=1000)
+    mock_api_initialize.assert_called_once()
+
+
 def test_preprocess(mock_PreProcessor_get_processor, mock_api_initialize):
     mock_PreProcessor_get_processor.return_value = transform(lambda tape: tape)
-    dev = MonarqBackup(client=client, shots=1000)
+    dev = MonarqBackup(client=client)
     result = dev.preprocess()[0]
     assert len(result) == 1
     mock_PreProcessor_get_processor.assert_called_once()
@@ -89,7 +83,7 @@ def test_preprocess(mock_PreProcessor_get_processor, mock_api_initialize):
 
 def test_execute(mock_measure):
     mock_measure.return_value = ["a", "b", "c"]
-    dev = MonarqBackup(client=client, shots=1000)
+    dev = MonarqBackup(client=client)
 
     # ran 1 time
     quantum_tape = QuantumTape([], [], 1000)
