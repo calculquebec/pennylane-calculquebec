@@ -2,17 +2,26 @@ import logging
 import os
 from pennylane_calculquebec._version import __version__
 
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DEFAULT_LOG_PATH = os.path.join(
+    os.getcwd(),
+    "pennylane_calculquebec.log",
+)
 LOG_PATH = os.environ.get(
-    "PLCQ_LOG_PATH", os.path.join(ROOT_DIR, "pennylane_calculquebec.log")
+    "PLCQ_LOG_PATH",
+    DEFAULT_LOG_PATH,
 )
 
 logger = logging.getLogger("pennylane_calculquebec")
 logger.setLevel(logging.INFO)
 
-handler = logging.FileHandler(LOG_PATH, mode="a", encoding="utf-8")
+try:
+    handler = logging.FileHandler(LOG_PATH, mode="a", encoding="utf-8")
+
+except PermissionError as e:
+    handler = logging.StreamHandler()
+
 formatter = logging.Formatter(
-    f"%(asctime)s - The plugin version is {__version__} | Incident: %(message)s",
+    f"%(asctime)s [%(levelname)s] Version {__version__} | Message: %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 handler.setFormatter(formatter)
