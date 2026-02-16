@@ -17,7 +17,14 @@ logger.setLevel(logging.INFO)
 try:
     handler = logging.FileHandler(LOG_PATH, mode="a", encoding="utf-8")
 
-except PermissionError as e:
+except OSError as e:
+    logging.warning(
+        "Unable to open log file '%s' for writing due to a %s: %s. "
+        "Falling back to console logging (StreamHandler).",
+        LOG_PATH,
+        type(e).__name__,
+        e,
+    )
     handler = logging.StreamHandler()
 
 formatter = logging.Formatter(

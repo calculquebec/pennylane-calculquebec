@@ -20,7 +20,7 @@ def clean_logger():
         h.close()
 
 
-def test_logger_write_permission_denied(clean_logger):
+def test_logger_write_permission_denied(clean_logger, caplog):
     """Test that logger falls back to StreamHandler if FileHandler fails due to permissions."""
     with patch("logging.FileHandler", side_effect=PermissionError("Permission denied")):
         importlib.reload(logger_module)
@@ -28,6 +28,20 @@ def test_logger_write_permission_denied(clean_logger):
     handlers = logger_module.logger.handlers
     # Check if a StreamHandler is present (and it's not a FileHandler which is a subclass)
     assert any(type(h) is logging.StreamHandler for h in handlers)
+    assert "Unable to open log file" in caplog.text
+    assert "PermissionError" in caplog.text
+
+
+def test_logger_file_not_found(clean_logger, caplog):
+    """Test that logger falls back to StreamHandler if FileHandler fails due to file not found."""
+    with patch("logging.FileHandler", side_effect=FileNotFoundError("File not found")):
+        importlib.reload(logger_module)
+
+    handlers = logger_module.logger.handlers
+    # Check if a StreamHandler is present (and it's not a FileHandler which is a subclass)
+    assert any(type(h) is logging.StreamHandler for h in handlers)
+    assert "Unable to open log file" in caplog.text
+    assert "FileNotFoundError" in caplog.text
 
 
 def test_logger_create_logfile_in_set_env_var(clean_logger, tmp_path):
