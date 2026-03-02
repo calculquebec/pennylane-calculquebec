@@ -12,7 +12,6 @@ import pennylane as qml
 from pennylane_calculquebec.base_device import BaseDevice
 import pennylane_calculquebec.API.job as api_job
 
-
 client = CalculQuebecClient("test", "test", "test", project_id="test_project_id")
 
 

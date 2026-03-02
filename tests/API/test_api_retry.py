@@ -4,7 +4,6 @@ from unittest.mock import patch, Mock
 import time
 import warnings
 
-
 # ------------ TEST FUNCTIONS ----------------------
 
 
