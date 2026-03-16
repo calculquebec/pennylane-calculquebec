@@ -23,18 +23,20 @@ extensions = [
 
 apidoc_modules = [
     {
-        'path': '../pennylane_calculquebec',
-        'destination': 'rtd/code_ref/',
-        'exclude_patterns': ['**/test*'],
-        'max_depth': 3,
-        'follow_links': False,
-        'separate_modules': True,
-        'include_private': False,
-        'no_headings': False,
-        'module_first': False,
-        'implicit_namespaces': False,
-        'automodule_options': {
-            'members', 'show-inheritance', 'member-order : groupwise',
+        "path": "../pennylane_calculquebec",
+        "destination": "rtd/code_ref/",
+        "exclude_patterns": ["**/test*"],
+        "max_depth": 3,
+        "follow_links": False,
+        "separate_modules": True,
+        "include_private": False,
+        "no_headings": False,
+        "module_first": False,
+        "implicit_namespaces": False,
+        "automodule_options": {
+            "members",
+            "show-inheritance",
+            "member-order : groupwise",
         },
     },
 ]
