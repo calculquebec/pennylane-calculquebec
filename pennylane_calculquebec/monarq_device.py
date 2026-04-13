@@ -1,5 +1,7 @@
-"""
-Contains the Device implementation of monarq.default
+"""PennyLane device for executing circuits on MonarQ quantum hardware (``monarq.default``).
+
+Contains :class:`MonarqDevice`, which applies the full MonarQ transpilation
+pipeline and submits jobs to the Yamaska machine via the Thunderhead API.
 """
 
 from pennylane.tape import QuantumTape

@@ -1,5 +1,11 @@
-"""
-Contains the Device implementation of monarq.default
+"""Abstract base device shared by all MonarQ PennyLane device implementations.
+
+Defines the common preprocessing/execution interface and the supported
+measurement types (counts, probabilities, expectation value).  Concrete
+subclasses (:class:`~pennylane_calculquebec.MonarqDevice`,
+:class:`~pennylane_calculquebec.MonarqSim`,
+:class:`~pennylane_calculquebec.monarq_backup.MonarqBackup`) must implement
+:attr:`machine_name` and :meth:`_measure`.
 """
 
 from typing import Tuple

@@ -1,5 +1,8 @@
-"""
-Contains a wrapper around the job creation and executing process for MonarQ
+"""Job submission and lifecycle management for MonarQ circuit execution.
+
+Contains the :class:`Job` class, which serialises a PennyLane tape into the
+Thunderhead circuit format, submits it via :class:`~pennylane_calculquebec.API.adapter.ApiAdapter`,
+and polls for the result with configurable retries.
 """
 
 from pennylane.tape import QuantumTape

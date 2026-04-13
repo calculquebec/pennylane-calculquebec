@@ -1,5 +1,9 @@
-"""
-Contains a wrapper around default.mixed which uses MonarQ pre/post processing.
+"""PennyLane device that simulates MonarQ execution locally (``monarq.sim``).
+
+Contains :class:`MonarqSim`, which applies the full MonarQ transpilation
+pipeline and then simulates the native-gate circuit on PennyLane's
+``default.mixed`` device, optionally injecting gate and readout noise derived
+from live benchmark data.
 """
 
 import pennylane as qml
