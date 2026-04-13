@@ -41,14 +41,16 @@ def all_results(results, num_qubits):
 
 
 def get_readout_fidelities(machine_name, chosen_qubits):
-    """
-    what are the readout 0 and 1 fidelities for given qubits?
+    """Fetch state-0 and state-1 readout fidelities from the latest benchmark.
 
-    Args
-        chosen_qubits (list[int]) : qubits from the circuit
+    Args:
+        machine_name (str): name of the target machine (e.g. ``"yamaska"``)
+        chosen_qubits (list[int]): qubit indices used by the circuit
 
-    Returns
-        a tuple appending readouts on 0 and 1 for given qubits
+    Returns:
+        tuple[list[float], list[float]]: ``(readout0, readout1)`` where
+        ``readout0[i]`` is the state-0 fidelity for ``chosen_qubits[i]`` and
+        ``readout1[i]`` is the state-1 fidelity.
     """
     benchmark = ApiAdapter.get_qubits_and_couplers(machine_name)
 
@@ -64,13 +66,24 @@ def get_readout_fidelities(machine_name, chosen_qubits):
 
 
 def get_calibration_data(machine_name, chosen_qubits):
-    """gets readout matrices for the observed qubits
+    """Build per-qubit 2×2 calibration matrices from benchmark readout fidelities.
+
+    Each calibration matrix is:
+
+    .. code-block:: none
+
+        [[P(0|0),  P(0|1)],
+         [P(1|0),  P(1|1)]]
+
+    where ``P(m|p)`` is the probability of measuring ``m`` when the qubit is
+    prepared in state ``p``.
 
     Args:
-        chosen_qubits (list[int]) : which qubits are observed
+        machine_name (str): name of the target machine (e.g. ``"yamaska"``)
+        chosen_qubits (list[int]): qubit indices observed by the circuit
 
     Returns:
-        readout matrices for given qubits
+        list[numpy.ndarray]: one 2×2 calibration matrix per qubit in ``chosen_qubits``
     """
     num_qubits = len(chosen_qubits)
     readout0, readout1 = get_readout_fidelities(machine_name, chosen_qubits)
@@ -87,8 +100,17 @@ def get_calibration_data(machine_name, chosen_qubits):
 
 
 def tensor_product_calibration(calibration_matrices):
-    """
-    returns all calibrations concatenated together using tensor product
+    """Combine per-qubit calibration matrices into a full multi-qubit readout matrix.
+
+    Computes the Kronecker (tensor) product of all individual 2×2 calibration
+    matrices to produce a :math:`2^n \\times 2^n` response matrix for ``n`` qubits.
+
+    Args:
+        calibration_matrices (list[numpy.ndarray]): per-qubit 2×2 calibration matrices,
+            ordered from the most-significant to the least-significant qubit
+
+    Returns:
+        numpy.ndarray: the :math:`2^n \\times 2^n` combined readout response matrix
     """
     readout_matrix = calibration_matrices[0]
 
@@ -100,6 +122,18 @@ def tensor_product_calibration(calibration_matrices):
 
 
 def get_full_readout_matrix(machine_name, chosen_qubits):
+    """Build and normalise the full readout response matrix for a set of qubits.
+
+    Constructs the tensor-product calibration matrix and normalises each column
+    so that the values represent valid conditional probabilities.
+
+    Args:
+        machine_name (str): name of the target machine (e.g. ``"yamaska"``)
+        chosen_qubits (list[int]): qubit indices observed by the circuit
+
+    Returns:
+        numpy.ndarray: column-normalised :math:`2^n \\times 2^n` readout matrix
+    """
     calibration_data = get_calibration_data(machine_name, chosen_qubits)
     full_readout_matrix = tensor_product_calibration(calibration_data)
 

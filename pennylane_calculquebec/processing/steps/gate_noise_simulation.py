@@ -35,6 +35,31 @@ class GateNoiseSimulation(PreProcStep):
         return data.monarq_native_gates()
 
     def execute(self, tape):
+        """Apply gate noise to a circuit tape using MonarQ's noise model.
+
+        For each operation in ``tape``:
+
+        * Single-qubit gates are followed by a depolarizing channel parameterised
+          by the qubit's single-qubit gate fidelity.
+        * Two-qubit (CZ) gates are followed by a depolarizing channel on each
+          involved wire, parameterised by the coupler's CZ gate fidelity.
+
+        Amplitude-damping (T1) and phase-damping (T2 Ramsey) channels are built
+        from benchmark data when ``use_benchmark=True``, or from
+        :class:`~pennylane_calculquebec.utility.noise.TypicalBenchmark` typical
+        values otherwise.
+
+        Args:
+            tape (QuantumTape): a circuit whose operations must all belong to
+                MonarQ's native gate set
+
+        Returns:
+            QuantumTape: a new tape with noise channels inserted after each gate
+
+        Raises:
+            ValueError: if any operation is not in the MonarQ native gate set
+            ValueError: if no CZ noise data can be found for a two-qubit gate
+        """
         # build qubit noise from readout 1 fidelity using typical value if benchmark should not be used
         connectivity = data.get_connectivity(self.machine_name, self.use_benchmark)
         qubit_count = len(set([a for b in connectivity.values() for a in b]))
