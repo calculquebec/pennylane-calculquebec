@@ -1,6 +1,8 @@
-"""
-Contains base client class and implementations. \n
-MonarQ users will mostly use MonarqClient.
+"""Client credential classes for authenticating with the Thunderhead API.
+
+Provides :class:`ApiClient` as the base data object and
+:class:`CalculQuebecClient` as the standard implementation for MonarQ users.
+:class:`MonarqClient` is kept for backwards compatibility but is deprecated.
 """
 
 

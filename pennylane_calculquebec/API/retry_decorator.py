@@ -1,3 +1,10 @@
+"""Exponential-backoff retry decorator for Thunderhead API calls.
+
+Provides the :func:`retry` decorator, which transparently re-attempts a
+function call up to a configurable number of times with increasing delays
+between each attempt.
+"""
+
 from time import sleep
 import logging
 

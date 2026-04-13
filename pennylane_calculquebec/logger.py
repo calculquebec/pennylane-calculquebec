@@ -1,3 +1,11 @@
+"""Plugin-wide logger configuration for the PennyLane Calcul Québec plugin.
+
+Configures a named :class:`logging.Logger` that writes timestamped entries
+(including the plugin version) to a log file.  The log file path defaults to
+``pennylane_calculquebec.log`` at the repository root but can be overridden
+with the ``PLCQ_LOG_PATH`` environment variable.
+"""
+
 import logging
 import os
 from pennylane_calculquebec._version import __version__

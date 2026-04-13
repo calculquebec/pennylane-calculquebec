@@ -1,3 +1,13 @@
+"""Exception hierarchy for the PennyLane Calcul Québec plugin.
+
+All plugin exceptions inherit from :class:`PennylaneCQError`, which
+automatically logs the full class path and error message via the plugin
+logger.  Specialised subclasses allow callers to catch errors from a
+specific layer (device, processing, API, utility) without catching
+unrelated exceptions.
+"""
+
+
 class PennylaneCQError(Exception):
     """Pennylane Calcul Quebec base error."""
 
