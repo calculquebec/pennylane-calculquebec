@@ -36,7 +36,6 @@ apidoc_modules = [
         "automodule_options": {
             "members",
             "show-inheritance",
-            "member-order : groupwise",
         },
     },
 ]

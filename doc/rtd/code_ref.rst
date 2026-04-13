@@ -5,7 +5,15 @@ This section contains the API reference for the ``pennylane_calculquebec`` packa
 
 .. currentmodule:: pennylane_calculquebec
 
-.. autosummary:: pennylane_calculquebec
+.. autosummary:: 
+    API
+    base_device
+    monarq_backup
+    monarq_device
+    monarq_sim
+    monarq_data
+    processing
+    utility
     :toctree: code_ref
     :recursive:
 
