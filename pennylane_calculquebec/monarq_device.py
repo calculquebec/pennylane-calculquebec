@@ -1,5 +1,7 @@
-"""
-Contains the Device implementation of monarq.default
+"""PennyLane device for executing circuits on MonarQ quantum hardware (``monarq.default``).
+
+Contains :class:`MonarqDevice`, which applies the full MonarQ transpilation
+pipeline and submits jobs to the Yamaska machine via the Thunderhead API.
 """
 
 from pennylane.tape import QuantumTape
@@ -17,19 +19,32 @@ from pennylane_calculquebec.logger import logger
 
 
 class MonarqDevice(BaseDevice):
-    """PennyLane device for interfacing with Anyon's quantum Hardware.
+    """PennyLane device for executing circuits on MonarQ quantum hardware.
 
-    * Extends the PennyLane :class:`~.pennylane.Device` class.
-    * Batching is not supported yet.
+    * Extends :class:`~pennylane_calculquebec.base_device.BaseDevice`.
+    * Batching is not supported.
+    * Shots must be between 1 and 1000 (inclusive).
 
     Args:
-        wires (int, Iterable[Number, str]): Number of wires present on the device, or iterable that
-            contains unique labels for the wires as numbers (i.e., ``[-1, 0, 2]``) or strings
-            (``['ancilla', 'q1', 'q2']``). Default ``None`` if not specified.
-        shots (int, Sequence[int], Sequence[Union[int, Sequence[int]]]): The default number of shots
-            to use in executions involving this device.
-        client (Client) : client information for connecting to MonarQ
-        behaviour_config (Config) : behaviour changes to apply to the transpiler
+        wires (int or Iterable[Number, str]): number of wires or iterable of
+            unique wire labels (e.g. ``[-1, 0, 2]`` or ``['ancilla', 'q1']``).
+            Defaults to ``None``.
+        shots (int or Sequence[int]): default number of shots per execution.
+            Must be in the range ``[1, 1000]``.
+        client (ApiClient): credentials for connecting to MonarQ.
+            Required — raises :class:`~pennylane_calculquebec.device_exception.DeviceException`
+            when ``None``.
+        processing_config (ProcessingConfig, optional): transpilation pipeline
+            configuration.  Defaults to :func:`~pennylane_calculquebec.processing.config.MonarqDefaultConfig`.
+
+    **Callbacks**
+
+    Three optional callbacks can be attached to monitor job lifecycle events:
+
+    * ``job_started(job_id: int)`` — called when the job is submitted
+    * ``job_status_changed(job_id: int, status: str)`` — called each time the
+      job status changes while polling
+    * ``job_completed(job_id: int)`` — called when the job reaches a terminal state
     """
 
     name = "MonarqDevice"
@@ -72,6 +87,11 @@ class MonarqDevice(BaseDevice):
 
     @property
     def machine_name(self):
+        """Name of the primary MonarQ machine targeted by this device.
+
+        Returns:
+            str: ``"yamaska"``
+        """
         try:
             return "yamaska"
         except Exception as e:
@@ -84,6 +104,11 @@ class MonarqDevice(BaseDevice):
 
     @property
     def name(self):
+        """Short identifier of this device as registered with PennyLane.
+
+        Returns:
+            str: ``"monarq.default"``
+        """
         try:
             return MonarqDevice.short_name
         except Exception as e:
@@ -93,14 +118,24 @@ class MonarqDevice(BaseDevice):
             return None
 
     def _measure(self, tape: QuantumTape):
-        """
-        runs job to Monarq and returns value, converted to required measurement type
+        """Submit a circuit job to MonarQ and return post-processed results.
 
-        Args :
-            tape (QuantumTape) : the tape from which to get results
+        Submits ``tape`` as a job via :class:`~pennylane_calculquebec.API.job.Job`,
+        applies the configured post-processing pipeline, then converts the raw
+        counts to the measurement type requested by the tape (counts, probabilities,
+        or expectation value).
 
-        Returns :
-            a result, which format can change according to the measurement process
+        Args:
+            tape (QuantumTape): the pre-processed circuit to execute
+
+        Returns:
+            any: result in the format determined by the measurement type
+                (``dict`` for counts, ``numpy.ndarray`` for probabilities,
+                ``float`` for expectation value)
+
+        Raises:
+            DeviceException: if the tape contains more than one measurement
+            DeviceException: if the measurement type is not supported
         """
         if len(tape.measurements) != 1:
             raise DeviceException("Multiple measurements not supported")
