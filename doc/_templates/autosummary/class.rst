@@ -1,4 +1,4 @@
-{{ fullname | escape | underline }}
+{{ name | escape | underline }}
 
 .. autoclass:: {{ fullname }}
    :show-inheritance:
@@ -10,20 +10,22 @@
    {% block attributes_documentation %}
    {% if attributes %}
 
+   {% set collapse_id_suffix = (fullname | replace('.', '-') | replace('_', '-')) %}
+
    .. raw:: html
 
-      <a class="attr-details-header collapse-header" data-toggle="collapse" href="#attrDetails" aria-expanded="false" aria-controls="attrDetails">
+      <a class="attr-details-header collapse-header collapsed" data-bs-toggle="collapse" href="#attrDetails-{{ collapse_id_suffix }}" role="button" aria-expanded="false" aria-controls="attrDetails-{{ collapse_id_suffix }}">
          <h2 style="font-size: 24px;">
             <i class="fas fa-angle-down rotate" style="float: right;"></i> Attributes
          </h2>
       </a>
-      <div class="collapse" id="attrDetails">
+      <div class="collapse show" id="attrDetails-{{ collapse_id_suffix }}">
 
    {% block attributes_summary %}
    {% if attributes %}
 
    .. autosummary::
-      :nosignatures:
+      
    {% for item in attributes %}
       ~{{ name }}.{{ item }}
    {%- endfor %}
@@ -47,12 +49,12 @@
 
    .. raw:: html
 
-      <a class="meth-details-header collapse-header" data-toggle="collapse" href="#methDetails" aria-expanded="false" aria-controls="methDetails">
+      <a class="meth-details-header collapse-header collapsed" data-bs-toggle="collapse" href="#methDetails-{{ collapse_id_suffix }}" role="button" aria-expanded="false" aria-controls="methDetails-{{ collapse_id_suffix }}">
          <h2 style="font-size: 24px;">
             <i class="fas fa-angle-down rotate" style="float: right;"></i> Methods
          </h2>
       </a>
-      <div class="collapse" id="methDetails">
+      <div class="collapse show" id="methDetails-{{ collapse_id_suffix }}">
 
    {% block methods_summary %}
    {% if methods %}
@@ -79,7 +81,10 @@
    .. raw:: html
 
       <script type="text/javascript">
-         $(".collapse-header").click(function () {
-             $(this).children('h2').eq(0).children('i').eq(0).toggleClass("up");
-         })
+             document.querySelectorAll('.collapse-header').forEach((header) => {
+                header.addEventListener('click', () => {
+                   const icon = header.querySelector('h2 i');
+                   if (icon) icon.classList.toggle('up');
+                });
+             });
       </script>

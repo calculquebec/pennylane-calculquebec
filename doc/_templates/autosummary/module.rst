@@ -1,12 +1,7 @@
-{{ fullname | escape | underline }}
+{{ fullname.replace('pennylane_calculquebec.', '') | escape | underline }}
 
 .. automodule:: {{ fullname }}
-    :members:
-    :undoc-members:
-    :inherited-members:
-    :show-inheritance:
-    :special-members: __init__
-    :private-members:
+
 
 {% if modules %}
 Submodules
@@ -59,4 +54,3 @@ Module Attributes
     {{ item }}
 {% endfor %}
 {% endif %}
-    
