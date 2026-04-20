@@ -16,39 +16,17 @@ author = "CalculQuébec"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
-    "sphinx.ext.apidoc",
     "sphinx.ext.autosummary",
     "myst_parser",
 ]
 
-apidoc_modules = [
-    {
-        "path": "../pennylane_calculquebec",
-        "destination": "rtd/code_ref/",
-        "exclude_patterns": ["**/test*"],
-        "max_depth": 3,
-        "follow_links": False,
-        "separate_modules": True,
-        "include_private": False,
-        "no_headings": False,
-        "module_first": False,
-        "implicit_namespaces": False,
-        "automodule_options": {
-            "members",
-            "show-inheritance",
-        },
-    },
-]
-
 # Autodoc and Autosummary configuration
-# autodoc_default_options = {
-#     "members": True,
-#     "inherited-members": True,
-#     "show-inheritance": True,
-#     "special-members": "__init__",
-# }
+autodoc_default_options = {
+    "show-inheritance": True,
+}
 # Include both class docstring and __init__ docstring
 autoclass_content = "both"
+autosummary_generate = True
 
 templates_path = ["_templates"]
 exclude_patterns = [
@@ -57,8 +35,6 @@ exclude_patterns = [
     ".DS_Store",
     "**/*.md",
 ]
-
-autosummary_generate = True
 
 
 language = "en"
