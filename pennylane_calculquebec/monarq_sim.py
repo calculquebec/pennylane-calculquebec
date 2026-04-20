@@ -1,5 +1,9 @@
-"""
-Contains a wrapper around default.mixed which uses MonarQ pre/post processing\n
+"""PennyLane device that simulates MonarQ execution locally (``monarq.sim``).
+
+Contains :class:`MonarqSim`, which applies the full MonarQ transpilation
+pipeline and then simulates the native-gate circuit on PennyLane's
+``default.mixed`` device, optionally injecting gate and readout noise derived
+from live benchmark data.
 """
 
 import pennylane as qml
@@ -17,8 +21,25 @@ from pennylane_calculquebec.logger import logger
 
 
 class MonarqSim(BaseDevice):
-    """
-    a device that uses the monarq transpiler but simulates results using default.mixed
+    """PennyLane device that simulates MonarQ execution using ``default.mixed``.
+
+    Applies the full MonarQ transpilation pipeline (decomposition, placement,
+    routing, optimisation) and then simulates the resulting native-gate circuit
+    with ``default.mixed``, optionally injecting gate noise and readout noise
+    derived from the latest hardware benchmark.
+
+    When a ``client`` is provided, noise parameters are fetched from the live
+    benchmark data.  Without a client, typical noise values are used instead.
+
+    Args:
+        wires (int or Iterable): number of wires or iterable of wire labels.
+            Defaults to ``None``.
+        shots (int): number of shots used during simulation. Defaults to ``None``.
+        client (ApiClient, optional): when provided, enables benchmark-based noise
+            simulation.  Defaults to ``None``.
+        processing_config (ProcessingConfig, optional): custom transpilation
+            pipeline configuration.  Defaults to
+            :func:`~pennylane_calculquebec.processing.config.MonarqDefaultConfig`.
     """
 
     name = "MonarqSim"
@@ -26,6 +47,11 @@ class MonarqSim(BaseDevice):
 
     @property
     def name(self):
+        """Short identifier of this device as registered with PennyLane.
+
+        Returns:
+            str: ``"monarq.sim"``
+        """
         try:
             return MonarqSim.short_name
         except Exception as e:
@@ -51,14 +77,31 @@ class MonarqSim(BaseDevice):
             )
 
     def _measure(self, tape: QuantumTape):
-        """
-        simulates job to Monarq and returns value, converted to required measurement type
+        """Simulate a circuit on ``default.mixed`` and return post-processed results.
 
-        Args :
-            tape (QuantumTape) : the tape from which to get results
+        Execution pipeline:
 
-        Returns :
-            a result, which format can change according to the measurement process
+        1. Rebuild the tape with :class:`~pennylane.measurements.CountsMP` measurements
+           and 1000 shots for internal simulation.
+        2. Inject gate noise via
+           :class:`~pennylane_calculquebec.processing.steps.GateNoiseSimulation`.
+        3. Execute on ``default.mixed``.
+        4. Apply readout noise via
+           :class:`~pennylane_calculquebec.processing.steps.ReadoutNoiseSimulation`.
+        5. Apply the post-processing pipeline (e.g. readout error mitigation).
+        6. Convert the counts to the measurement type requested by the original tape.
+
+        Args:
+            tape (QuantumTape): the pre-processed circuit to simulate
+
+        Returns:
+            any: result in the format determined by the measurement type
+                (``dict`` for counts, ``numpy.ndarray`` for probabilities,
+                ``float`` for expectation value)
+
+        Raises:
+            DeviceException: if the tape contains more than one measurement
+            DeviceException: if the measurement type is not supported
         """
         if len(tape.measurements) != 1:
             raise DeviceException("Multiple measurements not supported")
@@ -98,6 +141,11 @@ class MonarqSim(BaseDevice):
 
     @property
     def machine_name(self):
+        """Name of the MonarQ machine whose topology is used for simulation.
+
+        Returns:
+            str: ``"yamaska"``
+        """
         try:
             return "yamaska"
         except Exception as e:

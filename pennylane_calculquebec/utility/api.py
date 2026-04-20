@@ -129,6 +129,16 @@ class ApiUtility:
 
 
 class JobStatus(Enum):
+    """Possible lifecycle states of a MonarQ job.
+
+    Attributes:
+        SUCCEEDED: the job finished successfully
+        FAILED: the job encountered an error during execution
+        QUEUED: the job is waiting in the execution queue
+        RUNNING: the job is currently being executed
+        CANCELLED: the job was cancelled before completion
+    """
+
     SUCCEEDED = "SUCCEEDED"
     FAILED = "FAILED"
     QUEUED = "QUEUED"
@@ -137,11 +147,27 @@ class JobStatus(Enum):
 
 
 class queries:
+    """Query-string parameter prefixes used when building API URLs.
+
+    Attributes:
+        MACHINE_NAME (str): filter parameter for machine name (``?machineName``)
+        NAME (str): filter parameter for resource name (``?name``)
+    """
+
     MACHINE_NAME = "?machineName"
     NAME = "?name"
 
 
 class routes:
+    """URL path segments for the Thunderhead REST API.
+
+    Attributes:
+        JOBS (str): endpoint for job creation and listing (``/jobs``)
+        PROJECTS (str): endpoint for project queries (``/projects``)
+        MACHINES (str): endpoint for machine queries (``/machines``)
+        BENCHMARKING (str): sub-path for machine benchmarking (``/benchmarking``)
+    """
+
     JOBS = "/jobs"
     PROJECTS = "/projects"
     MACHINES = "/machines"
@@ -149,6 +175,13 @@ class routes:
 
 
 class keys:
+    """JSON key constants used when serialising/deserialising API payloads.
+
+    These string constants mirror the exact field names expected by the
+    Thunderhead API, centralising them to avoid hard-coded strings scattered
+    across the codebase.
+    """
+
     NAME = "name"
     STATUS = "status"
     ONLINE = "online"

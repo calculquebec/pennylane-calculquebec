@@ -1,5 +1,8 @@
-"""
-Contains the Device implementation of monarq.default
+"""PennyLane device targeting the backup MonarQ machine (``monarq.backup``).
+
+Contains :class:`MonarqBackup`, a thin subclass of
+:class:`~pennylane_calculquebec.MonarqDevice` that redirects execution to the
+Yukon machine instead of the primary Yamaska machine.
 """
 
 from pennylane.tape import QuantumTape
